@@ -1,0 +1,9 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements">
+    <ui:VisualElement class="panel" style="position: absolute; right: 12px; bottom: 12px; width: 320px; padding: 12px;">
+        <ui:Label text="[ Cheats ]" class="panel-title" style="-unity-text-align: upper-center; font-size: 18px; color: rgb(255, 200, 50); margin-bottom: 8px;" />
+
+        <ui:Button name="btn-send-test" text="Send Test Message" class="btn" style="margin-bottom: 8px;" />
+
+        <ui:Label name="feedback-label" text="---" style="font-size: 14px; color: rgb(180, 255, 180); -unity-text-align: upper-center; white-space: normal;" />
+    </ui:VisualElement>
+</ui:UXML>

@@ -1,0 +1,21 @@
+{
+    "name": "Game.Infrastructure",
+    "rootNamespace": "Game.Infrastructure",
+    "references": [
+        "Game.Domain",
+        "Game.Application",
+        "Game.Shared",
+        "UniTask",
+        "Unity.Addressables",
+        "Unity.ResourceManager"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

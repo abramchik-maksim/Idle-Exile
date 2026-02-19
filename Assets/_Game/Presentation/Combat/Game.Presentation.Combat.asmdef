@@ -1,0 +1,27 @@
+{
+    "name": "Game.Presentation.Combat",
+    "rootNamespace": "Game.Presentation.Combat",
+    "references": [
+        "Game.Domain",
+        "Game.Application",
+        "Game.Presentation.Core",
+        "Game.Shared",
+        "VContainer",
+        "MessagePipe",
+        "UniTask",
+        "Unity.Entities",
+        "Unity.Transforms",
+        "Unity.Mathematics",
+        "Unity.Collections",
+        "Unity.Burst"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": true,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

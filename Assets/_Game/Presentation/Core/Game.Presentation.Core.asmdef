@@ -1,0 +1,25 @@
+{
+    "name": "Game.Presentation.Core",
+    "rootNamespace": "Game.Presentation.Core",
+    "references": [
+        "Game.Domain",
+        "Game.Application",
+        "Game.Infrastructure",
+        "Game.Shared",
+        "Game.Presentation.UI",
+        "VContainer",
+        "MessagePipe",
+        "MessagePipe.VContainer",
+        "UniTask",
+        "R3.Unity"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
