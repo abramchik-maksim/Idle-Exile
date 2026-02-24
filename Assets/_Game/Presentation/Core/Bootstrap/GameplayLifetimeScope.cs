@@ -14,9 +14,7 @@ using Game.Domain.DTOs.Stats;
 using Game.Infrastructure.Configs;
 using Game.Infrastructure.Repositories;
 using Game.Infrastructure.Services;
-using Game.Presentation.UI.HUD;
-using Game.Presentation.UI.Inventory;
-using Game.Presentation.UI.CharacterPanel;
+using Game.Presentation.UI.MainScreen;
 using Game.Presentation.UI.Cheats;
 using Game.Presentation.UI.Presenters;
 
@@ -42,7 +40,7 @@ namespace Game.Presentation.Core.Bootstrap
             builder.RegisterMessageBroker<HeroStatsChangedDTO>(options);
 
             // --- Infrastructure (Singletons) ---
-            builder.Register<IRandomService, UnityRandomService>(Lifetime.Singleton);
+            builder.Register<IRandomService>(c => new UnityRandomService(), Lifetime.Singleton);
             builder.Register<IConfigProvider, HardcodedConfigProvider>(Lifetime.Singleton);
             builder.Register<IPlayerProgressRepository, PlayerPrefsProgressRepository>(Lifetime.Singleton);
             builder.Register<IInventoryRepository, InMemoryInventoryRepository>(Lifetime.Singleton);
@@ -50,19 +48,22 @@ namespace Game.Presentation.Core.Bootstrap
             // --- Use Cases (Transient) ---
             builder.Register<CalculateHeroStatsUseCase>(Lifetime.Transient);
             builder.Register<EquipItemUseCase>(Lifetime.Transient);
+            builder.Register<UnequipItemUseCase>(Lifetime.Transient);
             builder.Register<AddItemToInventoryUseCase>(Lifetime.Transient);
             builder.Register<GenerateLootUseCase>(Lifetime.Transient);
             builder.Register<StartCombatSessionUseCase>(Lifetime.Transient);
             builder.Register<SendTestMessageUseCase>(Lifetime.Transient);
 
             // --- Views (MonoBehaviours from scene hierarchy) ---
-            builder.RegisterComponentInHierarchy<HUDView>();
-            builder.RegisterComponentInHierarchy<InventoryView>();
-            builder.RegisterComponentInHierarchy<CharacterPanelView>();
+            builder.RegisterComponentInHierarchy<MainScreenView>();
+            builder.RegisterComponentInHierarchy<CharacterTabView>();
+            builder.RegisterComponentInHierarchy<EquipmentTabView>();
             builder.RegisterComponentInHierarchy<CheatsView>();
 
             // --- Presenters as EntryPoints (IStartable → auto-calls Start()) ---
-            builder.RegisterEntryPoint<HUDPresenter>();
+            builder.RegisterEntryPoint<MainScreenPresenter>();
+            builder.RegisterEntryPoint<CharacterPresenter>();
+            builder.RegisterEntryPoint<EquipmentPresenter>();
             builder.RegisterEntryPoint<CheatsPresenter>();
 
             // --- Game bootstrap ---

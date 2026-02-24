@@ -11,6 +11,8 @@ namespace Game.Presentation.UI.Base
         [SerializeField] private bool _visibleOnStart = true;
         [SerializeField] private int _sortOrder;
 
+        private bool _initialized;
+
         protected UIDocument UIDocument => _uiDocument;
         protected VisualElement Root { get; private set; }
         public bool IsVisible => Root?.style.display != DisplayStyle.None;
@@ -23,9 +25,26 @@ namespace Game.Presentation.UI.Base
             _uiDocument.sortingOrder = _sortOrder;
         }
 
-        protected virtual void Start()
+        protected virtual void OnEnable()
         {
+            InitializeIfNeeded();
+        }
+
+        /// <summary>
+        /// Ensures Root is set and OnBind has been called.
+        /// Safe to call multiple times; only the first call has effect.
+        /// </summary>
+        public void InitializeIfNeeded()
+        {
+            if (_initialized) return;
+
+            if (_uiDocument == null)
+                _uiDocument = GetComponent<UIDocument>();
+
             Root = _uiDocument.rootVisualElement;
+            if (Root == null) return;
+
+            _initialized = true;
             OnBind();
 
             if (!_visibleOnStart)
@@ -39,12 +58,14 @@ namespace Game.Presentation.UI.Base
 
         public virtual void Show()
         {
+            InitializeIfNeeded();
             Root.style.display = DisplayStyle.Flex;
             OnShow();
         }
 
         public virtual void Hide()
         {
+            InitializeIfNeeded();
             Root.style.display = DisplayStyle.None;
             OnHide();
         }

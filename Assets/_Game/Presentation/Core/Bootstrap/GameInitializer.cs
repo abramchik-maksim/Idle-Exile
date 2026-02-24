@@ -1,5 +1,4 @@
 using System;
-using Cysharp.Threading.Tasks;
 using VContainer.Unity;
 using Game.Application.Ports;
 using Game.Domain.Characters;
@@ -8,7 +7,7 @@ using InventoryModel = Game.Domain.Inventory.Inventory;
 
 namespace Game.Presentation.Core.Bootstrap
 {
-    public sealed class GameInitializer : IAsyncStartable, IDisposable
+    public sealed class GameInitializer : IInitializable, IDisposable, IGameStateProvider
     {
         private readonly IPlayerProgressRepository _progressRepo;
         private readonly IInventoryRepository _inventoryRepo;
@@ -25,7 +24,7 @@ namespace Game.Presentation.Core.Bootstrap
             _inventoryRepo = inventoryRepo;
         }
 
-        public async UniTask StartAsync(System.Threading.CancellationToken cancellation)
+        public void Initialize()
         {
             Debug.Log("[GameInitializer] Starting game...");
 
@@ -35,9 +34,11 @@ namespace Game.Presentation.Core.Bootstrap
 
             _inventoryRepo.Save(Inventory);
 
-            Debug.Log($"[GameInitializer] Hero '{Hero.Id}' ready. Wave: {Progress.CurrentWave}. Inventory: {Inventory.Items.Count}/{Inventory.Capacity}");
+            var cam = Camera.main;
+            if (cam != null)
+                cam.rect = new Rect(0f, 0f, 1f / 3f, 1f);
 
-            await UniTask.CompletedTask;
+            Debug.Log($"[GameInitializer] Hero '{Hero.Id}' ready. Wave: {Progress.CurrentWave}. Inventory: {Inventory.Items.Count}/{Inventory.Capacity}");
         }
 
         public void Dispose()

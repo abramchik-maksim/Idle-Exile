@@ -1,0 +1,32 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements">
+    <Style src="../Styles/Common.uss" />
+
+    <!-- Positioned to fill the right 2/3 panel below the tab bar -->
+    <ui:VisualElement name="equipment-tab-root" style="position: absolute; left: 33.33%; width: 66.67%; top: 52px; bottom: 0;">
+
+        <ui:VisualElement name="equipment-layout" class="equipment-layout">
+
+            <!-- Left half: equipment slots -->
+            <ui:VisualElement name="equipment-panel" style="flex: 1; padding: 12px;">
+                <ui:Label text="Equipment" class="panel-header" />
+                <ui:VisualElement name="equipment-slots" style="flex-grow: 1; align-items: center; justify-content: center;" />
+            </ui:VisualElement>
+
+            <!-- Vertical divider -->
+            <ui:VisualElement class="vertical-divider" />
+
+            <!-- Right half: inventory grid -->
+            <ui:VisualElement name="inventory-panel" style="flex: 1; padding: 12px;">
+                <ui:VisualElement style="flex-direction: row; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                    <ui:Label text="Inventory" class="panel-header" style="margin-bottom: 0;" />
+                    <ui:Label name="inventory-count" text="0 / 30" class="stat-label" />
+                </ui:VisualElement>
+                <ui:ScrollView name="inventory-scroll" style="flex-grow: 1;">
+                    <ui:VisualElement name="inventory-grid" style="flex-direction: row; flex-wrap: wrap;" />
+                </ui:ScrollView>
+            </ui:VisualElement>
+
+        </ui:VisualElement>
+
+    </ui:VisualElement>
+</ui:UXML>

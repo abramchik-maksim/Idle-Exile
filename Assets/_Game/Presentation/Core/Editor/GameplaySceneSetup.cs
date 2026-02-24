@@ -5,9 +5,7 @@ using UnityEngine;
 using UnityEngine.UIElements;
 using Game.Presentation.Core.Bootstrap;
 using Game.Presentation.UI.Base;
-using Game.Presentation.UI.HUD;
-using Game.Presentation.UI.Inventory;
-using Game.Presentation.UI.CharacterPanel;
+using Game.Presentation.UI.MainScreen;
 using Game.Presentation.UI.Cheats;
 
 namespace Game.Presentation.Core.Editor
@@ -19,10 +17,10 @@ namespace Game.Presentation.Core.Editor
 
         private static readonly ViewDefinition[] AllViews =
         {
-            new("HUD", "Assets/_Game/Presentation/UI/HUD/HUDView.uxml", typeof(HUDView), 0, true),
-            new("Inventory", "Assets/_Game/Presentation/UI/Inventory/InventoryView.uxml", typeof(InventoryView), 10, false),
-            new("CharacterPanel", "Assets/_Game/Presentation/UI/CharacterPanel/CharacterPanelView.uxml", typeof(CharacterPanelView), 10, false),
-            new("Cheats", "Assets/_Game/Presentation/UI/Cheats/CheatsView.uxml", typeof(CheatsView), 100, false),
+            new("MainScreen", "Assets/_Game/Presentation/UI/MainScreen/MainScreenView.uxml", typeof(MainScreenView), 0, true),
+            new("CharacterTab", "Assets/_Game/Presentation/UI/MainScreen/CharacterTabView.uxml", typeof(CharacterTabView), 5, true),
+            new("EquipmentTab", "Assets/_Game/Presentation/UI/MainScreen/EquipmentTabView.uxml", typeof(EquipmentTabView), 5, false),
+            new("Cheats", "Assets/_Game/Presentation/UI/Cheats/CheatsView.uxml", typeof(CheatsView), 100, true),
         };
 
         [MenuItem("Idle Exile/Setup/Add Missing Views to Scene", false, 201)]
@@ -91,6 +89,7 @@ namespace Game.Presentation.Core.Editor
             cam.orthographicSize = 5f;
             cam.clearFlags = CameraClearFlags.SolidColor;
             cam.backgroundColor = new Color(0.07f, 0.07f, 0.09f);
+            cam.rect = new Rect(0f, 0f, 1f / 3f, 1f);
             cameraGo.tag = "MainCamera";
         }
 
