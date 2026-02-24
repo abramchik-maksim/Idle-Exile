@@ -1,4 +1,5 @@
 using MessagePipe;
+using UnityEngine;
 using VContainer;
 using VContainer.Unity;
 using Game.Application.Ports;
@@ -17,11 +18,14 @@ using Game.Infrastructure.Services;
 using Game.Presentation.UI.MainScreen;
 using Game.Presentation.UI.Cheats;
 using Game.Presentation.UI.Presenters;
+using Game.Presentation.UI.Services;
 
 namespace Game.Presentation.Core.Bootstrap
 {
     public sealed class GameplayLifetimeScope : LifetimeScope
     {
+        [SerializeField] private ItemDatabaseSO _itemDatabase;
+
         protected override void Configure(IContainerBuilder builder)
         {
             // --- MessagePipe ---
@@ -41,9 +45,11 @@ namespace Game.Presentation.Core.Bootstrap
 
             // --- Infrastructure (Singletons) ---
             builder.Register<IRandomService>(c => new UnityRandomService(), Lifetime.Singleton);
-            builder.Register<IConfigProvider, HardcodedConfigProvider>(Lifetime.Singleton);
+            builder.Register<IConfigProvider>(
+                _ => new ScriptableObjectConfigProvider(_itemDatabase), Lifetime.Singleton);
             builder.Register<IPlayerProgressRepository, PlayerPrefsProgressRepository>(Lifetime.Singleton);
             builder.Register<IInventoryRepository, InMemoryInventoryRepository>(Lifetime.Singleton);
+            builder.Register<IIconProvider, AddressableIconProvider>(Lifetime.Singleton);
 
             // --- Use Cases (Transient) ---
             builder.Register<CalculateHeroStatsUseCase>(Lifetime.Transient);

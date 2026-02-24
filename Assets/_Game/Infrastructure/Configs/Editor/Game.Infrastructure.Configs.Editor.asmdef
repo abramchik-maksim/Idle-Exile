@@ -1,0 +1,19 @@
+{
+    "name": "Game.Infrastructure.Configs.Editor",
+    "rootNamespace": "Game.Infrastructure.Configs.Editor",
+    "references": [
+        "Game.Domain",
+        "Game.Infrastructure"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

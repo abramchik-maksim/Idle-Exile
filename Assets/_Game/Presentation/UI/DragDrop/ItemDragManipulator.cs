@@ -2,6 +2,7 @@ using System;
 using UnityEngine;
 using UnityEngine.UIElements;
 using Game.Domain.Items;
+using Game.Presentation.UI.MainScreen;
 using Game.Presentation.UI.Tooltip;
 
 namespace Game.Presentation.UI.DragDrop
@@ -112,24 +113,34 @@ namespace Game.Presentation.UI.DragDrop
         private void CreateGhost(Vector2 position)
         {
             var root = target.panel.visualTree;
+            var rarityKey = EquipmentTabView.RarityKey(_draggedItem.Definition.Rarity);
 
             _ghost = new VisualElement();
             _ghost.AddToClassList("drag-ghost");
+            _ghost.AddToClassList($"drag-ghost--{rarityKey}");
             _ghost.pickingMode = PickingMode.Ignore;
 
             var icon = new VisualElement();
             icon.AddToClassList("item-icon");
-            icon.AddToClassList("item-icon--small");
-            icon.AddToClassList("item-icon--filled");
-            icon.AddToClassList($"item-icon--{RarityClass(_draggedItem.Definition.Rarity)}");
             icon.pickingMode = PickingMode.Ignore;
-            _ghost.Add(icon);
 
-            var label = new Label(_draggedItem.Definition.Name);
-            label.AddToClassList("item-label");
-            label.AddToClassList(RarityClass(_draggedItem.Definition.Rarity));
-            label.pickingMode = PickingMode.Ignore;
-            _ghost.Add(label);
+            var sourceIcon = target.Q("item-icon");
+            if (sourceIcon != null)
+            {
+                var bgImg = sourceIcon.resolvedStyle.backgroundImage;
+                if (bgImg.sprite != null)
+                    icon.style.backgroundImage = new StyleBackground(bgImg.sprite);
+                else if (bgImg.texture != null)
+                    icon.style.backgroundImage = new StyleBackground(bgImg.texture);
+                else
+                    icon.AddToClassList($"item-icon--placeholder-{rarityKey}");
+            }
+            else
+            {
+                icon.AddToClassList($"item-icon--placeholder-{rarityKey}");
+            }
+
+            _ghost.Add(icon);
 
             _ghost.style.position = Position.Absolute;
             _ghost.style.left = position.x - 32;
@@ -179,13 +190,5 @@ namespace Game.Presentation.UI.DragDrop
             root.Query(className: "equipment-slot--drop-hover")
                 .ForEach(el => el.RemoveFromClassList("equipment-slot--drop-hover"));
         }
-
-        private static string RarityClass(Rarity r) => r switch
-        {
-            Rarity.Magic => "rarity-magic",
-            Rarity.Rare => "rarity-rare",
-            Rarity.Unique => "rarity-unique",
-            _ => "rarity-normal"
-        };
     }
 }

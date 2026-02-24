@@ -1,10 +1,12 @@
 using System;
 using System.Collections.Generic;
+using Cysharp.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.UIElements;
 using Game.Domain.Items;
 using Game.Presentation.UI.Base;
 using Game.Presentation.UI.DragDrop;
+using Game.Presentation.UI.Services;
 using Game.Presentation.UI.Tooltip;
 
 namespace Game.Presentation.UI.MainScreen
@@ -14,10 +16,10 @@ namespace Game.Presentation.UI.MainScreen
         private VisualElement _equipmentSlots;
         private VisualElement _inventoryGrid;
         private Label _countLabel;
+        private IIconProvider _iconProvider;
 
         public event Action<string, EquipmentSlotType> OnItemDroppedOnSlot;
         public event Action<EquipmentSlotType> OnSlotClicked;
-        public event Action<string> OnItemClicked;
 
         private static readonly EquipmentSlotType[] AllSlots =
         {
@@ -28,21 +30,14 @@ namespace Game.Presentation.UI.MainScreen
             EquipmentSlotType.Boots
         };
 
-        private static readonly Color[] SlotPlaceholderColors =
-        {
-            new(0.45f, 0.30f, 0.20f, 0.6f),
-            new(0.30f, 0.35f, 0.45f, 0.6f),
-            new(0.35f, 0.40f, 0.30f, 0.6f),
-            new(0.40f, 0.30f, 0.35f, 0.6f),
-            new(0.30f, 0.30f, 0.40f, 0.6f),
-        };
-
         protected override void OnBind()
         {
             _equipmentSlots = Q("equipment-slots");
             _inventoryGrid = Q("inventory-grid");
             _countLabel = Q<Label>("inventory-count");
         }
+
+        public void SetIconProvider(IIconProvider provider) => _iconProvider = provider;
 
         public VisualElement EquipmentSlotsContainer => _equipmentSlots;
         public VisualElement InventoryGridContainer => _inventoryGrid;
@@ -51,40 +46,26 @@ namespace Game.Presentation.UI.MainScreen
         {
             _equipmentSlots.Clear();
 
-            for (int i = 0; i < AllSlots.Length; i++)
+            foreach (var slotType in AllSlots)
             {
-                var slotType = AllSlots[i];
+                equipped.TryGetValue(slotType, out var item);
+
                 var slot = new VisualElement();
                 slot.AddToClassList("equipment-slot");
                 slot.userData = slotType;
 
                 var slotLabel = new Label(FormatSlotName(slotType));
                 slotLabel.AddToClassList("equipment-slot__label");
-
-                equipped.TryGetValue(slotType, out var item);
-
-                var icon = new VisualElement();
-                icon.AddToClassList("item-icon");
-                if (item != null)
-                {
-                    icon.AddToClassList("item-icon--filled");
-                    icon.AddToClassList($"item-icon--{RarityClass(item.Definition.Rarity)}");
-                }
-                else
-                {
-                    icon.style.backgroundColor = SlotPlaceholderColors[i];
-                }
-
-                var itemLabel = new Label(item != null ? item.Definition.Name : "Empty");
-                itemLabel.AddToClassList("item-label");
-                if (item != null)
-                    itemLabel.AddToClassList(RarityClass(item.Definition.Rarity));
-                else
-                    itemLabel.AddToClassList("item-label--empty");
-
                 slot.Add(slotLabel);
-                slot.Add(icon);
-                slot.Add(itemLabel);
+
+                if (item != null)
+                {
+                    ApplyRarityStyle(slot, item.Definition.Rarity);
+
+                    var icon = CreateIconElement(item, false);
+                    slot.Add(icon);
+                    LoadIconAsync(icon, item).Forget();
+                }
 
                 var capturedSlot = slotType;
                 var capturedItem = item;
@@ -106,10 +87,7 @@ namespace Game.Presentation.UI.MainScreen
             _inventoryGrid.Clear();
 
             foreach (var item in items)
-            {
-                var slot = CreateItemSlot(item);
-                _inventoryGrid.Add(slot);
-            }
+                _inventoryGrid.Add(CreateItemSlot(item));
 
             int emptySlots = capacity - items.Count;
             for (int i = 0; i < emptySlots; i++)
@@ -127,19 +105,11 @@ namespace Game.Presentation.UI.MainScreen
             slot.AddToClassList("inventory-slot");
             slot.userData = item;
 
-            var icon = new VisualElement();
-            icon.AddToClassList("item-icon");
-            icon.AddToClassList("item-icon--small");
-            icon.AddToClassList("item-icon--filled");
-            icon.AddToClassList($"item-icon--{RarityClass(item.Definition.Rarity)}");
+            ApplyRarityStyle(slot, item.Definition.Rarity);
+
+            var icon = CreateIconElement(item, true);
             slot.Add(icon);
-
-            var label = new Label(item.Definition.Name);
-            label.AddToClassList("item-label");
-            label.AddToClassList(RarityClass(item.Definition.Rarity));
-            slot.Add(label);
-
-            slot.RegisterCallback<ClickEvent>(_ => OnItemClicked?.Invoke(item.Uid));
+            LoadIconAsync(icon, item).Forget();
 
             slot.RegisterCallback<PointerEnterEvent>(_ =>
                 ItemTooltip.Show(slot, item, Root));
@@ -162,18 +132,57 @@ namespace Game.Presentation.UI.MainScreen
             return slot;
         }
 
+        private static VisualElement CreateIconElement(ItemInstance item, bool small)
+        {
+            var icon = new VisualElement { name = "item-icon" };
+            icon.AddToClassList("item-icon");
+            if (small)
+                icon.AddToClassList("item-icon--small");
+
+            var rarityKey = RarityKey(item.Definition.Rarity);
+            icon.AddToClassList($"item-icon--placeholder-{rarityKey}");
+            return icon;
+        }
+
+        private async UniTaskVoid LoadIconAsync(VisualElement iconElement, ItemInstance item)
+        {
+            if (_iconProvider == null || string.IsNullOrEmpty(item.Definition.IconAddress))
+                return;
+
+            var sprite = await _iconProvider.LoadIconAsync(item.Definition.IconAddress);
+            if (sprite == null) return;
+
+            iconElement.style.backgroundImage = new StyleBackground(sprite);
+            iconElement.RemoveFromClassList($"item-icon--placeholder-{RarityKey(item.Definition.Rarity)}");
+        }
+
+        private static void ApplyRarityStyle(VisualElement slot, Rarity rarity)
+        {
+            var key = RarityKey(rarity);
+            slot.AddToClassList($"slot-bg--{key}");
+            slot.AddToClassList($"slot-border--{key}");
+
+            if (rarity is Rarity.Rare or Rarity.Unique)
+            {
+                var glow = new VisualElement();
+                glow.AddToClassList($"slot-glow--{key}");
+                glow.pickingMode = PickingMode.Ignore;
+                slot.Add(glow);
+            }
+        }
+
         private static string FormatSlotName(EquipmentSlotType slot) => slot switch
         {
             EquipmentSlotType.BodyArmor => "Body",
             _ => slot.ToString()
         };
 
-        private static string RarityClass(Rarity r) => r switch
+        public static string RarityKey(Rarity r) => r switch
         {
-            Rarity.Magic => "rarity-magic",
-            Rarity.Rare => "rarity-rare",
-            Rarity.Unique => "rarity-unique",
-            _ => "rarity-normal"
+            Rarity.Magic => "magic",
+            Rarity.Rare => "rare",
+            Rarity.Unique => "unique",
+            _ => "normal"
         };
     }
 }

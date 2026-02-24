@@ -8,6 +8,7 @@ using Game.Domain.Items;
 using Game.Domain.DTOs.Inventory;
 using Game.Domain.DTOs.Stats;
 using Game.Presentation.UI.MainScreen;
+using Game.Presentation.UI.Services;
 
 namespace Game.Presentation.UI.Presenters
 {
@@ -15,6 +16,7 @@ namespace Game.Presentation.UI.Presenters
     {
         private readonly EquipmentTabView _view;
         private readonly IGameStateProvider _gameState;
+        private readonly IIconProvider _iconProvider;
         private readonly EquipItemUseCase _equipItemUseCase;
         private readonly UnequipItemUseCase _unequipItemUseCase;
         private readonly IPublisher<ItemEquippedDTO> _itemEquippedPub;
@@ -30,6 +32,7 @@ namespace Game.Presentation.UI.Presenters
         public EquipmentPresenter(
             EquipmentTabView view,
             IGameStateProvider gameState,
+            IIconProvider iconProvider,
             EquipItemUseCase equipItemUseCase,
             UnequipItemUseCase unequipItemUseCase,
             IPublisher<ItemEquippedDTO> itemEquippedPub,
@@ -42,6 +45,7 @@ namespace Game.Presentation.UI.Presenters
         {
             _view = view;
             _gameState = gameState;
+            _iconProvider = iconProvider;
             _equipItemUseCase = equipItemUseCase;
             _unequipItemUseCase = unequipItemUseCase;
             _itemEquippedPub = itemEquippedPub;
@@ -55,6 +59,7 @@ namespace Game.Presentation.UI.Presenters
 
         public void Start()
         {
+            _view.SetIconProvider(_iconProvider);
             _view.OnItemDroppedOnSlot += HandleItemDroppedOnSlot;
             _view.OnSlotClicked += HandleSlotClicked;
 

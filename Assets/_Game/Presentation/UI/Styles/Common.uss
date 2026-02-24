@@ -227,45 +227,81 @@
     -unity-font-style: italic;
 }
 
-/* --- Item icon placeholder --- */
+/* --- Item icon (sprite or placeholder) --- */
 
 .item-icon {
-    width: 32px;
-    height: 32px;
-    border-radius: 4px;
-    background-color: rgba(60, 60, 80, 0.5);
-    margin-bottom: 2px;
+    width: 48px;
+    height: 48px;
+    border-radius: 3px;
+    -unity-background-scale-mode: scale-to-fit;
 }
 
 .item-icon--small {
-    width: 24px;
-    height: 24px;
-    margin-bottom: 1px;
+    width: 32px;
+    height: 32px;
 }
 
-.item-icon--filled {
-    border-width: 1px;
-    border-radius: 3px;
+/* Placeholder colours when no sprite loaded */
+.item-icon--placeholder-normal  { background-color: rgba(180, 180, 180, 0.25); }
+.item-icon--placeholder-magic   { background-color: rgba(70, 100, 220, 0.30); }
+.item-icon--placeholder-rare    { background-color: rgba(200, 200, 60, 0.25); }
+.item-icon--placeholder-unique  { background-color: rgba(175, 96, 37, 0.30); }
+
+/* --- Rarity slot backgrounds (applied to slot container) --- */
+
+.slot-bg--normal {
+    background-color: rgba(160, 160, 160, 0.08);
 }
 
-.item-icon--rarity-normal {
-    background-color: rgba(160, 160, 160, 0.35);
+.slot-bg--magic {
+    background-color: rgba(60, 90, 200, 0.12);
+}
+
+.slot-bg--rare {
+    background-color: rgba(200, 200, 50, 0.10);
+}
+
+.slot-bg--unique {
+    background-color: rgba(175, 96, 37, 0.14);
+}
+
+/* --- Rarity slot borders --- */
+
+.slot-border--normal {
     border-color: rgba(200, 200, 200, 0.4);
+    border-width: 1px;
 }
 
-.item-icon--rarity-magic {
-    background-color: rgba(60, 90, 200, 0.35);
-    border-color: rgba(90, 130, 255, 0.6);
+.slot-border--magic {
+    border-color: rgba(90, 130, 255, 0.7);
+    border-width: 1px;
 }
 
-.item-icon--rarity-rare {
-    background-color: rgba(180, 180, 50, 0.3);
-    border-color: rgba(255, 255, 90, 0.6);
+.slot-border--rare {
+    border-color: rgba(255, 255, 90, 0.8);
+    border-width: 2px;
 }
 
-.item-icon--rarity-unique {
-    background-color: rgba(160, 80, 30, 0.35);
-    border-color: rgba(175, 96, 37, 0.6);
+.slot-border--unique {
+    border-color: rgba(175, 96, 37, 0.9);
+    border-width: 2px;
+}
+
+/* Glow effect for rare/unique via double-border inset trick */
+.slot-glow--rare {
+    border-color: rgba(255, 255, 90, 0.35);
+    border-width: 1px;
+    border-radius: 2px;
+    position: absolute;
+    left: -3px; right: -3px; top: -3px; bottom: -3px;
+}
+
+.slot-glow--unique {
+    border-color: rgba(175, 96, 37, 0.40);
+    border-width: 1px;
+    border-radius: 2px;
+    position: absolute;
+    left: -3px; right: -3px; top: -3px; bottom: -3px;
 }
 
 /* --- Drag ghost --- */
@@ -273,14 +309,17 @@
 .drag-ghost {
     width: 64px;
     height: 64px;
-    background-color: var(--color-bg-panel);
-    border-color: var(--color-border-highlight);
     border-width: 2px;
     border-radius: 4px;
     align-items: center;
     justify-content: center;
-    opacity: 0.85;
+    opacity: 0.9;
 }
+
+.drag-ghost--normal  { background-color: rgba(40, 40, 55, 0.95); border-color: rgba(200, 200, 200, 0.5); }
+.drag-ghost--magic   { background-color: rgba(30, 35, 65, 0.95); border-color: rgba(90, 130, 255, 0.7); }
+.drag-ghost--rare    { background-color: rgba(50, 50, 30, 0.95); border-color: rgba(255, 255, 90, 0.8); }
+.drag-ghost--unique  { background-color: rgba(50, 35, 20, 0.95); border-color: rgba(175, 96, 37, 0.9); }
 
 /* --- Item tooltip --- */
 

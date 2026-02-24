@@ -1,0 +1,53 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bbb281ee3bf0b054c82ac2347e9e782c, type: 3}
+  m_Name: Default Local Group
+  m_EditorClassIdentifier: Unity.Addressables.Editor::UnityEditor.AddressableAssets.Settings.AddressableAssetGroup
+  m_GroupName: Default Local Group
+  m_GUID: 03eacd8e500b22c448eac5a86e7dceeb
+  m_SerializeEntries:
+  - m_GUID: 3a5df0b3b7d8cc544b0cf67cb3198a4e
+    m_Address: Assets/_Game/Content/UI/Armor/fc2019.png
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 709b59a687203a44c899ddebd5e758dc
+    m_Address: Assets/_Game/Content/UI/Weapon/fc1441.png
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 77e52c95006b0fb4c8b7ebd7a0909922
+    m_Address: Assets/_Game/Content/UI/Weapon/fc1451.png
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 8333114cc9ddb5f44a456c276bf5e616
+    m_Address: Assets/_Game/Content/UI/Armor/fc1905.png
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 9ee4c46839e91464fa527afd73f134f2
+    m_Address: Assets/_Game/Content/UI/Armor/fc2060.png
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: f9a17e0865f277346995cb7ddf6e9cf2
+    m_Address: Assets/_Game/Content/UI/Armor/fc1938.png
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  m_ReadOnly: 0
+  m_Settings: {fileID: 11400000, guid: aec969ad6e2589b4ca9c9dbbbcc18c27, type: 2}
+  m_SchemaSet:
+    m_Schemas:
+    - {fileID: 11400000, guid: ed5fc42d81dc7984797f406e423ea624, type: 2}
+    - {fileID: 11400000, guid: 31434c030112f1646a141d914c238b56, type: 2}
