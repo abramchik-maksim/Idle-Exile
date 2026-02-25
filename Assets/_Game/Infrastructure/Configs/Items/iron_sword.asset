@@ -15,7 +15,8 @@ MonoBehaviour:
   id: iron_sword
   itemName: Iron Sword
   rarity: 1
-  slot: 1
+  slot: 10
+  handedness: 1
   iconAddress: Assets/_Game/Content/UI/Weapon/fc1441.png
   implicitModifiers:
   - stat: 2

@@ -1,24 +1,13 @@
-<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements">
-    <Style src="../Styles/Common.uss" />
-
-    <!-- Positioned to fill the right 2/3 panel below the tab bar -->
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" editor-extension-mode="False">
+    <Style src="project://database/Assets/_Game/Presentation/UI/Styles/Common.uss?fileID=7433441132597879392&amp;guid=473bed200a4e46549a357d83741ed130&amp;type=3#Common"/>
     <ui:VisualElement name="character-tab-root" style="position: absolute; left: 33.33%; width: 66.67%; top: 52px; bottom: 0;">
-
-        <ui:ScrollView name="stats-scroll" style="flex-grow: 1; padding: 12px;">
-
-            <!-- Combat stats -->
-            <ui:Label text="Combat" class="stat-group-header" />
-            <ui:VisualElement name="stats-combat" class="stat-group" />
-
-            <!-- Defense stats -->
-            <ui:Label text="Defense" class="stat-group-header" />
-            <ui:VisualElement name="stats-defense" class="stat-group" />
-
-            <!-- Utility stats -->
-            <ui:Label text="Utility" class="stat-group-header" />
-            <ui:VisualElement name="stats-utility" class="stat-group" />
-
+        <ui:ScrollView name="stats-scroll" style="flex-grow: 1; padding: 12px 16px; padding-left: 24px;">
+            <ui:Label text="Combat" class="stat-group-header"/>
+            <ui:VisualElement name="stats-combat" class="stat-group"/>
+            <ui:Label text="Defense" class="stat-group-header"/>
+            <ui:VisualElement name="stats-defense" class="stat-group"/>
+            <ui:Label text="Utility" class="stat-group-header"/>
+            <ui:VisualElement name="stats-utility" class="stat-group"/>
         </ui:ScrollView>
-
     </ui:VisualElement>
 </ui:UXML>

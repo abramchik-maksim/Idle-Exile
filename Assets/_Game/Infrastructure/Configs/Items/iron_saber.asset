@@ -15,7 +15,8 @@ MonoBehaviour:
   id: iron_saber
   itemName: Iron Saber
   rarity: 0
-  slot: 1
+  slot: 10
+  handedness: 1
   iconAddress: Assets/_Game/Content/UI/Weapon/fc1451.png
   implicitModifiers:
   - stat: 2

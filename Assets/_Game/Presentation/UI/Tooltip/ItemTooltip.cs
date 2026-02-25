@@ -117,7 +117,15 @@ namespace Game.Presentation.UI.Tooltip
 
             if (item.Definition.Slot != EquipmentSlotType.None)
             {
-                var slotLabel = new Label(FormatSlotName(item.Definition.Slot));
+                string slotText = FormatSlotName(item.Definition.Slot);
+                if (item.Definition.Handedness == Handedness.TwoHanded)
+                    slotText += " (Two-Handed)";
+                else if (item.Definition.Handedness == Handedness.Versatile)
+                    slotText += " (Versatile)";
+                else if (item.Definition.Handedness == Handedness.OffHandOnly)
+                    slotText += " (Off-Hand Only)";
+
+                var slotLabel = new Label(slotText);
                 slotLabel.AddToClassList("item-tooltip__slot");
                 slotLabel.pickingMode = PickingMode.Ignore;
                 panel.Add(slotLabel);
@@ -184,11 +192,17 @@ namespace Game.Presentation.UI.Tooltip
 
         private static string FormatSlotName(EquipmentSlotType slot) => slot switch
         {
-            EquipmentSlotType.Weapon => "Weapon",
             EquipmentSlotType.Helmet => "Helmet",
             EquipmentSlotType.BodyArmor => "Body Armor",
             EquipmentSlotType.Gloves => "Gloves",
             EquipmentSlotType.Boots => "Boots",
+            EquipmentSlotType.Amulet => "Amulet",
+            EquipmentSlotType.Belt => "Belt",
+            EquipmentSlotType.Ring => "Ring",
+            EquipmentSlotType.Ring1 => "Ring",
+            EquipmentSlotType.Ring2 => "Ring",
+            EquipmentSlotType.MainHand => "Main Hand",
+            EquipmentSlotType.OffHand => "Off Hand",
             _ => slot.ToString()
         };
 

@@ -14,7 +14,7 @@ namespace Game.Domain.Inventory
         public IReadOnlyDictionary<EquipmentSlotType, ItemInstance> Equipped => _equipped;
         public bool IsFull => _items.Count >= Capacity;
 
-        public Inventory(int capacity = 30)
+        public Inventory(int capacity = 32)
         {
             Capacity = capacity;
         }
@@ -39,23 +39,57 @@ namespace Game.Domain.Inventory
 
         public bool TryEquip(string uid, out ItemInstance previousItem)
         {
+            return TryEquip(uid, EquipmentSlotType.None, out previousItem, out _, out _);
+        }
+
+        public bool TryEquip(string uid, out ItemInstance previousItem,
+            out EquipmentSlotType resolvedSlot, out List<ItemInstance> additionalUnequipped)
+        {
+            return TryEquip(uid, EquipmentSlotType.None, out previousItem, out resolvedSlot, out additionalUnequipped);
+        }
+
+        public bool TryEquip(string uid, EquipmentSlotType targetSlotOverride,
+            out ItemInstance previousItem, out EquipmentSlotType resolvedSlot,
+            out List<ItemInstance> additionalUnequipped)
+        {
             previousItem = null;
+            resolvedSlot = EquipmentSlotType.None;
+            additionalUnequipped = null;
+
             var item = Find(uid);
             if (item == null) return false;
-            if (item.Definition.Slot == EquipmentSlotType.None) return false;
 
-            var slot = item.Definition.Slot;
-            if (_equipped.TryGetValue(slot, out var prev))
-            {
-                previousItem = prev;
-                _equipped.Remove(slot);
-            }
+            var targetSlot = targetSlotOverride != EquipmentSlotType.None
+                ? ValidateOverride(item, targetSlotOverride)
+                : ResolveTargetSlot(item);
+
+            if (targetSlot == EquipmentSlotType.None) return false;
+
+            if (targetSlot == EquipmentSlotType.OffHand &&
+                _equipped.TryGetValue(EquipmentSlotType.MainHand, out var mainHand) &&
+                mainHand.Definition.Handedness == Handedness.TwoHanded)
+                return false;
 
             int index = _items.IndexOf(item);
-            _equipped[slot] = item;
             _items.Remove(item);
-            if (previousItem != null)
+
+            if (_equipped.TryGetValue(targetSlot, out var prev))
+            {
+                previousItem = prev;
+                _equipped.Remove(targetSlot);
                 _items.Insert(index, previousItem);
+            }
+
+            if (item.Definition.Handedness == Handedness.TwoHanded &&
+                _equipped.TryGetValue(EquipmentSlotType.OffHand, out var offHand))
+            {
+                _equipped.Remove(EquipmentSlotType.OffHand);
+                additionalUnequipped = new List<ItemInstance> { offHand };
+                _items.Add(offHand);
+            }
+
+            _equipped[targetSlot] = item;
+            resolvedSlot = targetSlot;
             return true;
         }
 
@@ -69,6 +103,53 @@ namespace Game.Domain.Inventory
             _items.Add(item);
             unequipped = item;
             return true;
+        }
+
+        public ItemInstance GetEquippedFor(EquipmentSlotType itemSlot)
+        {
+            if (itemSlot == EquipmentSlotType.Ring)
+            {
+                if (_equipped.TryGetValue(EquipmentSlotType.Ring1, out var r1)) return r1;
+                if (_equipped.TryGetValue(EquipmentSlotType.Ring2, out var r2)) return r2;
+                return null;
+            }
+
+            _equipped.TryGetValue(itemSlot, out var found);
+            return found;
+        }
+
+        private EquipmentSlotType ResolveTargetSlot(ItemInstance item)
+        {
+            var slot = item.Definition.Slot;
+            var handedness = item.Definition.Handedness;
+
+            if (slot == EquipmentSlotType.Ring)
+            {
+                if (!_equipped.ContainsKey(EquipmentSlotType.Ring1))
+                    return EquipmentSlotType.Ring1;
+                if (!_equipped.ContainsKey(EquipmentSlotType.Ring2))
+                    return EquipmentSlotType.Ring2;
+                return EquipmentSlotType.Ring1;
+            }
+
+            if (handedness == Handedness.Versatile)
+            {
+                if (!_equipped.ContainsKey(EquipmentSlotType.MainHand))
+                    return EquipmentSlotType.MainHand;
+                if (!_equipped.ContainsKey(EquipmentSlotType.OffHand))
+                    return EquipmentSlotType.OffHand;
+                return EquipmentSlotType.MainHand;
+            }
+
+            return slot;
+        }
+
+        private EquipmentSlotType ValidateOverride(ItemInstance item, EquipmentSlotType requested)
+        {
+            if (EquipmentSlotHelper.IsSlotMatch(item.Definition.Slot, requested, item.Definition.Handedness))
+                return requested;
+
+            return EquipmentSlotType.None;
         }
     }
 }

@@ -15,20 +15,15 @@ namespace Game.Application.Inventory
             _calcStats = calcStats;
         }
 
-        public EquipItemResult Execute(InventoryModel inventory, HeroState hero, string itemUid)
+        public EquipItemResult Execute(InventoryModel inventory, HeroState hero, string itemUid,
+            EquipmentSlotType targetSlot = EquipmentSlotType.None)
         {
-            var itemToEquip = inventory.Find(itemUid);
-            if (itemToEquip == null)
-                return new EquipItemResult(false);
-
-            var slot = itemToEquip.Definition.Slot;
-
-            if (!inventory.TryEquip(itemUid, out _))
+            if (!inventory.TryEquip(itemUid, targetSlot, out _, out var resolvedSlot, out _))
                 return new EquipItemResult(false);
 
             var finalStats = _calcStats.Execute(hero, inventory.Equipped);
 
-            return new EquipItemResult(true, slot, finalStats);
+            return new EquipItemResult(true, resolvedSlot, finalStats);
         }
     }
 

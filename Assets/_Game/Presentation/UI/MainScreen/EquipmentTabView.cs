@@ -13,7 +13,8 @@ namespace Game.Presentation.UI.MainScreen
 {
     public sealed class EquipmentTabView : LayoutView
     {
-        private VisualElement _equipmentSlots;
+        private VisualElement _columnLeft;
+        private VisualElement _columnRight;
         private VisualElement _inventoryGrid;
         private Label _countLabel;
         private IIconProvider _iconProvider;
@@ -26,80 +27,55 @@ namespace Game.Presentation.UI.MainScreen
 
         private VisualElement _compareAnchor;
 
-        private static readonly EquipmentSlotType[] AllSlots =
+        private static readonly EquipmentSlotType[] LeftColumnSlots =
         {
-            EquipmentSlotType.Weapon,
             EquipmentSlotType.Helmet,
+            EquipmentSlotType.Amulet,
+            EquipmentSlotType.Belt,
+            EquipmentSlotType.Ring1,
+            EquipmentSlotType.MainHand,
+        };
+
+        private static readonly EquipmentSlotType[] RightColumnSlots =
+        {
             EquipmentSlotType.BodyArmor,
             EquipmentSlotType.Gloves,
-            EquipmentSlotType.Boots
+            EquipmentSlotType.Boots,
+            EquipmentSlotType.Ring2,
+            EquipmentSlotType.OffHand,
         };
 
         protected override void OnBind()
         {
-            _equipmentSlots = Q("equipment-slots");
+            _columnLeft = Q("equipment-column-left");
+            _columnRight = Q("equipment-column-right");
             _inventoryGrid = Q("inventory-grid");
             _countLabel = Q<Label>("inventory-count");
         }
 
         public void SetIconProvider(IIconProvider provider) => _iconProvider = provider;
 
-        public VisualElement EquipmentSlotsContainer => _equipmentSlots;
+        public VisualElement EquipmentSlotsContainer => _columnLeft?.parent;
         public VisualElement InventoryGridContainer => _inventoryGrid;
 
         public void RenderEquipment(IReadOnlyDictionary<EquipmentSlotType, ItemInstance> equipped)
         {
-            _equipmentSlots.Clear();
+            _columnLeft.Clear();
+            _columnRight.Clear();
 
-            foreach (var slotType in AllSlots)
+            bool offHandBlocked = equipped.TryGetValue(EquipmentSlotType.MainHand, out var mainHandItem)
+                                  && mainHandItem.Definition.Handedness == Handedness.TwoHanded;
+
+            foreach (var slotType in LeftColumnSlots)
             {
                 equipped.TryGetValue(slotType, out var item);
+                _columnLeft.Add(CreateEquipmentSlot(slotType, item, offHandBlocked));
+            }
 
-                var slot = new VisualElement();
-                slot.AddToClassList("equipment-slot");
-                slot.userData = slotType;
-
-                var slotLabel = new Label(FormatSlotName(slotType));
-                slotLabel.AddToClassList("equipment-slot__label");
-                slot.Add(slotLabel);
-
-                if (item != null)
-                {
-                    ApplyRarityStyle(slot, item.Definition.Rarity);
-
-                    var icon = CreateIconElement(item, false);
-                    slot.Add(icon);
-                    LoadIconAsync(icon, item).Forget();
-                }
-
-                var capturedSlot = slotType;
-                var capturedItem = item;
-
-                slot.RegisterCallback<PointerUpEvent>(evt =>
-                {
-                    if (evt.button == 1 && capturedItem != null)
-                    {
-                        OnSlotRightClicked?.Invoke(capturedSlot);
-                        evt.StopPropagation();
-                    }
-                });
-
-                slot.RegisterCallback<PointerEnterEvent>(_ =>
-                {
-                    if (capturedItem != null)
-                        ItemTooltip.Show(slot, capturedItem, Root);
-                });
-                slot.RegisterCallback<PointerLeaveEvent>(_ => ItemTooltip.Hide());
-
-                if (capturedItem != null)
-                {
-                    var dragManip = new ItemDragManipulator(
-                        explicitItem: capturedItem,
-                        onDragReleased: () => OnSlotDraggedOff?.Invoke(capturedSlot));
-                    slot.AddManipulator(dragManip);
-                }
-
-                _equipmentSlots.Add(slot);
+            foreach (var slotType in RightColumnSlots)
+            {
+                equipped.TryGetValue(slotType, out var item);
+                _columnRight.Add(CreateEquipmentSlot(slotType, item, offHandBlocked));
             }
         }
 
@@ -124,6 +100,62 @@ namespace Game.Presentation.UI.MainScreen
         {
             if (_compareAnchor == null) return;
             ItemTooltip.ShowComparison(_compareAnchor, item, equipped, Root);
+        }
+
+        private VisualElement CreateEquipmentSlot(EquipmentSlotType slotType, ItemInstance item,
+            bool offHandBlocked)
+        {
+            var slot = new VisualElement();
+            slot.AddToClassList("equipment-slot");
+            slot.userData = slotType;
+
+            bool isBlocked = slotType == EquipmentSlotType.OffHand && offHandBlocked;
+            if (isBlocked)
+                slot.AddToClassList("equipment-slot--blocked");
+
+            var slotLabel = new Label(isBlocked ? "Off Hand\n(blocked)" : FormatSlotName(slotType));
+            slotLabel.AddToClassList("equipment-slot__label");
+            slot.Add(slotLabel);
+
+            if (item != null)
+            {
+                ApplyRarityStyle(slot, item.Definition.Rarity);
+
+                var icon = CreateIconElement(item, false);
+                slot.Add(icon);
+                LoadIconAsync(icon, item).Forget();
+            }
+
+            if (isBlocked) return slot;
+
+            var capturedSlot = slotType;
+            var capturedItem = item;
+
+            slot.RegisterCallback<PointerUpEvent>(evt =>
+            {
+                if (evt.button == 1 && capturedItem != null)
+                {
+                    OnSlotRightClicked?.Invoke(capturedSlot);
+                    evt.StopPropagation();
+                }
+            });
+
+            slot.RegisterCallback<PointerEnterEvent>(_ =>
+            {
+                if (capturedItem != null)
+                    ItemTooltip.Show(slot, capturedItem, Root);
+            });
+            slot.RegisterCallback<PointerLeaveEvent>(_ => ItemTooltip.Hide());
+
+            if (capturedItem != null)
+            {
+                var dragManip = new ItemDragManipulator(
+                    explicitItem: capturedItem,
+                    onDragReleased: () => OnSlotDraggedOff?.Invoke(capturedSlot));
+                slot.AddManipulator(dragManip);
+            }
+
+            return slot;
         }
 
         private VisualElement CreateItemSlot(ItemInstance item)
@@ -217,7 +249,16 @@ namespace Game.Presentation.UI.MainScreen
 
         private static string FormatSlotName(EquipmentSlotType slot) => slot switch
         {
+            EquipmentSlotType.Helmet => "Head",
             EquipmentSlotType.BodyArmor => "Body",
+            EquipmentSlotType.Gloves => "Gloves",
+            EquipmentSlotType.Boots => "Boots",
+            EquipmentSlotType.Amulet => "Amulet",
+            EquipmentSlotType.Belt => "Belt",
+            EquipmentSlotType.Ring1 => "Ring",
+            EquipmentSlotType.Ring2 => "Ring",
+            EquipmentSlotType.MainHand => "Main Hand",
+            EquipmentSlotType.OffHand => "Off Hand",
             _ => slot.ToString()
         };
 

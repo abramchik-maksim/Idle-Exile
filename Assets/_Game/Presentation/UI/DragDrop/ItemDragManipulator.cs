@@ -97,9 +97,13 @@ namespace Game.Presentation.UI.DragDrop
             {
                 bool handled = false;
                 var dropTarget = FindDropTarget(evt.position);
-                if (dropTarget != null && dropTarget.userData is EquipmentSlotType slotType)
+                if (dropTarget != null
+                    && !dropTarget.ClassListContains("equipment-slot--blocked")
+                    && dropTarget.userData is EquipmentSlotType slotType)
                 {
-                    if (_draggedItem.Definition.Slot == slotType && _onDroppedOnSlot != null)
+                    if (EquipmentSlotHelper.IsSlotMatch(
+                            _draggedItem.Definition.Slot, slotType, _draggedItem.Definition.Handedness)
+                        && _onDroppedOnSlot != null)
                     {
                         _onDroppedOnSlot.Invoke(_draggedItem.Uid, slotType);
                         handled = true;
@@ -236,10 +240,12 @@ namespace Game.Presentation.UI.DragDrop
             var root = target.panel?.visualTree;
             if (root == null) return;
 
-            var targetSlot = _draggedItem.Definition.Slot;
+            var itemSlot = _draggedItem.Definition.Slot;
+            var handedness = _draggedItem.Definition.Handedness;
             root.Query(className: "equipment-slot").ForEach(el =>
             {
-                if (el.userData is EquipmentSlotType st && st == targetSlot)
+                if (el.ClassListContains("equipment-slot--blocked")) return;
+                if (el.userData is EquipmentSlotType st && EquipmentSlotHelper.IsSlotMatch(itemSlot, st, handedness))
                     el.AddToClassList("equipment-slot--drop-hint");
             });
         }
@@ -261,10 +267,12 @@ namespace Game.Presentation.UI.DragDrop
             ClearHoverHighlights();
 
             var dropTarget = FindDropTarget(position);
-            if (dropTarget == null) return;
+            if (dropTarget == null || dropTarget.ClassListContains("equipment-slot--blocked"))
+                return;
 
             if (dropTarget.userData is EquipmentSlotType slotType
-                && _draggedItem.Definition.Slot == slotType)
+                && EquipmentSlotHelper.IsSlotMatch(
+                    _draggedItem.Definition.Slot, slotType, _draggedItem.Definition.Handedness))
             {
                 dropTarget.AddToClassList("equipment-slot--drop-hover");
             }

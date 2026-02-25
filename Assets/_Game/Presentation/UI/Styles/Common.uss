@@ -298,6 +298,18 @@
     left: -3px; right: -3px; top: -3px; bottom: -3px;
 }
 
+/* --- Blocked slot (off-hand when two-handed weapon equipped) --- */
+
+.equipment-slot--blocked {
+    opacity: 0.35;
+    background-color: rgba(10, 10, 15, 0.6);
+    border-color: rgba(60, 60, 80, 0.3);
+}
+
+.equipment-slot--blocked .equipment-slot__label {
+    color: rgba(130, 125, 115, 0.4);
+}
+
 /* --- Drop highlights (AFTER rarity styles to override borders) --- */
 
 .equipment-slot--drop-hint {

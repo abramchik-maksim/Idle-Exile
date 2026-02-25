@@ -14,8 +14,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: Game.Infrastructure::Game.Infrastructure.Configs.ItemDefinitionSO
   id: simple_boots
   itemName: Simple Boots
-  rarity: 0
-  slot: 5
+  rarity: 1
+  slot: 4
+  handedness: 0
   iconAddress: Assets/_Game/Content/UI/Armor/fc1938.png
   implicitModifiers:
   - stat: 8

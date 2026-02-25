@@ -14,8 +14,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: Game.Infrastructure::Game.Infrastructure.Configs.ItemDefinitionSO
   id: iron_helmet
   itemName: Iron Helmet
-  rarity: 0
-  slot: 3
+  rarity: 2
+  slot: 1
+  handedness: 0
   iconAddress: Assets/_Game/Content/UI/Armor/fc1905.png
   implicitModifiers:
   - stat: 6

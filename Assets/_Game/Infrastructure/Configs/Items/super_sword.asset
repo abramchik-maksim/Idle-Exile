@@ -10,15 +10,15 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: d8229efcbe93e11419376fa9bed4fa51, type: 3}
-  m_Name: worn_gloves
+  m_Name: super_sword
   m_EditorClassIdentifier: Game.Infrastructure::Game.Infrastructure.Configs.ItemDefinitionSO
-  id: worn_gloves
-  itemName: Worn Gloves
-  rarity: 0
-  slot: 3
-  handedness: 0
-  iconAddress: Assets/_Game/Content/UI/Armor/fc2060.png
+  id: super_sword
+  itemName: Super Sword
+  rarity: 3
+  slot: 10
+  handedness: 2
+  iconAddress: Assets/_Game/Content/UI/Weapon/fc1518.png
   implicitModifiers:
-  - stat: 3
-    type: 1
-    value: 0.05
+  - stat: 2
+    type: 0
+    value: 10

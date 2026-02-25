@@ -80,9 +80,9 @@ namespace Game.Presentation.UI.Presenters
             UnityEngine.Debug.Log("[EquipmentPresenter] Initialized.");
         }
 
-        private void HandleEquipItem(string itemUid, EquipmentSlotType slot)
+        private void HandleEquipItem(string itemUid, EquipmentSlotType targetSlot)
         {
-            EquipByUid(itemUid);
+            EquipByUid(itemUid, targetSlot);
         }
 
         private void HandleEquipItemByUid(string itemUid)
@@ -90,12 +90,12 @@ namespace Game.Presentation.UI.Presenters
             EquipByUid(itemUid);
         }
 
-        private void EquipByUid(string itemUid)
+        private void EquipByUid(string itemUid, EquipmentSlotType targetSlot = EquipmentSlotType.None)
         {
             var inventory = _gameState.Inventory;
             var hero = _gameState.Hero;
 
-            var result = _equipItemUseCase.Execute(inventory, hero, itemUid);
+            var result = _equipItemUseCase.Execute(inventory, hero, itemUid, targetSlot);
             if (!result.Success)
                 return;
 
@@ -130,7 +130,7 @@ namespace Game.Presentation.UI.Presenters
             if (item == null) return;
 
             var inventory = _gameState.Inventory;
-            inventory.Equipped.TryGetValue(item.Definition.Slot, out var equipped);
+            var equipped = inventory.GetEquippedFor(item.Definition.Slot);
 
             _view.ShowItemComparison(item, equipped);
         }

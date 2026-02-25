@@ -1,32 +1,24 @@
-<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements">
-    <Style src="../Styles/Common.uss" />
-
-    <!-- Positioned to fill the right 2/3 panel below the tab bar -->
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" editor-extension-mode="False">
+    <Style src="project://database/Assets/_Game/Presentation/UI/Styles/Common.uss?fileID=7433441132597879392&amp;guid=473bed200a4e46549a357d83741ed130&amp;type=3#Common"/>
     <ui:VisualElement name="equipment-tab-root" style="position: absolute; left: 33.33%; width: 66.67%; top: 52px; bottom: 0;">
-
         <ui:VisualElement name="equipment-layout" class="equipment-layout">
-
-            <!-- Left half: equipment slots -->
-            <ui:VisualElement name="equipment-panel" style="flex: 1; padding: 12px;">
-                <ui:Label text="Equipment" class="panel-header" />
-                <ui:VisualElement name="equipment-slots" style="flex-grow: 1; align-items: center; justify-content: center;" />
+            <ui:VisualElement name="equipment-panel" style="flex: 1; padding: 12px 16px;">
+                <ui:Label text="Equipment" class="panel-header" style="padding-left: 10px;"/>
+                <ui:VisualElement name="equipment-slots" style="flex-direction: row; flex-grow: 1; justify-content: center;">
+                    <ui:VisualElement name="equipment-column-left" style="align-items: center; padding: 4px 8px;"/>
+                    <ui:VisualElement name="equipment-column-right" style="align-items: center; padding: 4px 8px;"/>
+                </ui:VisualElement>
             </ui:VisualElement>
-
-            <!-- Vertical divider -->
-            <ui:VisualElement class="vertical-divider" />
-
-            <!-- Right half: inventory grid -->
-            <ui:VisualElement name="inventory-panel" style="flex: 1; padding: 12px;">
+            <ui:VisualElement class="vertical-divider"/>
+            <ui:VisualElement name="inventory-panel" style="flex: 1; padding: 12px 16px;">
                 <ui:VisualElement style="flex-direction: row; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-                    <ui:Label text="Inventory" class="panel-header" style="margin-bottom: 0;" />
-                    <ui:Label name="inventory-count" text="0 / 30" class="stat-label" />
+                    <ui:Label text="Inventory" class="panel-header" style="margin-bottom: 0;"/>
+                    <ui:Label name="inventory-count" text="0 / 30" class="stat-label"/>
                 </ui:VisualElement>
                 <ui:ScrollView name="inventory-scroll" style="flex-grow: 1;">
-                    <ui:VisualElement name="inventory-grid" style="flex-direction: row; flex-wrap: wrap;" />
+                    <ui:VisualElement name="inventory-grid" style="flex-direction: row; flex-wrap: wrap;"/>
                 </ui:ScrollView>
             </ui:VisualElement>
-
         </ui:VisualElement>
-
     </ui:VisualElement>
 </ui:UXML>

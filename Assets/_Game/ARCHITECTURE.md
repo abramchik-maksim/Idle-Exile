@@ -104,7 +104,7 @@ Game.Infrastructure.Configs.Editor  (Editor-only)
 |--------------------|---------------------------------------------------|
 | `HeroState`        | Player character identity and base data            |
 | `EnemyState`       | Enemy identity and state                           |
-| `ItemDefinition`   | Immutable item template (id, name, rarity, slot, iconAddress, implicit modifiers) |
+| `ItemDefinition`   | Immutable item template (id, name, rarity, slot, handedness, iconAddress, implicit modifiers) |
 | `ItemInstance`     | Concrete item with rolled modifiers + unique ID    |
 | `Inventory`        | Item storage (list + equipped dictionary)          |
 | `StatCollection`   | Stat aggregation with modifier stacking            |
@@ -114,7 +114,31 @@ Game.Infrastructure.Configs.Editor  (Editor-only)
 
 ### Enums
 
-`StatType`, `ModifierType`, `EquipmentSlotType`, `Rarity`, `DamageType`
+`StatType`, `ModifierType`, `EquipmentSlotType`, `Handedness`, `Rarity`, `DamageType`
+
+### Equipment Slot System
+
+The equipment system uses a two-column layout with 10 slots:
+
+| Left Column     | Right Column    |
+|-----------------|-----------------|
+| Helmet (Armor)  | Body (Armor)    |
+| Amulet (Jewelry)| Gloves (Armor)  |
+| Belt (Jewelry)  | Boots (Armor)   |
+| Ring (Jewelry)  | Ring (Jewelry)  |
+| Main Hand (Wpn) | Off Hand (Wpn)  |
+
+`EquipmentSlotType` has both item-definition types (`Ring`, `MainHand`, `OffHand`) and position types (`Ring1`, `Ring2`). `Ring` items auto-resolve to `Ring1`/`Ring2` at equip time via `Inventory.ResolveTargetSlot()`.
+
+**Handedness** (`Versatile`, `TwoHanded`, `OffHandOnly`, `None`):
+- **Versatile** — weapon can be equipped in either `MainHand` or `OffHand`. Drag highlights both slots. RMB auto-equips to first free slot (MainHand priority). Drag-drop respects the specific target slot.
+- **TwoHanded** — weapon occupies `MainHand` and blocks `OffHand`. Equipping auto-unequips the off-hand item. The OffHand slot is visually dimmed with `equipment-slot--blocked` class.
+- **OffHandOnly** — item (shields, special daggers, scepters) can only go in `OffHand`.
+- **None** — non-weapon items (armor, jewelry), slot is determined by `EquipmentSlotType` alone.
+
+`EquipmentSlotHelper.IsSlotMatch(itemSlot, targetSlot, handedness)` handles matching: `Ring` → `Ring1`/`Ring2`, `Versatile` → both `MainHand`/`OffHand`.
+
+`Inventory.TryEquip` supports an optional `targetSlotOverride` parameter for drag-drop targeting a specific slot (e.g., dragging a Versatile weapon to OffHand). When no override is provided, `ResolveTargetSlot()` auto-routes to the first available slot.
 
 ### DTOs (MessagePipe Events)
 
@@ -169,7 +193,7 @@ Items are defined as individual `ItemDefinitionSO` ScriptableObjects, collected 
 
 ```
 ItemDefinitionSO (per item, CreateAssetMenu)
-    ├── id, itemName, rarity, slot
+    ├── id, itemName, rarity, slot, handedness
     ├── iconAddress (Addressables key)
     └── implicitModifiers: List<ModifierEntry>
 
@@ -180,7 +204,7 @@ ScriptableObjectConfigProvider : IConfigProvider
     └── Reads ItemDatabaseSO → Dictionary<string, ItemDefinition>
 ```
 
-The editor menu item **Idle Exile → Create Item Database** auto-generates all 6 initial items.
+The editor menu item **Idle Exile → Create Item Database** auto-generates all 11 initial items (weapons, armor, jewelry). Running it again force-updates existing assets with the latest blueprint data.
 
 ### Repositories
 
@@ -291,7 +315,7 @@ Placeholder colored squares display while sprites load or if no address is set.
 3. Ghost follows cursor, valid drop targets highlight green
 4. Pointer up on matching equipment slot → trigger `EquipItemUseCase`
 
-Equipment slots support click-to-unequip via `UnequipItemUseCase`.
+Equipment slots support RMB-to-unequip and drag-to-unequip via `UnequipItemUseCase`. LMB click on an inventory item shows a side-by-side comparison tooltip with the currently equipped item.
 
 ### Tooltips
 
@@ -389,7 +413,7 @@ Assets/
 │   │   ├── Combat/        (DamageCalculator, DamageResult, DamageType)
 │   │   ├── DTOs/          (Combat/, Debug/, Inventory/, Stats/)
 │   │   ├── Inventory/     (Inventory)
-│   │   ├── Items/         (ItemDefinition, ItemInstance, Rarity, EquipmentSlotType)
+│   │   ├── Items/         (ItemDefinition, ItemInstance, Rarity, EquipmentSlotType, Handedness, EquipmentSlotHelper)
 │   │   └── Stats/         (Modifier, ModifierType, StatCollection, StatType)
 │   ├── Application/
 │   │   ├── Combat/        (StartCombatSessionUseCase)
