@@ -209,12 +209,6 @@
     border-color: var(--color-border-highlight);
 }
 
-.equipment-slot--drop-hover {
-    border-color: rgb(100, 200, 100);
-    border-width: 2px;
-    background-color: rgba(100, 200, 100, 0.1);
-}
-
 .equipment-slot__label {
     font-size: 10px;
     color: var(--color-text-dim);
@@ -242,10 +236,10 @@
 }
 
 /* Placeholder colours when no sprite loaded */
-.item-icon--placeholder-normal  { background-color: rgba(180, 180, 180, 0.25); }
-.item-icon--placeholder-magic   { background-color: rgba(70, 100, 220, 0.30); }
-.item-icon--placeholder-rare    { background-color: rgba(200, 200, 60, 0.25); }
-.item-icon--placeholder-unique  { background-color: rgba(175, 96, 37, 0.30); }
+.item-icon--placeholder-normal  { background-color: rgba(180, 180, 180, 0.55); border-width: 1px; border-color: rgba(200, 200, 200, 0.3); }
+.item-icon--placeholder-magic   { background-color: rgba(70, 100, 220, 0.55); border-width: 1px; border-color: rgba(90, 130, 255, 0.4); }
+.item-icon--placeholder-rare    { background-color: rgba(200, 200, 60, 0.50); border-width: 1px; border-color: rgba(255, 255, 90, 0.4); }
+.item-icon--placeholder-unique  { background-color: rgba(175, 96, 37, 0.55); border-width: 1px; border-color: rgba(175, 96, 37, 0.5); }
 
 /* --- Rarity slot backgrounds (applied to slot container) --- */
 
@@ -302,6 +296,20 @@
     border-radius: 2px;
     position: absolute;
     left: -3px; right: -3px; top: -3px; bottom: -3px;
+}
+
+/* --- Drop highlights (AFTER rarity styles to override borders) --- */
+
+.equipment-slot--drop-hint {
+    border-color: rgba(100, 200, 100, 0.5);
+    border-width: 2px;
+    background-color: rgba(100, 200, 100, 0.06);
+}
+
+.equipment-slot--drop-hover {
+    border-color: rgb(100, 200, 100);
+    border-width: 2px;
+    background-color: rgba(100, 200, 100, 0.15);
 }
 
 /* --- Drag ghost --- */
@@ -365,4 +373,22 @@
 
 .item-tooltip__mod--implicit {
     color: var(--color-text-dim);
+}
+
+/* --- Comparison tooltip (two tooltips side by side) --- */
+
+.item-comparison {
+    flex-direction: row;
+    position: absolute;
+}
+
+.item-comparison__label {
+    font-size: 10px;
+    color: var(--color-text-dim);
+    -unity-text-align: middle-center;
+    margin-bottom: 2px;
+}
+
+.item-comparison__spacer {
+    width: 8px;
 }

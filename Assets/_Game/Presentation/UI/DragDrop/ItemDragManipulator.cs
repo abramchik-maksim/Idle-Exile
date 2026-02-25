@@ -2,7 +2,6 @@ using System;
 using UnityEngine;
 using UnityEngine.UIElements;
 using Game.Domain.Items;
-using Game.Presentation.UI.MainScreen;
 using Game.Presentation.UI.Tooltip;
 
 namespace Game.Presentation.UI.DragDrop
@@ -10,6 +9,9 @@ namespace Game.Presentation.UI.DragDrop
     public sealed class ItemDragManipulator : PointerManipulator
     {
         private readonly Action<string, EquipmentSlotType> _onDroppedOnSlot;
+        private readonly Action<ItemInstance> _onClicked;
+        private readonly Action _onDragReleased;
+        private readonly ItemInstance _explicitItem;
         private VisualElement _ghost;
         private bool _isDragging;
         private Vector2 _startPosition;
@@ -17,9 +19,16 @@ namespace Game.Presentation.UI.DragDrop
 
         private const float DragThreshold = 5f;
 
-        public ItemDragManipulator(Action<string, EquipmentSlotType> onDroppedOnSlot)
+        public ItemDragManipulator(
+            Action<string, EquipmentSlotType> onDroppedOnSlot = null,
+            Action<ItemInstance> onClicked = null,
+            Action onDragReleased = null,
+            ItemInstance explicitItem = null)
         {
             _onDroppedOnSlot = onDroppedOnSlot;
+            _onClicked = onClicked;
+            _onDragReleased = onDragReleased;
+            _explicitItem = explicitItem;
         }
 
         protected override void RegisterCallbacksOnTarget()
@@ -42,7 +51,7 @@ namespace Game.Presentation.UI.DragDrop
         {
             if (evt.button != 0) return;
 
-            _draggedItem = target.userData as ItemInstance;
+            _draggedItem = _explicitItem ?? target.userData as ItemInstance;
             if (_draggedItem == null) return;
 
             _startPosition = evt.position;
@@ -65,6 +74,7 @@ namespace Game.Presentation.UI.DragDrop
 
                 _isDragging = true;
                 ItemTooltip.Hide();
+                HighlightMatchingSlots();
                 CreateGhost(currentPos);
             }
 
@@ -85,15 +95,26 @@ namespace Game.Presentation.UI.DragDrop
 
             if (_isDragging)
             {
+                bool handled = false;
                 var dropTarget = FindDropTarget(evt.position);
                 if (dropTarget != null && dropTarget.userData is EquipmentSlotType slotType)
                 {
-                    if (_draggedItem.Definition.Slot == slotType)
-                        _onDroppedOnSlot?.Invoke(_draggedItem.Uid, slotType);
+                    if (_draggedItem.Definition.Slot == slotType && _onDroppedOnSlot != null)
+                    {
+                        _onDroppedOnSlot.Invoke(_draggedItem.Uid, slotType);
+                        handled = true;
+                    }
                 }
+
+                if (!handled)
+                    _onDragReleased?.Invoke();
 
                 ClearAllHighlights();
                 RemoveGhost();
+            }
+            else
+            {
+                _onClicked?.Invoke(_draggedItem);
             }
 
             _isDragging = false;
@@ -113,16 +134,41 @@ namespace Game.Presentation.UI.DragDrop
         private void CreateGhost(Vector2 position)
         {
             var root = target.panel.visualTree;
-            var rarityKey = EquipmentTabView.RarityKey(_draggedItem.Definition.Rarity);
+            var rarity = _draggedItem.Definition.Rarity;
+
+            GetRarityColors(rarity, out var ghostBg, out var ghostBorder, out var placeholderBg);
 
             _ghost = new VisualElement();
-            _ghost.AddToClassList("drag-ghost");
-            _ghost.AddToClassList($"drag-ghost--{rarityKey}");
             _ghost.pickingMode = PickingMode.Ignore;
+            _ghost.style.position = Position.Absolute;
+            _ghost.style.width = 64;
+            _ghost.style.height = 64;
+            _ghost.style.borderTopWidth = 2;
+            _ghost.style.borderBottomWidth = 2;
+            _ghost.style.borderLeftWidth = 2;
+            _ghost.style.borderRightWidth = 2;
+            _ghost.style.borderTopLeftRadius = 4;
+            _ghost.style.borderTopRightRadius = 4;
+            _ghost.style.borderBottomLeftRadius = 4;
+            _ghost.style.borderBottomRightRadius = 4;
+            _ghost.style.alignItems = Align.Center;
+            _ghost.style.justifyContent = Justify.Center;
+            _ghost.style.opacity = 0.92f;
+            _ghost.style.backgroundColor = ghostBg;
+            _ghost.style.borderTopColor = ghostBorder;
+            _ghost.style.borderBottomColor = ghostBorder;
+            _ghost.style.borderLeftColor = ghostBorder;
+            _ghost.style.borderRightColor = ghostBorder;
 
             var icon = new VisualElement();
-            icon.AddToClassList("item-icon");
             icon.pickingMode = PickingMode.Ignore;
+            icon.style.width = 48;
+            icon.style.height = 48;
+            icon.style.borderTopLeftRadius = 3;
+            icon.style.borderTopRightRadius = 3;
+            icon.style.borderBottomLeftRadius = 3;
+            icon.style.borderBottomRightRadius = 3;
+            icon.style.unityBackgroundScaleMode = ScaleMode.ScaleToFit;
 
             var sourceIcon = target.Q("item-icon");
             if (sourceIcon != null)
@@ -133,20 +179,47 @@ namespace Game.Presentation.UI.DragDrop
                 else if (bgImg.texture != null)
                     icon.style.backgroundImage = new StyleBackground(bgImg.texture);
                 else
-                    icon.AddToClassList($"item-icon--placeholder-{rarityKey}");
+                    icon.style.backgroundColor = placeholderBg;
             }
             else
             {
-                icon.AddToClassList($"item-icon--placeholder-{rarityKey}");
+                icon.style.backgroundColor = placeholderBg;
             }
 
             _ghost.Add(icon);
 
-            _ghost.style.position = Position.Absolute;
             _ghost.style.left = position.x - 32;
             _ghost.style.top = position.y - 32;
 
             root.Add(_ghost);
+        }
+
+        private static void GetRarityColors(
+            Rarity rarity, out Color ghostBg, out Color ghostBorder, out Color placeholderBg)
+        {
+            switch (rarity)
+            {
+                case Rarity.Magic:
+                    ghostBg = new Color(0.12f, 0.14f, 0.25f, 0.95f);
+                    ghostBorder = new Color(0.35f, 0.51f, 1f, 0.7f);
+                    placeholderBg = new Color(0.27f, 0.39f, 0.86f, 0.55f);
+                    break;
+                case Rarity.Rare:
+                    ghostBg = new Color(0.20f, 0.20f, 0.12f, 0.95f);
+                    ghostBorder = new Color(1f, 1f, 0.35f, 0.8f);
+                    placeholderBg = new Color(0.78f, 0.78f, 0.24f, 0.50f);
+                    break;
+                case Rarity.Unique:
+                    ghostBg = new Color(0.20f, 0.14f, 0.08f, 0.95f);
+                    ghostBorder = new Color(0.69f, 0.38f, 0.15f, 0.9f);
+                    placeholderBg = new Color(0.69f, 0.38f, 0.15f, 0.55f);
+                    break;
+                default:
+                    ghostBg = new Color(0.16f, 0.16f, 0.22f, 0.95f);
+                    ghostBorder = new Color(0.78f, 0.78f, 0.78f, 0.5f);
+                    placeholderBg = new Color(0.71f, 0.71f, 0.71f, 0.55f);
+                    break;
+            }
         }
 
         private void RemoveGhost()
@@ -154,6 +227,21 @@ namespace Game.Presentation.UI.DragDrop
             if (_ghost == null) return;
             _ghost.RemoveFromHierarchy();
             _ghost = null;
+        }
+
+        private void HighlightMatchingSlots()
+        {
+            if (_draggedItem == null) return;
+
+            var root = target.panel?.visualTree;
+            if (root == null) return;
+
+            var targetSlot = _draggedItem.Definition.Slot;
+            root.Query(className: "equipment-slot").ForEach(el =>
+            {
+                if (el.userData is EquipmentSlotType st && st == targetSlot)
+                    el.AddToClassList("equipment-slot--drop-hint");
+            });
         }
 
         private VisualElement FindDropTarget(Vector2 position)
@@ -170,7 +258,7 @@ namespace Game.Presentation.UI.DragDrop
 
         private void UpdateDropTargetHighlights(Vector2 position)
         {
-            ClearAllHighlights();
+            ClearHoverHighlights();
 
             var dropTarget = FindDropTarget(position);
             if (dropTarget == null) return;
@@ -182,6 +270,15 @@ namespace Game.Presentation.UI.DragDrop
             }
         }
 
+        private void ClearHoverHighlights()
+        {
+            var root = target.panel?.visualTree;
+            if (root == null) return;
+
+            root.Query(className: "equipment-slot--drop-hover")
+                .ForEach(el => el.RemoveFromClassList("equipment-slot--drop-hover"));
+        }
+
         private void ClearAllHighlights()
         {
             var root = target.panel?.visualTree;
@@ -189,6 +286,8 @@ namespace Game.Presentation.UI.DragDrop
 
             root.Query(className: "equipment-slot--drop-hover")
                 .ForEach(el => el.RemoveFromClassList("equipment-slot--drop-hover"));
+            root.Query(className: "equipment-slot--drop-hint")
+                .ForEach(el => el.RemoveFromClassList("equipment-slot--drop-hint"));
         }
     }
 }

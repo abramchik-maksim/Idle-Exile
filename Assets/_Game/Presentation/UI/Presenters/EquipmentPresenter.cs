@@ -60,8 +60,11 @@ namespace Game.Presentation.UI.Presenters
         public void Start()
         {
             _view.SetIconProvider(_iconProvider);
-            _view.OnItemDroppedOnSlot += HandleItemDroppedOnSlot;
-            _view.OnSlotClicked += HandleSlotClicked;
+            _view.OnItemDroppedOnSlot += HandleEquipItem;
+            _view.OnItemRightClicked += HandleEquipItemByUid;
+            _view.OnSlotRightClicked += HandleUnequipSlot;
+            _view.OnSlotDraggedOff += HandleUnequipSlot;
+            _view.OnItemCompareRequested += HandleCompare;
 
             _subscriptions.Add(
                 _inventoryChangedSub.Subscribe(_ => RefreshAll()));
@@ -77,7 +80,17 @@ namespace Game.Presentation.UI.Presenters
             UnityEngine.Debug.Log("[EquipmentPresenter] Initialized.");
         }
 
-        private void HandleItemDroppedOnSlot(string itemUid, EquipmentSlotType slot)
+        private void HandleEquipItem(string itemUid, EquipmentSlotType slot)
+        {
+            EquipByUid(itemUid);
+        }
+
+        private void HandleEquipItemByUid(string itemUid)
+        {
+            EquipByUid(itemUid);
+        }
+
+        private void EquipByUid(string itemUid)
         {
             var inventory = _gameState.Inventory;
             var hero = _gameState.Hero;
@@ -93,7 +106,7 @@ namespace Game.Presentation.UI.Presenters
                 _statsChangedPub.Publish(new HeroStatsChangedDTO(result.FinalStats));
         }
 
-        private void HandleSlotClicked(EquipmentSlotType slotType)
+        private void HandleUnequipSlot(EquipmentSlotType slotType)
         {
             var inventory = _gameState.Inventory;
             var hero = _gameState.Hero;
@@ -110,6 +123,16 @@ namespace Game.Presentation.UI.Presenters
 
             if (result.FinalStats != null)
                 _statsChangedPub.Publish(new HeroStatsChangedDTO(result.FinalStats));
+        }
+
+        private void HandleCompare(ItemInstance item)
+        {
+            if (item == null) return;
+
+            var inventory = _gameState.Inventory;
+            inventory.Equipped.TryGetValue(item.Definition.Slot, out var equipped);
+
+            _view.ShowItemComparison(item, equipped);
         }
 
         private void RefreshAll()

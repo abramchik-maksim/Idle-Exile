@@ -51,9 +51,11 @@ namespace Game.Domain.Inventory
                 _equipped.Remove(slot);
             }
 
+            int index = _items.IndexOf(item);
             _equipped[slot] = item;
             _items.Remove(item);
-            if (previousItem != null) _items.Add(previousItem);
+            if (previousItem != null)
+                _items.Insert(index, previousItem);
             return true;
         }
 

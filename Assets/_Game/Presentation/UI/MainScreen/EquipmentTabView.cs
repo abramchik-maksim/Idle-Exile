@@ -19,7 +19,12 @@ namespace Game.Presentation.UI.MainScreen
         private IIconProvider _iconProvider;
 
         public event Action<string, EquipmentSlotType> OnItemDroppedOnSlot;
-        public event Action<EquipmentSlotType> OnSlotClicked;
+        public event Action<string> OnItemRightClicked;
+        public event Action<EquipmentSlotType> OnSlotRightClicked;
+        public event Action<EquipmentSlotType> OnSlotDraggedOff;
+        public event Action<ItemInstance> OnItemCompareRequested;
+
+        private VisualElement _compareAnchor;
 
         private static readonly EquipmentSlotType[] AllSlots =
         {
@@ -69,7 +74,15 @@ namespace Game.Presentation.UI.MainScreen
 
                 var capturedSlot = slotType;
                 var capturedItem = item;
-                slot.RegisterCallback<ClickEvent>(_ => OnSlotClicked?.Invoke(capturedSlot));
+
+                slot.RegisterCallback<PointerUpEvent>(evt =>
+                {
+                    if (evt.button == 1 && capturedItem != null)
+                    {
+                        OnSlotRightClicked?.Invoke(capturedSlot);
+                        evt.StopPropagation();
+                    }
+                });
 
                 slot.RegisterCallback<PointerEnterEvent>(_ =>
                 {
@@ -77,6 +90,14 @@ namespace Game.Presentation.UI.MainScreen
                         ItemTooltip.Show(slot, capturedItem, Root);
                 });
                 slot.RegisterCallback<PointerLeaveEvent>(_ => ItemTooltip.Hide());
+
+                if (capturedItem != null)
+                {
+                    var dragManip = new ItemDragManipulator(
+                        explicitItem: capturedItem,
+                        onDragReleased: () => OnSlotDraggedOff?.Invoke(capturedSlot));
+                    slot.AddManipulator(dragManip);
+                }
 
                 _equipmentSlots.Add(slot);
             }
@@ -99,6 +120,12 @@ namespace Game.Presentation.UI.MainScreen
         public void RaiseItemDroppedOnSlot(string itemUid, EquipmentSlotType slot) =>
             OnItemDroppedOnSlot?.Invoke(itemUid, slot);
 
+        public void ShowItemComparison(ItemInstance item, ItemInstance equipped)
+        {
+            if (_compareAnchor == null) return;
+            ItemTooltip.ShowComparison(_compareAnchor, item, equipped, Root);
+        }
+
         private VisualElement CreateItemSlot(ItemInstance item)
         {
             var slot = new VisualElement();
@@ -111,14 +138,31 @@ namespace Game.Presentation.UI.MainScreen
             slot.Add(icon);
             LoadIconAsync(icon, item).Forget();
 
+            slot.RegisterCallback<PointerUpEvent>(evt =>
+            {
+                if (evt.button == 1)
+                {
+                    ItemTooltip.Hide();
+                    OnItemRightClicked?.Invoke(item.Uid);
+                    evt.StopPropagation();
+                }
+            });
+
             slot.RegisterCallback<PointerEnterEvent>(_ =>
                 ItemTooltip.Show(slot, item, Root));
             slot.RegisterCallback<PointerLeaveEvent>(_ => ItemTooltip.Hide());
 
             if (item.Definition.Slot != EquipmentSlotType.None)
             {
+                var capturedSlot = slot;
                 var manipulator = new ItemDragManipulator(
-                    (uid, slotType) => RaiseItemDroppedOnSlot(uid, slotType));
+                    onDroppedOnSlot: (uid, slotType) => RaiseItemDroppedOnSlot(uid, slotType),
+                    onClicked: clickedItem =>
+                    {
+                        ItemTooltip.Hide();
+                        _compareAnchor = capturedSlot;
+                        OnItemCompareRequested?.Invoke(clickedItem);
+                    });
                 slot.AddManipulator(manipulator);
             }
 
