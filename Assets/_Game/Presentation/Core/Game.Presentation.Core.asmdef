@@ -7,6 +7,7 @@
         "Game.Infrastructure",
         "Game.Shared",
         "Game.Presentation.UI",
+        "Game.Presentation.Combat",
         "VContainer",
         "MessagePipe",
         "MessagePipe.VContainer",

@@ -11,7 +11,9 @@ namespace Game.Infrastructure.Repositories
         {
             string json = JsonUtility.ToJson(new SerializableProgress
             {
-                currentWave = data.CurrentWave,
+                currentTier = data.CurrentTier,
+                currentMap = data.CurrentMap,
+                currentBattle = data.CurrentBattle,
                 totalKills = data.TotalKills,
                 heroId = data.HeroId
             });
@@ -22,12 +24,21 @@ namespace Game.Infrastructure.Repositories
         public PlayerProgressData Load()
         {
             if (!HasSave())
-                return new PlayerProgressData { CurrentWave = 0, TotalKills = 0, HeroId = "default_hero" };
+                return new PlayerProgressData
+                {
+                    CurrentTier = 0,
+                    CurrentMap = 0,
+                    CurrentBattle = 0,
+                    TotalKills = 0,
+                    HeroId = "default_hero"
+                };
 
             var s = JsonUtility.FromJson<SerializableProgress>(PlayerPrefs.GetString(Key));
             return new PlayerProgressData
             {
-                CurrentWave = s.currentWave,
+                CurrentTier = s.currentTier,
+                CurrentMap = s.currentMap,
+                CurrentBattle = s.currentBattle,
                 TotalKills = s.totalKills,
                 HeroId = s.heroId
             };
@@ -38,7 +49,9 @@ namespace Game.Infrastructure.Repositories
         [System.Serializable]
         private struct SerializableProgress
         {
-            public int currentWave;
+            public int currentTier;
+            public int currentMap;
+            public int currentBattle;
             public int totalKills;
             public string heroId;
         }

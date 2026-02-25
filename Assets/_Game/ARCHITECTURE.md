@@ -74,7 +74,10 @@ Game.Presentation.UI
 └── Editor/       (PanelSettingsSetup)
 
 Game.Presentation.Combat
-└── (ECS Components, Systems – future)
+├── Components/  (HeroTag, EnemyTag, ProjectileTag, DeadTag, Position2D, CombatStats, AttackCooldown, ProjectileData, ActorId)
+├── Systems/     (DamageEventBufferSystem, HeroAttackSystem, ProjectileMovementSystem, ProjectileHitSystem, DeathCleanupSystem)
+├── Rendering/   (CombatRenderer, DamageNumber, DamageNumberPool)
+└── CombatBridge (wave/battle orchestration, entity lifecycle)
 
 Game.Infrastructure.Configs.Editor  (Editor-only)
 └── ItemDatabaseCreator
@@ -86,13 +89,14 @@ Game.Infrastructure.Configs.Editor  (Editor-only)
 
 | Layer              | C# Files |
 |--------------------|----------|
-| Domain             | 23       |
-| Application        | 12       |
+| Domain             | 31       |
+| Application        | 14       |
 | Shared             | 1        |
-| Infrastructure     | 9        |
+| Infrastructure     | 10       |
 | Presentation.Core  | 3        |
-| Presentation.UI    | 20       |
-| **Total**          | **68**   |
+| Presentation.UI    | 21       |
+| Presentation.Combat| 16       |
+| **Total**          | **96**   |
 
 ---
 
@@ -144,10 +148,14 @@ The equipment system uses a two-column layout with 10 slots:
 
 | DTO                    | Feature    | Published When                          |
 |------------------------|------------|-----------------------------------------|
-| `CombatStartedDTO`     | Combat     | Combat session begins                   |
-| `CombatEndedDTO`       | Combat     | Combat session ends                     |
+| `BattleStartedDTO`     | Combat     | New battle begins (tier/map/battle info)|
+| `BattleCompletedDTO`   | Combat     | Battle completed, rewards granted       |
+| `WaveStartedDTO`       | Combat     | Wave begins within a battle             |
+| `AllWavesClearedDTO`   | Combat     | All waves in a battle cleared           |
+| `CombatStartedDTO`     | Combat     | Combat session begins (legacy)          |
+| `CombatEndedDTO`       | Combat     | Combat session ends (legacy)            |
 | `EnemyKilledDTO`       | Combat     | Enemy dies                              |
-| `DamageDealtDTO`       | Combat     | Damage is dealt                         |
+| `DamageDealtDTO`       | Combat     | Damage is dealt (includes WorldX/Y)     |
 | `ItemAddedDTO`         | Inventory  | Item added to inventory                 |
 | `ItemEquippedDTO`      | Inventory  | Item equipped to slot                   |
 | `ItemUnequippedDTO`    | Inventory  | Item removed from slot                  |
@@ -171,6 +179,7 @@ Each use case is a pure C# class with a single `Execute()` method:
 | `CalculateHeroStatsUseCase`  | Aggregate all modifiers into final stat values   |
 | `GenerateLootUseCase`        | Generate loot drops from combat                  |
 | `StartCombatSessionUseCase`  | Initialize a combat session                      |
+| `ProgressBattleUseCase`      | Advance to next battle/map/tier                  |
 | `SendTestMessageUseCase`     | Publish test debug message                       |
 
 ### Ports (Interfaces)
@@ -178,6 +187,7 @@ Each use case is a pure C# class with a single `Execute()` method:
 | Interface                   | Implemented By                    |
 |-----------------------------|-----------------------------------|
 | `IConfigProvider`           | `ScriptableObjectConfigProvider`  |
+| `ICombatConfigProvider`     | `HardcodedCombatConfigProvider`   |
 | `IGameStateProvider`        | `GameInitializer`                 |
 | `IRandomService`            | `UnityRandomService`              |
 | `IPlayerProgressRepository` | `PlayerPrefsProgressRepository`   |
@@ -260,7 +270,8 @@ Pure C# classes implementing `IStartable` + `IDisposable`:
 
 | Presenter            | View(s)            | Responsibilities                                    |
 |----------------------|--------------------|-----------------------------------------------------|
-| `MainScreenPresenter`| `MainScreenView`, tab views | Tab switching, combat HUD updates           |
+| `MainScreenPresenter`| `MainScreenView`, tab views | Tab switching                                |
+| `CombatPresenter`    | `MainScreenView`   | Battle/tier label updates via BattleStartedDTO       |
 | `CharacterPresenter` | `CharacterTabView` | Binds hero stats, subscribes to stat changes         |
 | `EquipmentPresenter` | `EquipmentTabView` | Equip/unequip, inventory rendering, icon provider    |
 | `CheatsPresenter`    | `CheatsView`       | Debug actions, random item generation                |
@@ -328,6 +339,109 @@ Equipment slots support RMB-to-unequip and drag-to-unequip via `UnequipItemUseCa
 
 ---
 
+## Combat System (ECS)
+
+### Progression Model
+
+The game uses a hierarchical progression structure:
+
+```
+Tier (Act I, Act II, ...)
+ └── Map (Twilight Shore, ...)
+      └── Battle (1..10 per map)
+           └── Wave (2..4 per battle, invisible to player)
+                └── Enemy Spawns (skeleton ×3, zombie ×2, ...)
+```
+
+Player sees: **Tier name** + **Battle N / Total**. Waves are internal and auto-advance.
+
+After a battle completes: rewards are granted, `ProgressBattleUseCase` advances progress, next battle auto-starts.
+
+### Domain Models (`Domain/Combat/Progression/`)
+
+| Class               | Purpose                                                    |
+|---------------------|------------------------------------------------------------|
+| `TierDefinition`    | Tier identity, ordered, references maps                    |
+| `MapDefinition`     | Map identity, references battles                           |
+| `BattleDefinition`  | Battle identity, ordered, contains waves + rewards         |
+| `WaveDefinition`    | Spawn entries + delay before wave                          |
+| `WaveSpawnEntry`    | Enemy definition ID + count                                |
+| `EnemyDefinition`   | Enemy template: base HP, damage, armor, speed              |
+| `RewardEntry`       | Reward type (Item/Currency/XP) + amount                    |
+
+### Config Provider
+
+`ICombatConfigProvider` — port for progression data:
+- `GetTier/Map/Battle(index)`, `GetEnemy(id)`, `GetTierScaling(tierIndex)`
+- Implemented by `HardcodedCombatConfigProvider` (procedurally generated Tier 1 / 1 map / 10 battles)
+
+### ECS Architecture
+
+All combat simulation runs in Unity ECS (Entities 1.x). Logic is in `Game.Presentation.Combat`.
+
+**Entity Types:**
+
+| Entity     | Components                                            |
+|------------|-------------------------------------------------------|
+| Hero       | `HeroTag`, `Position2D`, `CombatStats`, `AttackCooldown`, `ActorId` |
+| Enemy      | `EnemyTag`, `Position2D`, `CombatStats`, `ActorId`    |
+| Projectile | `ProjectileTag`, `Position2D`, `ProjectileData`       |
+
+**Systems (SimulationSystemGroup order):**
+
+```
+HeroAttackSystem        → fires projectile at nearest enemy
+ProjectileMovementSystem → moves projectiles toward targets (homing)
+ProjectileHitSystem      → detects hits, applies damage, enqueues DamageEvent
+DeathCleanupSystem       → destroys dead enemy entities
+DamageEventBufferSystem  → drains NativeQueue<DamageEvent> into managed list
+```
+
+### CombatBridge (MonoBehaviour orchestrator)
+
+Manages battle/wave lifecycle from managed code:
+- Creates hero entity once from `HeroState` stats
+- Manages wave delay timers, spawns enemy entities per wave
+- Polls `aliveEnemyQuery` to detect wave completion
+- Publishes `BattleStartedDTO`, `BattleCompletedDTO`, `WaveStartedDTO` via MessagePipe
+- Drains `DamageEventBufferSystem.FrameEvents` in `LateUpdate()` → feeds `DamageNumberPool`
+- Auto-advances battles via `ProgressBattleUseCase`
+
+### Rendering (`CombatRenderer`)
+
+Uses `Graphics.DrawMeshInstanced` — zero GameObjects for combat entities:
+- Queries ECS for entity positions by tag (`HeroTag`, `EnemyTag`, `ProjectileTag`)
+- Builds `Matrix4x4[]` arrays per entity type
+- Draws all entities of each type in a single instanced draw call
+- Hero = blue quad, Enemy = red quad, Projectile = yellow quad
+- Auto-creates materials with URP/Unlit shader if none assigned
+
+### Damage Numbers (`DamageNumberPool`)
+
+Object pool of 50 pre-allocated `DamageNumber` GameObjects (world-space `TextMeshPro`):
+- On hit: position near enemy, display rounded damage, animate float-up + fade-out
+- Critical hits: larger font, yellow color
+- Pool exhaustion: recycles oldest active number
+- Duration: 0.8s per number
+
+### Damage Event Flow (NativeQueue batching)
+
+```
+ProjectileHitSystem (ECS, per frame)
+  → NativeQueue<DamageEvent>.Enqueue(amount, position, isCrit)
+      → DamageEventBufferSystem.OnUpdate() drains queue → FrameEvents list
+          → CombatBridge.LateUpdate() reads FrameEvents
+              → DamageNumberPool.Show(position, amount, isCrit)
+              → Publish DamageDealtDTO via MessagePipe
+```
+
+### Performance TODOs
+
+- **DamageCalculator in Burst**: Currently uses managed `DamageCalculator` (option A). Domain formula is the source of truth. Will duplicate as ECS-native calculation when formulas stabilize.
+- **Spatial partitioning**: Collision detection is O(projectiles × enemies). Implement spatial hash when entity counts exceed ~200.
+
+---
+
 ## Event Flow
 
 ```
@@ -355,20 +469,21 @@ User drags item to slot
 ## VContainer Registration Summary
 
 ```csharp
-// MessagePipe brokers (10 DTOs)
+// MessagePipe brokers (14 DTOs)
 RegisterMessageBroker<TDto>(options)  // for each DTO type
 
 // Infrastructure — Singleton
-IRandomService        → UnityRandomService
-IConfigProvider       → ScriptableObjectConfigProvider(itemDatabase)
-IPlayerProgressRepo   → PlayerPrefsProgressRepository
-IInventoryRepository  → InMemoryInventoryRepository
-IIconProvider         → AddressableIconProvider
+IRandomService          → UnityRandomService
+IConfigProvider         → ScriptableObjectConfigProvider(itemDatabase)
+ICombatConfigProvider   → HardcodedCombatConfigProvider
+IPlayerProgressRepo     → PlayerPrefsProgressRepository
+IInventoryRepository    → InMemoryInventoryRepository
+IIconProvider           → AddressableIconProvider
 
 // Use Cases — Transient
 CalculateHeroStatsUseCase, EquipItemUseCase, UnequipItemUseCase,
 AddItemToInventoryUseCase, GenerateLootUseCase, StartCombatSessionUseCase,
-SendTestMessageUseCase
+ProgressBattleUseCase, SendTestMessageUseCase
 
 // Views — MonoBehaviours from scene
 RegisterComponentInHierarchy<MainScreenView>()
@@ -376,11 +491,17 @@ RegisterComponentInHierarchy<CharacterTabView>()
 RegisterComponentInHierarchy<EquipmentTabView>()
 RegisterComponentInHierarchy<CheatsView>()
 
+// Combat — MonoBehaviours from scene
+RegisterComponentInHierarchy<CombatBridge>()
+RegisterComponentInHierarchy<CombatRenderer>()
+RegisterComponentInHierarchy<DamageNumberPool>()
+
 // Presenters — EntryPoints (IStartable auto-Start)
 RegisterEntryPoint<MainScreenPresenter>()
 RegisterEntryPoint<CharacterPresenter>()
 RegisterEntryPoint<EquipmentPresenter>()
 RegisterEntryPoint<CheatsPresenter>()
+RegisterEntryPoint<CombatPresenter>()
 
 // Bootstrap
 RegisterEntryPoint<GameInitializer>()  // IInitializable runs first
@@ -411,6 +532,7 @@ Assets/
 │   ├── Domain/
 │   │   ├── Characters/    (HeroState, EnemyState)
 │   │   ├── Combat/        (DamageCalculator, DamageResult, DamageType)
+│   │   │   └── Progression/ (TierDefinition, MapDefinition, BattleDefinition, WaveDefinition, EnemyDefinition, RewardEntry, ...)
 │   │   ├── DTOs/          (Combat/, Debug/, Inventory/, Stats/)
 │   │   ├── Inventory/     (Inventory)
 │   │   ├── Items/         (ItemDefinition, ItemInstance, Rarity, EquipmentSlotType, Handedness, EquipmentSlotHelper)
@@ -424,6 +546,7 @@ Assets/
 │   │   └── Stats/         (CalculateHeroStatsUseCase)
 │   ├── Infrastructure/
 │   │   ├── Configs/       (ItemDefinitionSO, ItemDatabaseSO, ScriptableObjectConfigProvider)
+│   │   │   ├── Combat/    (HardcodedCombatConfigProvider)
 │   │   │   ├── Editor/    (ItemDatabaseCreator)
 │   │   │   └── Items/     (generated .asset files)
 │   │   ├── Repositories/  (InMemoryInventoryRepository, PlayerPrefsProgressRepository)
@@ -432,7 +555,11 @@ Assets/
 │   │   ├── Core/
 │   │   │   ├── Bootstrap/ (GameInitializer, GameplayLifetimeScope)
 │   │   │   └── Editor/    (GameplaySceneSetup)
-│   │   ├── Combat/        (ECS — future)
+│   │   ├── Combat/
+│   │   │   ├── Components/  (HeroTag, EnemyTag, ProjectileTag, Position2D, CombatStats, ...)
+│   │   │   ├── Systems/     (HeroAttackSystem, ProjectileMovementSystem, ProjectileHitSystem, ...)
+│   │   │   ├── Rendering/   (CombatRenderer, DamageNumber, DamageNumberPool)
+│   │   │   └── CombatBridge.cs
 │   │   └── UI/
 │   │       ├── Base/      (LayoutView)
 │   │       ├── Cheats/    (CheatsView + UXML)
@@ -456,9 +583,16 @@ Assets/
 
 ### First-Time Scene Setup
 
-1. **Menu → Idle Exile → Setup Gameplay Scene** — creates all GameObjects, views, camera
+1. **Menu → Idle Exile → Setup → Create Gameplay Scene** — creates all GameObjects, views, camera, combat objects
 2. **Menu → Idle Exile → Create Item Database** — generates ItemDefinitionSO + ItemDatabaseSO assets
 3. Assign `ItemDatabase.asset` to `GameplayLifetimeScope._itemDatabase` in the Inspector
 4. Mark sprites in `Content/UI/Items/` as Addressable with addresses `Icons/Items/{id}`
 5. Build Addressables (Window → Asset Management → Addressables → Groups → Build)
 6. Enter Play Mode
+
+### Adding Combat to Existing Scene
+
+If the scene was created before the combat system, use **Menu → Idle Exile → Setup → Add Missing Views to Scene**. Additionally, manually add a `[Combat]` parent GameObject with children:
+- `CombatBridge` (add `CombatBridge` component)
+- `CombatRenderer` (add `CombatRenderer` component)
+- `DamageNumberPool` (add `DamageNumberPool` component)

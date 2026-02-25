@@ -4,7 +4,6 @@
     "references": [
         "Game.Domain",
         "Game.Application",
-        "Game.Presentation.Core",
         "Game.Shared",
         "VContainer",
         "MessagePipe",
@@ -13,7 +12,8 @@
         "Unity.Transforms",
         "Unity.Mathematics",
         "Unity.Collections",
-        "Unity.Burst"
+        "Unity.Burst",
+        "Unity.TextMeshPro"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

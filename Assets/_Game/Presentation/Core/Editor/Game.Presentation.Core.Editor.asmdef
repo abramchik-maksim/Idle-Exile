@@ -4,6 +4,7 @@
     "references": [
         "Game.Presentation.Core",
         "Game.Presentation.UI",
+        "Game.Presentation.Combat",
         "VContainer"
     ],
     "includePlatforms": [

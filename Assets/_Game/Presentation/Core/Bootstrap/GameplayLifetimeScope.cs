@@ -13,8 +13,11 @@ using Game.Domain.DTOs.Debug;
 using Game.Domain.DTOs.Inventory;
 using Game.Domain.DTOs.Stats;
 using Game.Infrastructure.Configs;
+using Game.Infrastructure.Configs.Combat;
 using Game.Infrastructure.Repositories;
 using Game.Infrastructure.Services;
+using Game.Presentation.Combat;
+using Game.Presentation.Combat.Rendering;
 using Game.Presentation.UI.MainScreen;
 using Game.Presentation.UI.Cheats;
 using Game.Presentation.UI.Presenters;
@@ -42,11 +45,16 @@ namespace Game.Presentation.Core.Bootstrap
             builder.RegisterMessageBroker<ItemUnequippedDTO>(options);
             builder.RegisterMessageBroker<InventoryChangedDTO>(options);
             builder.RegisterMessageBroker<HeroStatsChangedDTO>(options);
+            builder.RegisterMessageBroker<BattleStartedDTO>(options);
+            builder.RegisterMessageBroker<BattleCompletedDTO>(options);
+            builder.RegisterMessageBroker<WaveStartedDTO>(options);
+            builder.RegisterMessageBroker<AllWavesClearedDTO>(options);
 
             // --- Infrastructure (Singletons) ---
             builder.Register<IRandomService>(c => new UnityRandomService(), Lifetime.Singleton);
             builder.Register<IConfigProvider>(
                 _ => new ScriptableObjectConfigProvider(_itemDatabase), Lifetime.Singleton);
+            builder.Register<ICombatConfigProvider, HardcodedCombatConfigProvider>(Lifetime.Singleton);
             builder.Register<IPlayerProgressRepository, PlayerPrefsProgressRepository>(Lifetime.Singleton);
             builder.Register<IInventoryRepository, InMemoryInventoryRepository>(Lifetime.Singleton);
             builder.Register<IIconProvider, AddressableIconProvider>(Lifetime.Singleton);
@@ -58,6 +66,7 @@ namespace Game.Presentation.Core.Bootstrap
             builder.Register<AddItemToInventoryUseCase>(Lifetime.Transient);
             builder.Register<GenerateLootUseCase>(Lifetime.Transient);
             builder.Register<StartCombatSessionUseCase>(Lifetime.Transient);
+            builder.Register<ProgressBattleUseCase>(Lifetime.Transient);
             builder.Register<SendTestMessageUseCase>(Lifetime.Transient);
 
             // --- Views (MonoBehaviours from scene hierarchy) ---
@@ -66,11 +75,17 @@ namespace Game.Presentation.Core.Bootstrap
             builder.RegisterComponentInHierarchy<EquipmentTabView>();
             builder.RegisterComponentInHierarchy<CheatsView>();
 
+            // --- Combat (MonoBehaviours from scene hierarchy) ---
+            builder.RegisterComponentInHierarchy<CombatBridge>();
+            builder.RegisterComponentInHierarchy<CombatRenderer>();
+            builder.RegisterComponentInHierarchy<DamageNumberPool>();
+
             // --- Presenters as EntryPoints (IStartable → auto-calls Start()) ---
             builder.RegisterEntryPoint<MainScreenPresenter>();
             builder.RegisterEntryPoint<CharacterPresenter>();
             builder.RegisterEntryPoint<EquipmentPresenter>();
             builder.RegisterEntryPoint<CheatsPresenter>();
+            builder.RegisterEntryPoint<CombatPresenter>();
 
             // --- Game bootstrap ---
             builder.RegisterEntryPoint<GameInitializer>();

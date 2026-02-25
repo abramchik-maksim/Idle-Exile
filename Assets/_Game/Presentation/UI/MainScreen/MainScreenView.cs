@@ -7,7 +7,8 @@ namespace Game.Presentation.UI.MainScreen
 {
     public sealed class MainScreenView : LayoutView
     {
-        private Label _waveLabel;
+        private Label _tierLabel;
+        private Label _battleLabel;
         private VisualElement _healthFill;
         private Button _btnCharacterTab;
         private Button _btnEquipmentTab;
@@ -16,7 +17,8 @@ namespace Game.Presentation.UI.MainScreen
 
         protected override void OnBind()
         {
-            _waveLabel = Q<Label>("wave-label");
+            _tierLabel = Q<Label>("tier-label");
+            _battleLabel = Q<Label>("battle-label");
             _healthFill = Q("hero-health-fill");
             _btnCharacterTab = Q<Button>("btn-tab-character");
             _btnEquipmentTab = Q<Button>("btn-tab-equipment");
@@ -25,8 +27,11 @@ namespace Game.Presentation.UI.MainScreen
             _btnEquipmentTab.clicked += () => SelectTab(1);
         }
 
-        public void SetWave(int wave) =>
-            _waveLabel.text = $"Wave {wave}";
+        public void SetBattleInfo(string tierName, int battleIndex, int totalBattles)
+        {
+            _tierLabel.text = tierName;
+            _battleLabel.text = $"Battle {battleIndex + 1} / {totalBattles}";
+        }
 
         public void SetHealthPercent(float normalized)
         {

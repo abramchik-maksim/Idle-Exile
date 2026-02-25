@@ -7,5 +7,6 @@ namespace Game.Application.Ports
     {
         HeroState Hero { get; }
         InventoryModel Inventory { get; }
+        PlayerProgressData Progress { get; }
     }
 }

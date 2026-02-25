@@ -36,9 +36,14 @@ namespace Game.Presentation.Core.Bootstrap
 
             var cam = Camera.main;
             if (cam != null)
+            {
+                cam.transform.position = new Vector3(0f, 0f, -10f);
                 cam.rect = new Rect(0f, 0f, 1f / 3f, 1f);
+                cam.nearClipPlane = 0.1f;
+                cam.farClipPlane = 100f;
+            }
 
-            Debug.Log($"[GameInitializer] Hero '{Hero.Id}' ready. Wave: {Progress.CurrentWave}. Inventory: {Inventory.Items.Count}/{Inventory.Capacity}");
+            Debug.Log($"[GameInitializer] Hero '{Hero.Id}' ready. Tier: {Progress.CurrentTier}, Map: {Progress.CurrentMap}, Battle: {Progress.CurrentBattle}. Inventory: {Inventory.Items.Count}/{Inventory.Capacity}");
         }
 
         public void Dispose()

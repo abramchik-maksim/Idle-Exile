@@ -7,6 +7,8 @@ using Game.Presentation.Core.Bootstrap;
 using Game.Presentation.UI.Base;
 using Game.Presentation.UI.MainScreen;
 using Game.Presentation.UI.Cheats;
+using Game.Presentation.Combat;
+using Game.Presentation.Combat.Rendering;
 
 namespace Game.Presentation.Core.Editor
 {
@@ -60,6 +62,7 @@ namespace Game.Presentation.Core.Editor
 
             CreateCamera();
             CreateLifetimeScope();
+            CreateCombatObjects();
             foreach (var v in AllViews)
                 CreateViewObject(v.Name, v.UxmlPath, v.ViewType, v.SortOrder, v.VisibleOnStart);
 
@@ -84,9 +87,12 @@ namespace Game.Presentation.Core.Editor
         private static void CreateCamera()
         {
             var cameraGo = new GameObject("Main Camera");
+            cameraGo.transform.position = new Vector3(0f, 0f, -10f);
             var cam = cameraGo.AddComponent<Camera>();
             cam.orthographic = true;
             cam.orthographicSize = 5f;
+            cam.nearClipPlane = 0.1f;
+            cam.farClipPlane = 100f;
             cam.clearFlags = CameraClearFlags.SolidColor;
             cam.backgroundColor = new Color(0.07f, 0.07f, 0.09f);
             cam.rect = new Rect(0f, 0f, 1f / 3f, 1f);
@@ -97,6 +103,27 @@ namespace Game.Presentation.Core.Editor
         {
             var go = new GameObject("[GameplayLifetimeScope]");
             go.AddComponent<GameplayLifetimeScope>();
+        }
+
+        private static void CreateCombatObjects()
+        {
+            var combatRoot = new GameObject("[Combat]");
+
+            var bridgeGo = new GameObject("CombatBridge");
+            bridgeGo.transform.SetParent(combatRoot.transform);
+            bridgeGo.AddComponent<CombatBridge>();
+
+            var rendererGo = new GameObject("CombatRenderer");
+            rendererGo.transform.SetParent(combatRoot.transform);
+            rendererGo.AddComponent<CombatRenderer>();
+
+            var poolGo = new GameObject("DamageNumberPool");
+            poolGo.transform.SetParent(combatRoot.transform);
+            poolGo.AddComponent<DamageNumberPool>();
+
+            var camCtrlGo = new GameObject("CombatCameraController");
+            camCtrlGo.transform.SetParent(combatRoot.transform);
+            camCtrlGo.AddComponent<CombatCameraController>();
         }
 
         private static void CreateViewObject(string name, string uxmlPath, System.Type viewType,
