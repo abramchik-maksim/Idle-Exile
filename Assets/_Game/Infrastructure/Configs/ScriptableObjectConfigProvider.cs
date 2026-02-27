@@ -24,9 +24,5 @@ namespace Game.Infrastructure.Configs
             _items.TryGetValue(id, out var def) ? def : null;
 
         public IReadOnlyList<ItemDefinition> GetAllItems() => _allItems;
-
-        public float GetEnemyHealthBase(int waveIndex) => 20f + waveIndex * 8f;
-
-        public float GetEnemyDamageBase(int waveIndex) => 3f + waveIndex * 1.5f;
     }
 }

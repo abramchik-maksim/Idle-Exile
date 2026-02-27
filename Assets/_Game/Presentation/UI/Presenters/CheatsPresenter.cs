@@ -4,11 +4,11 @@ using MessagePipe;
 using VContainer.Unity;
 using Game.Application.Debug;
 using Game.Application.Inventory;
+using Game.Application.Loot;
 using Game.Application.Ports;
 using Game.Domain.DTOs.Debug;
 using Game.Domain.DTOs.Inventory;
 using Game.Domain.Items;
-using Game.Domain.Stats;
 using Game.Presentation.UI.Cheats;
 using UnityEngine;
 
@@ -19,9 +19,8 @@ namespace Game.Presentation.UI.Presenters
         private readonly CheatsView _cheatsView;
         private readonly SendTestMessageUseCase _sendTestUC;
         private readonly AddItemToInventoryUseCase _addItemUC;
+        private readonly ItemRollingService _itemRolling;
         private readonly IGameStateProvider _gameState;
-        private readonly IConfigProvider _config;
-        private readonly IRandomService _random;
         private readonly ISubscriber<TestMessageDTO> _testMessageSub;
         private readonly IPublisher<InventoryChangedDTO> _inventoryChangedPub;
         private readonly IPublisher<ItemAddedDTO> _itemAddedPub;
@@ -33,9 +32,8 @@ namespace Game.Presentation.UI.Presenters
             CheatsView cheatsView,
             SendTestMessageUseCase sendTestUC,
             AddItemToInventoryUseCase addItemUC,
+            ItemRollingService itemRolling,
             IGameStateProvider gameState,
-            IConfigProvider config,
-            IRandomService random,
             ISubscriber<TestMessageDTO> testMessageSub,
             IPublisher<InventoryChangedDTO> inventoryChangedPub,
             IPublisher<ItemAddedDTO> itemAddedPub)
@@ -43,9 +41,8 @@ namespace Game.Presentation.UI.Presenters
             _cheatsView = cheatsView;
             _sendTestUC = sendTestUC;
             _addItemUC = addItemUC;
+            _itemRolling = itemRolling;
             _gameState = gameState;
-            _config = config;
-            _random = random;
             _testMessageSub = testMessageSub;
             _inventoryChangedPub = inventoryChangedPub;
             _itemAddedPub = itemAddedPub;
@@ -77,16 +74,12 @@ namespace Game.Presentation.UI.Presenters
 
         private void HandleGenerateItem()
         {
-            var allItems = _config.GetAllItems();
-            if (allItems.Count == 0)
+            var item = _itemRolling.RollRandomItem();
+            if (item == null)
             {
                 _cheatsView.SetFeedback("No item definitions available.");
                 return;
             }
-
-            var def = allItems[_random.Next(0, allItems.Count)];
-            var mods = RollModifiers(def);
-            var item = new ItemInstance(def, mods);
 
             var inventory = _gameState.Inventory;
             if (!_addItemUC.Execute(inventory, item))
@@ -95,36 +88,13 @@ namespace Game.Presentation.UI.Presenters
                 return;
             }
 
-            _itemAddedPub.Publish(new ItemAddedDTO(item.Uid, def.Id));
+            _itemAddedPub.Publish(new ItemAddedDTO(item.Uid, item.Definition.Id));
             _inventoryChangedPub.Publish(new InventoryChangedDTO());
 
+            var def = item.Definition;
             string rarityTag = def.Rarity != Rarity.Normal ? $" [{def.Rarity}]" : "";
-            _cheatsView.SetFeedback($"Added: {def.Name}{rarityTag}\n+{mods.Count} modifiers");
-            Debug.Log($"[CheatsPresenter] Generated item: {def.Name} ({def.Slot}) with {mods.Count} mods");
-        }
-
-        private List<Modifier> RollModifiers(ItemDefinition def)
-        {
-            var mods = new List<Modifier>();
-            int count = def.Rarity switch
-            {
-                Rarity.Normal => 0,
-                Rarity.Magic => _random.Next(1, 3),
-                Rarity.Rare => _random.Next(3, 6),
-                _ => 1
-            };
-
-            var pool = ModifierRollingConfig.RollableStats;
-
-            for (int i = 0; i < count; i++)
-            {
-                var stat = pool[_random.Next(0, pool.Length)];
-                var (modType, min, max) = ModifierRollingConfig.GetRange(stat);
-                float value = _random.NextFloat(min, max);
-                mods.Add(new Modifier(stat, modType, value, "rolled"));
-            }
-
-            return mods;
+            _cheatsView.SetFeedback($"Added: {def.Name}{rarityTag}\n+{item.RolledModifiers.Count} modifiers");
+            Debug.Log($"[CheatsPresenter] Generated item: {def.Name} ({def.Slot}) with {item.RolledModifiers.Count} mods");
         }
 
         private void HandleResetSave()

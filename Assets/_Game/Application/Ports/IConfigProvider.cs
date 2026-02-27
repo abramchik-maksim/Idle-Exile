@@ -7,7 +7,5 @@ namespace Game.Application.Ports
     {
         ItemDefinition GetItemDefinition(string id);
         IReadOnlyList<ItemDefinition> GetAllItems();
-        float GetEnemyHealthBase(int waveIndex);
-        float GetEnemyDamageBase(int waveIndex);
     }
 }

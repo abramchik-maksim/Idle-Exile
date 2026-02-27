@@ -64,13 +64,13 @@ namespace Game.Presentation.Core.Bootstrap
                 new PlayerPrefsInventoryRepository(c.Resolve<IConfigProvider>()), Lifetime.Singleton);
             builder.Register<IIconProvider, AddressableIconProvider>(Lifetime.Singleton);
 
-            // --- Use Cases (Transient) ---
+            // --- Services & Use Cases ---
+            builder.Register<ItemRollingService>(Lifetime.Transient);
             builder.Register<CalculateHeroStatsUseCase>(Lifetime.Transient);
             builder.Register<EquipItemUseCase>(Lifetime.Transient);
             builder.Register<UnequipItemUseCase>(Lifetime.Transient);
             builder.Register<AddItemToInventoryUseCase>(Lifetime.Transient);
             builder.Register<GenerateLootUseCase>(Lifetime.Transient);
-            builder.Register<StartCombatSessionUseCase>(Lifetime.Transient);
             builder.Register<ProgressBattleUseCase>(Lifetime.Transient);
             builder.Register<GrantBattleRewardUseCase>(Lifetime.Transient);
             builder.Register<SendTestMessageUseCase>(Lifetime.Transient);
@@ -86,12 +86,13 @@ namespace Game.Presentation.Core.Bootstrap
             builder.RegisterComponentInHierarchy<CombatRenderer>();
             builder.RegisterComponentInHierarchy<DamageNumberPool>();
 
-            // --- Presenters as EntryPoints (IStartable → auto-calls Start()) ---
+            // --- Presenters & Controllers (EntryPoints) ---
             builder.RegisterEntryPoint<MainScreenPresenter>();
             builder.RegisterEntryPoint<CharacterPresenter>();
             builder.RegisterEntryPoint<EquipmentPresenter>();
             builder.RegisterEntryPoint<CheatsPresenter>();
             builder.RegisterEntryPoint<CombatPresenter>();
+            builder.RegisterEntryPoint<BattleFlowController>();
 
             // --- Game bootstrap ---
             builder.RegisterEntryPoint<GameInitializer>();

@@ -20,12 +20,6 @@ namespace Game.Infrastructure.Configs
         public IReadOnlyList<ItemDefinition> GetAllItems() =>
             new List<ItemDefinition>(_items.Values);
 
-        public float GetEnemyHealthBase(int waveIndex) =>
-            20f + waveIndex * 8f;
-
-        public float GetEnemyDamageBase(int waveIndex) =>
-            3f + waveIndex * 1.5f;
-
         private static Dictionary<string, ItemDefinition> BuildItemTable()
         {
             return new Dictionary<string, ItemDefinition>
