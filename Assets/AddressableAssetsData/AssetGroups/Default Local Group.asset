@@ -40,6 +40,11 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 949a187938ec7574681dbc1bbc1c99ab
+    m_Address: Assets/_Game/Content/UI/Weapon/fc1483.png
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 9ee4c46839e91464fa527afd73f134f2
     m_Address: Assets/_Game/Content/UI/Armor/fc2060.png
     m_ReadOnly: 0

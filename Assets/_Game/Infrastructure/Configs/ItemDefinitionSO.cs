@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using Game.Domain.Items;
+using Game.Domain.Skills;
 using Game.Domain.Stats;
 using UnityEngine;
 
@@ -15,6 +16,7 @@ namespace Game.Infrastructure.Configs
         public Rarity rarity;
         public EquipmentSlotType slot;
         public Handedness handedness;
+        public WeaponType weaponType;
 
         [Header("Visuals")]
         public string iconAddress;
@@ -31,7 +33,7 @@ namespace Game.Infrastructure.Configs
                 mods[i] = new Modifier(e.stat, e.type, e.value, "implicit");
             }
 
-            return new ItemDefinition(id, itemName, rarity, slot, mods, iconAddress, handedness);
+            return new ItemDefinition(id, itemName, rarity, slot, mods, iconAddress, handedness, weaponType);
         }
     }
 

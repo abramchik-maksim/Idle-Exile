@@ -1,0 +1,40 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" editor-extension-mode="False">
+    <Style src="project://database/Assets/_Game/Presentation/UI/Styles/Common.uss?fileID=7433441132597879392&amp;guid=473bed200a4e46549a357d83741ed130&amp;type=3#Common"/>
+    <ui:VisualElement name="skills-tab-root" style="position: absolute; left: 33.33%; width: 66.67%; top: 52px; bottom: 0;">
+        <ui:VisualElement name="category-chooser" style="flex-direction: row; flex-grow: 1; padding-top: 0; padding-right: 0; padding-bottom: 0; padding-left: 16px;">
+            <ui:VisualElement name="card-main" class="skill-category-card">
+                <ui:Label text="Main" class="skill-category-card__title"/>
+                <ui:Label text="Your primary attack skill" class="skill-category-card__subtitle"/>
+            </ui:VisualElement>
+            <ui:VisualElement class="vertical-divider"/>
+            <ui:VisualElement name="card-utility" class="skill-category-card">
+                <ui:Label text="Utility" class="skill-category-card__title"/>
+                <ui:Label text="Support, defense and buffs" class="skill-category-card__subtitle"/>
+            </ui:VisualElement>
+        </ui:VisualElement>
+        <ui:VisualElement name="main-skills-view" style="flex-grow: 1; display: none;">
+            <ui:VisualElement style="flex-direction: row; align-items: center; padding: 8px 16px;">
+                <ui:Button name="btn-back-main" text="Back" class="btn" style="width: 60px; margin-right: 8px;"/>
+                <ui:Label text="Main Skills" class="panel-header" style="margin-bottom: 0;"/>
+            </ui:VisualElement>
+            <ui:VisualElement style="flex-grow: 1; justify-content: center; align-items: center;">
+                <ui:Label text="Crafting (coming soon)" style="font-size: 20px; color: rgb(120, 120, 120); -unity-font-style: italic;"/>
+            </ui:VisualElement>
+            <ui:VisualElement style="padding: 12px 16px;">
+                <ui:Label text="Owned Main Skills" class="panel-header" style="font-size: 16px;"/>
+                <ui:ScrollView scroll-direction="Horizontal" name="main-skills-scroll" style="height: 80px;">
+                    <ui:VisualElement name="main-skills-grid" style="flex-direction: row;"/>
+                </ui:ScrollView>
+            </ui:VisualElement>
+        </ui:VisualElement>
+        <ui:VisualElement name="utility-skills-view" style="flex-grow: 1; display: none;">
+            <ui:VisualElement style="flex-direction: row; align-items: center; padding: 8px 16px;">
+                <ui:Button name="btn-back-utility" text="Back" class="btn" style="width: 60px; margin-right: 8px;"/>
+                <ui:Label text="Utility Skills" class="panel-header" style="margin-bottom: 0;"/>
+            </ui:VisualElement>
+            <ui:ScrollView name="utility-skills-scroll" style="flex-grow: 1; padding: 0 16px 12px 16px;">
+                <ui:VisualElement name="utility-skills-container"/>
+            </ui:ScrollView>
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

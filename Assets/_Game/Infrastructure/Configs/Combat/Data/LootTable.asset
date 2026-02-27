@@ -12,9 +12,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e0590023c3fedb4439084cfe67af9b77, type: 3}
   m_Name: LootTable
   m_EditorClassIdentifier: Game.Infrastructure::Game.Infrastructure.Configs.Combat.LootTableSO
-  baseDropChance: 0.3
+  baseDropChance: 0.4
   dropChancePerBattle: 0.025
-  maxDropChance: 0.65
+  maxDropChance: 0.8
   bonusDropChancePerTier: 0.1
   minModValue: 1
   maxModValue: 10

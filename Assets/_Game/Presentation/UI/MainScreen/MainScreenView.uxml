@@ -30,6 +30,7 @@
             <ui:VisualElement name="tab-bar" class="tab-bar">
                 <ui:Button name="btn-tab-character" text="Character" class="tab-btn tab-btn--active" />
                 <ui:Button name="btn-tab-equipment" text="Equipment" class="tab-btn" />
+                <ui:Button name="btn-tab-skills" text="Skills" class="tab-btn" />
             </ui:VisualElement>
 
             <!-- Tab content area (filled by separate UIDocuments) -->

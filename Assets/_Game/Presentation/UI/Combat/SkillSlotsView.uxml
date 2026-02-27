@@ -1,0 +1,12 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" editor-extension-mode="False">
+    <Style src="project://database/Assets/_Game/Presentation/UI/Styles/Common.uss?fileID=7433441132597879392&amp;guid=473bed200a4e46549a357d83741ed130&amp;type=3#Common"/>
+    <ui:VisualElement name="skill-slots-root" picking-mode="Ignore" style="position: absolute; left: 20px; width: 33.33%; bottom: 0; padding: 8px;">
+        <ui:VisualElement name="skill-slots-bar" picking-mode="Ignore" style="flex-direction: row; justify-content: center; align-items: flex-end;">
+            <ui:VisualElement name="slot-0" class="skill-slot skill-slot--main"/>
+            <ui:VisualElement name="slot-1" class="skill-slot skill-slot--utility"/>
+            <ui:VisualElement name="slot-2" class="skill-slot skill-slot--utility"/>
+            <ui:VisualElement name="slot-3" class="skill-slot skill-slot--utility"/>
+            <ui:VisualElement name="slot-4" class="skill-slot skill-slot--utility"/>
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

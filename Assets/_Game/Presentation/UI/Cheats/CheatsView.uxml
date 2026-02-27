@@ -1,15 +1,14 @@
-<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements">
-    <Style src="../Styles/Common.uss" />
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" editor-extension-mode="False">
+    <Style src="project://database/Assets/_Game/Presentation/UI/Styles/Common.uss?fileID=7433441132597879392&amp;guid=473bed200a4e46549a357d83741ed130&amp;type=3#Common"/>
     <ui:VisualElement name="cheats-panel" class="panel" style="position: absolute; right: 12px; bottom: 12px; width: 320px; padding: 0;">
         <ui:VisualElement name="cheats-header" class="cheats-header" style="cursor: link;">
-            <ui:Label text="[ Cheats ]" style="-unity-text-align: upper-center; font-size: 18px; color: rgb(255, 200, 50); -unity-font-style: bold;" />
+            <ui:Label text="[ Cheats ]" style="-unity-text-align: upper-center; font-size: 18px; color: rgb(255, 200, 50); -unity-font-style: bold;"/>
         </ui:VisualElement>
         <ui:VisualElement style="padding: 0 12px 12px 12px;">
-            <ui:Button name="btn-generate-item" text="Generate Random Item" class="btn" style="margin-bottom: 4px;" />
-            <ui:Button name="btn-send-test" text="Send Test Message" class="btn" style="margin-bottom: 4px;" />
-            <ui:Button name="btn-reset-save" text="Reset Save Data" class="btn" style="margin-bottom: 8px; color: rgb(255, 100, 100);" />
-
-            <ui:Label name="feedback-label" text="---" style="font-size: 14px; color: rgb(180, 255, 180); -unity-text-align: upper-center; white-space: normal;" />
+            <ui:Button name="btn-generate-item" text="Generate Random Item" class="btn" style="margin-bottom: 4px; margin-top: 6px;"/>
+            <ui:Button name="btn-send-test" text="Send Test Message" class="btn" style="margin-bottom: 4px;"/>
+            <ui:Button name="btn-reset-save" text="Reset Save Data" class="btn" style="margin-bottom: 8px; color: rgb(255, 100, 100);"/>
+            <ui:Label name="feedback-label" text="---" style="font-size: 14px; color: rgb(180, 255, 180); -unity-text-align: upper-center; white-space: normal;"/>
         </ui:VisualElement>
     </ui:VisualElement>
 </ui:UXML>

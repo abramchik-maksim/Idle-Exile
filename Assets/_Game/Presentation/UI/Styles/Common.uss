@@ -484,3 +484,92 @@
     border-color: rgb(255, 80, 80);
     border-width: 2px;
 }
+
+/* === Skills === */
+
+/* --- Category chooser (Main / Utility split screen) --- */
+
+.skill-category-card {
+    flex: 1;
+    justify-content: center;
+    align-items: center;
+    background-color: var(--color-bg-panel);
+    cursor: link;
+    transition-property: background-color, border-color;
+    transition-duration: 0.15s;
+}
+
+.skill-category-card:hover {
+    background-color: rgb(38, 38, 52);
+}
+
+.skill-category-card--selected {
+    background-color: rgb(42, 42, 58);
+    border-color: var(--color-border-highlight);
+    border-width: 2px;
+}
+
+.skill-category-card__title {
+    font-size: var(--font-size-xl);
+    color: var(--color-text);
+    -unity-font-style: bold;
+    margin-bottom: 8px;
+}
+
+.skill-category-card__subtitle {
+    font-size: var(--font-size-md);
+    color: var(--color-text-dim);
+}
+
+/* --- Utility sub-category headers --- */
+
+.skill-category-header {
+    font-size: var(--font-size-md);
+    color: var(--color-border-highlight);
+    -unity-font-style: bold;
+    margin-top: 16px;
+    margin-bottom: 6px;
+    padding-bottom: 4px;
+    border-bottom-color: var(--color-border);
+    border-bottom-width: 1px;
+}
+
+.skills-grid {
+    flex-direction: row;
+    flex-wrap: wrap;
+    margin-bottom: 4px;
+}
+
+/* --- Combat skill slots (bottom of combat area) --- */
+
+.skill-slot {
+    background-color: var(--color-bg-slot);
+    border-color: var(--color-border);
+    border-width: 1px;
+    border-radius: 4px;
+    margin: 0 3px;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    cursor: link;
+}
+
+.skill-slot:hover {
+    border-color: var(--color-border-highlight);
+}
+
+.skill-slot--main {
+    width: 80px;
+    height: 80px;
+    border-width: 2px;
+    border-color: rgb(140, 110, 50);
+}
+
+.skill-slot--utility {
+    width: 64px;
+    height: 64px;
+}
+
+.skill-slot--empty {
+    opacity: 0.5;
+}
