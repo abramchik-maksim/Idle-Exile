@@ -404,3 +404,83 @@
 .item-comparison__spacer {
     width: 8px;
 }
+
+/* --- Loot notification popup --- */
+
+.loot-notification {
+    background-color: rgba(18, 18, 24, 0.92);
+    border-color: var(--color-border-highlight);
+    border-width: 1px;
+    border-radius: 4px;
+    padding: 6px 12px;
+    margin-bottom: 8px;
+    transition-property: opacity;
+    transition-duration: 0.3s;
+}
+
+.loot-notification__text {
+    font-size: var(--font-size-md);
+    -unity-font-style: bold;
+}
+
+/* --- Cheats header (draggable) --- */
+
+.cheats-header {
+    padding: 8px 12px;
+    background-color: rgba(255, 200, 50, 0.08);
+    border-bottom-color: var(--color-border);
+    border-bottom-width: 1px;
+    border-top-left-radius: 4px;
+    border-top-right-radius: 4px;
+}
+
+.cheats-header:hover {
+    background-color: rgba(255, 200, 50, 0.15);
+}
+
+/* --- Danger button --- */
+
+.btn--danger {
+    color: rgb(255, 100, 100);
+    border-color: rgb(120, 40, 40);
+}
+
+.btn--danger:hover {
+    background-color: rgb(80, 25, 25);
+    border-color: rgb(200, 60, 60);
+}
+
+/* --- Sell zone --- */
+
+.sell-zone {
+    flex: 1;
+    max-width: 160px;
+    height: 40px;
+    margin-left: 8px;
+    background-color: rgba(60, 20, 20, 0.4);
+    border-color: rgb(120, 40, 40);
+    border-width: 1px;
+    border-radius: 4px;
+    border-style: dashed;
+    align-items: center;
+    justify-content: center;
+    transition-property: background-color, border-color;
+    transition-duration: 0.15s;
+}
+
+.sell-zone__label {
+    font-size: var(--font-size-sm);
+    color: rgb(180, 80, 80);
+    -unity-text-align: middle-center;
+}
+
+.sell-zone--drop-hint {
+    background-color: rgba(120, 40, 40, 0.3);
+    border-color: rgb(200, 60, 60);
+}
+
+.sell-zone--drop-hover {
+    background-color: rgba(180, 40, 40, 0.4);
+    border-color: rgb(255, 80, 80);
+    border-width: 2px;
+}

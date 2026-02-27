@@ -65,6 +65,9 @@ namespace Game.Presentation.UI.Presenters
             _view.OnSlotRightClicked += HandleUnequipSlot;
             _view.OnSlotDraggedOff += HandleUnequipSlot;
             _view.OnItemCompareRequested += HandleCompare;
+            _view.OnDeleteAllClicked += HandleDeleteAll;
+            _view.OnItemSellDropped += HandleSellItem;
+            _view.OnEquipmentSellDropped += HandleSellEquipped;
 
             _subscriptions.Add(
                 _inventoryChangedSub.Subscribe(_ => RefreshAll()));
@@ -123,6 +126,46 @@ namespace Game.Presentation.UI.Presenters
 
             if (result.FinalStats != null)
                 _statsChangedPub.Publish(new HeroStatsChangedDTO(result.FinalStats));
+        }
+
+        private void HandleDeleteAll()
+        {
+            var inventory = _gameState.Inventory;
+            if (inventory.Items.Count == 0) return;
+
+            inventory.ClearItems();
+            _inventoryChangedPub.Publish(new InventoryChangedDTO());
+            UnityEngine.Debug.Log("[EquipmentPresenter] All inventory items deleted.");
+        }
+
+        private void HandleSellItem(string uid)
+        {
+            var inventory = _gameState.Inventory;
+            if (!inventory.Remove(uid)) return;
+
+            _inventoryChangedPub.Publish(new InventoryChangedDTO());
+            UnityEngine.Debug.Log($"[EquipmentPresenter] Item sold: {uid}");
+        }
+
+        private void HandleSellEquipped(EquipmentSlotType slotType)
+        {
+            var inventory = _gameState.Inventory;
+            var hero = _gameState.Hero;
+
+            if (!inventory.Equipped.ContainsKey(slotType)) return;
+
+            var result = _unequipItemUseCase.Execute(inventory, hero, slotType);
+            if (!result.Success) return;
+
+            inventory.Remove(result.UnequippedItem.Uid);
+
+            _itemUnequippedPub.Publish(new ItemUnequippedDTO(result.Slot.Value));
+            _inventoryChangedPub.Publish(new InventoryChangedDTO());
+
+            if (result.FinalStats != null)
+                _statsChangedPub.Publish(new HeroStatsChangedDTO(result.FinalStats));
+
+            UnityEngine.Debug.Log($"[EquipmentPresenter] Equipped item sold from slot: {slotType}");
         }
 
         private void HandleCompare(ItemInstance item)

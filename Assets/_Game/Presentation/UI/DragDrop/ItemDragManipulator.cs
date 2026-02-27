@@ -11,6 +11,7 @@ namespace Game.Presentation.UI.DragDrop
         private readonly Action<string, EquipmentSlotType> _onDroppedOnSlot;
         private readonly Action<ItemInstance> _onClicked;
         private readonly Action _onDragReleased;
+        private readonly Action<string> _onDroppedOnSellZone;
         private readonly ItemInstance _explicitItem;
         private VisualElement _ghost;
         private bool _isDragging;
@@ -23,12 +24,14 @@ namespace Game.Presentation.UI.DragDrop
             Action<string, EquipmentSlotType> onDroppedOnSlot = null,
             Action<ItemInstance> onClicked = null,
             Action onDragReleased = null,
-            ItemInstance explicitItem = null)
+            ItemInstance explicitItem = null,
+            Action<string> onDroppedOnSellZone = null)
         {
             _onDroppedOnSlot = onDroppedOnSlot;
             _onClicked = onClicked;
             _onDragReleased = onDragReleased;
             _explicitItem = explicitItem;
+            _onDroppedOnSellZone = onDroppedOnSellZone;
         }
 
         protected override void RegisterCallbacksOnTarget()
@@ -108,6 +111,12 @@ namespace Game.Presentation.UI.DragDrop
                         _onDroppedOnSlot.Invoke(_draggedItem.Uid, slotType);
                         handled = true;
                     }
+                }
+
+                if (!handled && _onDroppedOnSellZone != null && FindSellZone(evt.position) != null)
+                {
+                    _onDroppedOnSellZone.Invoke(_draggedItem.Uid);
+                    handled = true;
                 }
 
                 if (!handled)
@@ -248,6 +257,12 @@ namespace Game.Presentation.UI.DragDrop
                 if (el.userData is EquipmentSlotType st && EquipmentSlotHelper.IsSlotMatch(itemSlot, st, handedness))
                     el.AddToClassList("equipment-slot--drop-hint");
             });
+
+            if (_onDroppedOnSellZone != null)
+            {
+                root.Query(className: "sell-zone").ForEach(el =>
+                    el.AddToClassList("sell-zone--drop-hint"));
+            }
         }
 
         private VisualElement FindDropTarget(Vector2 position)
@@ -262,20 +277,35 @@ namespace Game.Presentation.UI.DragDrop
             return null;
         }
 
+        private VisualElement FindSellZone(Vector2 position)
+        {
+            var picked = target.panel.Pick(position);
+            while (picked != null)
+            {
+                if (picked.ClassListContains("sell-zone"))
+                    return picked;
+                picked = picked.parent;
+            }
+            return null;
+        }
+
         private void UpdateDropTargetHighlights(Vector2 position)
         {
             ClearHoverHighlights();
 
             var dropTarget = FindDropTarget(position);
-            if (dropTarget == null || dropTarget.ClassListContains("equipment-slot--blocked"))
-                return;
-
-            if (dropTarget.userData is EquipmentSlotType slotType
+            if (dropTarget != null && !dropTarget.ClassListContains("equipment-slot--blocked")
+                && dropTarget.userData is EquipmentSlotType slotType
                 && EquipmentSlotHelper.IsSlotMatch(
                     _draggedItem.Definition.Slot, slotType, _draggedItem.Definition.Handedness))
             {
                 dropTarget.AddToClassList("equipment-slot--drop-hover");
+                return;
             }
+
+            var sellTarget = FindSellZone(position);
+            if (sellTarget != null)
+                sellTarget.AddToClassList("sell-zone--drop-hover");
         }
 
         private void ClearHoverHighlights()
@@ -285,6 +315,8 @@ namespace Game.Presentation.UI.DragDrop
 
             root.Query(className: "equipment-slot--drop-hover")
                 .ForEach(el => el.RemoveFromClassList("equipment-slot--drop-hover"));
+            root.Query(className: "sell-zone--drop-hover")
+                .ForEach(el => el.RemoveFromClassList("sell-zone--drop-hover"));
         }
 
         private void ClearAllHighlights()
@@ -296,6 +328,10 @@ namespace Game.Presentation.UI.DragDrop
                 .ForEach(el => el.RemoveFromClassList("equipment-slot--drop-hover"));
             root.Query(className: "equipment-slot--drop-hint")
                 .ForEach(el => el.RemoveFromClassList("equipment-slot--drop-hint"));
+            root.Query(className: "sell-zone--drop-hint")
+                .ForEach(el => el.RemoveFromClassList("sell-zone--drop-hint"));
+            root.Query(className: "sell-zone--drop-hover")
+                .ForEach(el => el.RemoveFromClassList("sell-zone--drop-hover"));
         }
     }
 }

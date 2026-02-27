@@ -55,6 +55,7 @@ namespace Game.Presentation.UI.Presenters
         {
             _cheatsView.OnSendTestClicked += HandleSendTest;
             _cheatsView.OnGenerateItemClicked += HandleGenerateItem;
+            _cheatsView.OnResetSaveClicked += HandleResetSave;
 
             _subscriptions.Add(
                 _testMessageSub.Subscribe(dto =>
@@ -113,21 +114,34 @@ namespace Game.Presentation.UI.Presenters
                 _ => 1
             };
 
-            var statPool = new[]
-            {
-                StatType.MaxHealth, StatType.PhysicalDamage,
-                StatType.Armor, StatType.AttackSpeed,
-                StatType.CriticalChance, StatType.Evasion
-            };
+            var pool = ModifierRollingConfig.RollableStats;
 
             for (int i = 0; i < count; i++)
             {
-                var stat = statPool[_random.Next(0, statPool.Length)];
-                float value = _random.NextFloat(1f, 10f);
-                mods.Add(new Modifier(stat, ModifierType.Flat, value, "rolled"));
+                var stat = pool[_random.Next(0, pool.Length)];
+                var (modType, min, max) = ModifierRollingConfig.GetRange(stat);
+                float value = _random.NextFloat(min, max);
+                mods.Add(new Modifier(stat, modType, value, "rolled"));
             }
 
             return mods;
+        }
+
+        private void HandleResetSave()
+        {
+            _gameState.Inventory.ClearAll();
+            _gameState.Hero.Stats.ClearModifiers();
+
+            var progress = _gameState.Progress;
+            progress.CurrentTier = 0;
+            progress.CurrentMap = 0;
+            progress.CurrentBattle = 0;
+            progress.TotalKills = 0;
+
+            _inventoryChangedPub.Publish(new InventoryChangedDTO());
+
+            _cheatsView.SetFeedback("Save data cleared!\nRestart to apply.");
+            Debug.Log("[CheatsPresenter] All save data has been reset.");
         }
 
         public void Dispose()

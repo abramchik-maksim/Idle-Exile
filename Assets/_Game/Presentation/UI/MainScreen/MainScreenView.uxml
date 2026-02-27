@@ -14,8 +14,12 @@
                 </ui:VisualElement>
             </ui:VisualElement>
 
-            <!-- Bottom: placeholder for future combat controls -->
-            <ui:VisualElement name="combat-bottom" style="align-items: center;" picking-mode="Ignore" />
+            <!-- Bottom: loot notification -->
+            <ui:VisualElement name="combat-bottom" style="align-items: flex-start; justify-content: flex-end;" picking-mode="Ignore">
+                <ui:VisualElement name="loot-notification" class="loot-notification" style="display: none;" picking-mode="Ignore">
+                    <ui:Label name="loot-text" text="" class="loot-notification__text" />
+                </ui:VisualElement>
+            </ui:VisualElement>
 
         </ui:VisualElement>
 

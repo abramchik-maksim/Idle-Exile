@@ -17,6 +17,7 @@ namespace Game.Presentation.UI.MainScreen
         private VisualElement _columnRight;
         private VisualElement _inventoryGrid;
         private Label _countLabel;
+        private Button _btnDeleteAll;
         private IIconProvider _iconProvider;
 
         public event Action<string, EquipmentSlotType> OnItemDroppedOnSlot;
@@ -24,6 +25,9 @@ namespace Game.Presentation.UI.MainScreen
         public event Action<EquipmentSlotType> OnSlotRightClicked;
         public event Action<EquipmentSlotType> OnSlotDraggedOff;
         public event Action<ItemInstance> OnItemCompareRequested;
+        public event Action OnDeleteAllClicked;
+        public event Action<string> OnItemSellDropped;
+        public event Action<EquipmentSlotType> OnEquipmentSellDropped;
 
         private VisualElement _compareAnchor;
 
@@ -51,6 +55,10 @@ namespace Game.Presentation.UI.MainScreen
             _columnRight = Q("equipment-column-right");
             _inventoryGrid = Q("inventory-grid");
             _countLabel = Q<Label>("inventory-count");
+            _btnDeleteAll = Q<Button>("btn-delete-all");
+
+            if (_btnDeleteAll != null)
+                _btnDeleteAll.clicked += () => OnDeleteAllClicked?.Invoke();
         }
 
         public void SetIconProvider(IIconProvider provider) => _iconProvider = provider;
@@ -151,7 +159,8 @@ namespace Game.Presentation.UI.MainScreen
             {
                 var dragManip = new ItemDragManipulator(
                     explicitItem: capturedItem,
-                    onDragReleased: () => OnSlotDraggedOff?.Invoke(capturedSlot));
+                    onDragReleased: () => OnSlotDraggedOff?.Invoke(capturedSlot),
+                    onDroppedOnSellZone: _ => OnEquipmentSellDropped?.Invoke(capturedSlot));
                 slot.AddManipulator(dragManip);
             }
 
@@ -194,7 +203,14 @@ namespace Game.Presentation.UI.MainScreen
                         ItemTooltip.Hide();
                         _compareAnchor = capturedSlot;
                         OnItemCompareRequested?.Invoke(clickedItem);
-                    });
+                    },
+                    onDroppedOnSellZone: uid => OnItemSellDropped?.Invoke(uid));
+                slot.AddManipulator(manipulator);
+            }
+            else
+            {
+                var manipulator = new ItemDragManipulator(
+                    onDroppedOnSellZone: uid => OnItemSellDropped?.Invoke(uid));
                 slot.AddManipulator(manipulator);
             }
 

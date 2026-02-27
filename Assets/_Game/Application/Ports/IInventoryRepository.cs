@@ -6,5 +6,6 @@ namespace Game.Application.Ports
     {
         void Save(InventoryModel inventory);
         InventoryModel Load();
+        void Delete();
     }
 }

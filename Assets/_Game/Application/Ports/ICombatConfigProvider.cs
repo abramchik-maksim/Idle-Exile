@@ -12,5 +12,10 @@ namespace Game.Application.Ports
         int GetTierCount();
         int GetMapCount(int tierIndex);
         int GetBattleCount(int tierIndex, int mapIndex);
+
+        float GetDropChance(int battleIndex, int tierIndex);
+        float GetBonusDropChance(int tierIndex);
+        float GetMinModValue();
+        float GetMaxModValue();
     }
 }

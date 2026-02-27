@@ -44,13 +44,14 @@ namespace Game.Application.Loot
                 _ => 1
             };
 
-            var statPool = new[] { StatType.MaxHealth, StatType.PhysicalDamage, StatType.Armor, StatType.AttackSpeed };
+            var pool = ModifierRollingConfig.RollableStats;
 
             for (int i = 0; i < count; i++)
             {
-                var stat = statPool[_random.Next(0, statPool.Length)];
-                float value = _random.NextFloat(1f, 10f);
-                mods.Add(new Modifier(stat, ModifierType.Flat, value, "rolled"));
+                var stat = pool[_random.Next(0, pool.Length)];
+                var (modType, min, max) = ModifierRollingConfig.GetRange(stat);
+                float value = _random.NextFloat(min, max);
+                mods.Add(new Modifier(stat, modType, value, "rolled"));
             }
 
             return mods;

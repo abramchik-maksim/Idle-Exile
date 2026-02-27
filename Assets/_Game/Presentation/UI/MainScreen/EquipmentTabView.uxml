@@ -18,6 +18,12 @@
                 <ui:ScrollView name="inventory-scroll" style="flex-grow: 1;">
                     <ui:VisualElement name="inventory-grid" style="flex-direction: row; flex-wrap: wrap;"/>
                 </ui:ScrollView>
+                <ui:VisualElement name="inventory-actions" style="flex-direction: row; justify-content: space-between; align-items: center; margin-top: 8px;">
+                    <ui:Button name="btn-delete-all" text="Delete All" class="btn btn--danger" style="flex: 0 0 auto;"/>
+                    <ui:VisualElement name="sell-zone" class="sell-zone">
+                        <ui:Label text="Drop to Sell" class="sell-zone__label"/>
+                    </ui:VisualElement>
+                </ui:VisualElement>
             </ui:VisualElement>
         </ui:VisualElement>
     </ui:VisualElement>

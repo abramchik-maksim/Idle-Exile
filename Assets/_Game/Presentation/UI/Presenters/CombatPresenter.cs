@@ -12,17 +12,20 @@ namespace Game.Presentation.UI.Presenters
         private readonly MainScreenView _mainScreenView;
         private readonly ISubscriber<BattleStartedDTO> _battleStartedSub;
         private readonly ISubscriber<BattleCompletedDTO> _battleCompletedSub;
+        private readonly ISubscriber<LootDroppedDTO> _lootDroppedSub;
 
         private readonly List<IDisposable> _subscriptions = new();
 
         public CombatPresenter(
             MainScreenView mainScreenView,
             ISubscriber<BattleStartedDTO> battleStartedSub,
-            ISubscriber<BattleCompletedDTO> battleCompletedSub)
+            ISubscriber<BattleCompletedDTO> battleCompletedSub,
+            ISubscriber<LootDroppedDTO> lootDroppedSub)
         {
             _mainScreenView = mainScreenView;
             _battleStartedSub = battleStartedSub;
             _battleCompletedSub = battleCompletedSub;
+            _lootDroppedSub = lootDroppedSub;
         }
 
         public void Start()
@@ -34,6 +37,10 @@ namespace Game.Presentation.UI.Presenters
             _subscriptions.Add(
                 _battleCompletedSub.Subscribe(dto =>
                     UnityEngine.Debug.Log($"[CombatPresenter] Battle {dto.BattleIndex + 1} completed! Rewards: {dto.Rewards.Count}")));
+
+            _subscriptions.Add(
+                _lootDroppedSub.Subscribe(dto =>
+                    _mainScreenView.ShowLootNotification(dto.ItemName, dto.Rarity)));
 
             UnityEngine.Debug.Log("[CombatPresenter] Initialized.");
         }

@@ -19,6 +19,14 @@ namespace Game.Domain.Inventory
             Capacity = capacity;
         }
 
+        public Inventory(int capacity, List<ItemInstance> items,
+            Dictionary<EquipmentSlotType, ItemInstance> equipped)
+        {
+            Capacity = capacity;
+            _items = new List<ItemInstance>(items);
+            _equipped = new Dictionary<EquipmentSlotType, ItemInstance>(equipped);
+        }
+
         public bool TryAdd(ItemInstance item)
         {
             if (IsFull) return false;
@@ -36,6 +44,17 @@ namespace Game.Domain.Inventory
 
         public ItemInstance Find(string uid) =>
             _items.FirstOrDefault(i => i.Uid == uid);
+
+        public void ClearItems()
+        {
+            _items.Clear();
+        }
+
+        public void ClearAll()
+        {
+            _items.Clear();
+            _equipped.Clear();
+        }
 
         public bool TryEquip(string uid, out ItemInstance previousItem)
         {

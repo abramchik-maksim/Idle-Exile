@@ -56,6 +56,13 @@ namespace Game.Infrastructure.Configs.Combat
             return map?.BattleIds.Count ?? 0;
         }
 
+        public float GetDropChance(int battleIndex, int tierIndex) =>
+            Math.Min(0.3f + battleIndex * 0.025f, 0.65f);
+
+        public float GetBonusDropChance(int tierIndex) => tierIndex * 0.1f;
+        public float GetMinModValue() => 1f;
+        public float GetMaxModValue() => 10f;
+
         private void BuildEnemies()
         {
             _enemies["skeleton"] = new EnemyDefinition("skeleton", "Skeleton", 30f, 5f, 2f, 2f);

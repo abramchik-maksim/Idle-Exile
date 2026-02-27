@@ -28,6 +28,8 @@ namespace Game.Presentation.Core.Bootstrap
     public sealed class GameplayLifetimeScope : LifetimeScope
     {
         [SerializeField] private ItemDatabaseSO _itemDatabase;
+        [SerializeField] private CombatDatabaseSO _combatDatabase;
+        [SerializeField] private LootTableSO _lootTable;
 
         protected override void Configure(IContainerBuilder builder)
         {
@@ -49,14 +51,17 @@ namespace Game.Presentation.Core.Bootstrap
             builder.RegisterMessageBroker<BattleCompletedDTO>(options);
             builder.RegisterMessageBroker<WaveStartedDTO>(options);
             builder.RegisterMessageBroker<AllWavesClearedDTO>(options);
+            builder.RegisterMessageBroker<LootDroppedDTO>(options);
 
             // --- Infrastructure (Singletons) ---
             builder.Register<IRandomService>(c => new UnityRandomService(), Lifetime.Singleton);
             builder.Register<IConfigProvider>(
                 _ => new ScriptableObjectConfigProvider(_itemDatabase), Lifetime.Singleton);
-            builder.Register<ICombatConfigProvider, HardcodedCombatConfigProvider>(Lifetime.Singleton);
+            builder.Register<ICombatConfigProvider>(
+                _ => new ScriptableObjectCombatConfigProvider(_combatDatabase, _lootTable), Lifetime.Singleton);
             builder.Register<IPlayerProgressRepository, PlayerPrefsProgressRepository>(Lifetime.Singleton);
-            builder.Register<IInventoryRepository, InMemoryInventoryRepository>(Lifetime.Singleton);
+            builder.Register<IInventoryRepository>(c =>
+                new PlayerPrefsInventoryRepository(c.Resolve<IConfigProvider>()), Lifetime.Singleton);
             builder.Register<IIconProvider, AddressableIconProvider>(Lifetime.Singleton);
 
             // --- Use Cases (Transient) ---
@@ -67,6 +72,7 @@ namespace Game.Presentation.Core.Bootstrap
             builder.Register<GenerateLootUseCase>(Lifetime.Transient);
             builder.Register<StartCombatSessionUseCase>(Lifetime.Transient);
             builder.Register<ProgressBattleUseCase>(Lifetime.Transient);
+            builder.Register<GrantBattleRewardUseCase>(Lifetime.Transient);
             builder.Register<SendTestMessageUseCase>(Lifetime.Transient);
 
             // --- Views (MonoBehaviours from scene hierarchy) ---

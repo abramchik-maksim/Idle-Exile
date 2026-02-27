@@ -6,11 +6,14 @@ using VContainer;
 using Unity.Entities;
 using Unity.Mathematics;
 using Game.Application.Combat;
+using Game.Application.Inventory;
 using Game.Application.Ports;
 using Game.Domain.Combat;
 using Game.Domain.Combat.Progression;
 using Game.Domain.DTOs.Combat;
+using Game.Domain.DTOs.Inventory;
 using Game.Domain.DTOs.Stats;
+using Game.Domain.Items;
 using Game.Domain.Stats;
 using Game.Presentation.Combat.Components;
 using Game.Presentation.Combat.Rendering;
@@ -23,12 +26,16 @@ namespace Game.Presentation.Combat
         private IGameStateProvider _gameState;
         private ICombatConfigProvider _combatConfig;
         private ProgressBattleUseCase _progressBattle;
+        private GrantBattleRewardUseCase _grantReward;
+        private AddItemToInventoryUseCase _addItem;
         private DamageNumberPool _damagePool;
         private IPublisher<BattleStartedDTO> _battleStartedPub;
         private IPublisher<BattleCompletedDTO> _battleCompletedPub;
         private IPublisher<WaveStartedDTO> _waveStartedPub;
         private IPublisher<DamageDealtDTO> _damageDealtPub;
         private IPublisher<EnemyKilledDTO> _enemyKilledPub;
+        private IPublisher<LootDroppedDTO> _lootDroppedPub;
+        private IPublisher<InventoryChangedDTO> _inventoryChangedPub;
         private ISubscriber<HeroStatsChangedDTO> _heroStatsChangedSub;
 
         private EntityManager _entityManager;
@@ -52,23 +59,31 @@ namespace Game.Presentation.Combat
             IGameStateProvider gameState,
             ICombatConfigProvider combatConfig,
             ProgressBattleUseCase progressBattle,
+            GrantBattleRewardUseCase grantReward,
+            AddItemToInventoryUseCase addItem,
             DamageNumberPool damagePool,
             IPublisher<BattleStartedDTO> battleStartedPub,
             IPublisher<BattleCompletedDTO> battleCompletedPub,
             IPublisher<WaveStartedDTO> waveStartedPub,
             IPublisher<DamageDealtDTO> damageDealtPub,
             IPublisher<EnemyKilledDTO> enemyKilledPub,
+            IPublisher<LootDroppedDTO> lootDroppedPub,
+            IPublisher<InventoryChangedDTO> inventoryChangedPub,
             ISubscriber<HeroStatsChangedDTO> heroStatsChangedSub)
         {
             _gameState = gameState;
             _combatConfig = combatConfig;
             _progressBattle = progressBattle;
+            _grantReward = grantReward;
+            _addItem = addItem;
             _damagePool = damagePool;
             _battleStartedPub = battleStartedPub;
             _battleCompletedPub = battleCompletedPub;
             _waveStartedPub = waveStartedPub;
             _damageDealtPub = damageDealtPub;
             _enemyKilledPub = enemyKilledPub;
+            _lootDroppedPub = lootDroppedPub;
+            _inventoryChangedPub = inventoryChangedPub;
             _heroStatsChangedSub = heroStatsChangedSub;
 
             _statsSubscription = _heroStatsChangedSub.Subscribe(OnHeroStatsChanged);
@@ -305,6 +320,8 @@ namespace Game.Presentation.Combat
 
             Debug.Log($"[CombatBridge] Battle {_currentBattle.Id} completed!");
 
+            GrantRewards(progress.CurrentBattle, progress.CurrentTier);
+
             var result = _progressBattle.Execute(progress);
             _currentBattle = result.NextBattle;
 
@@ -314,6 +331,33 @@ namespace Game.Presentation.Combat
                 Debug.Log($"[CombatBridge] Map advanced to {progress.CurrentMap}!");
 
             StartBattle();
+        }
+
+        private void GrantRewards(int battleIndex, int tierIndex)
+        {
+            var drops = _grantReward.Execute(battleIndex, tierIndex);
+            if (drops.Count == 0) return;
+
+            var inventory = _gameState.Inventory;
+            bool changed = false;
+
+            foreach (var item in drops)
+            {
+                if (_addItem.Execute(inventory, item))
+                {
+                    changed = true;
+                    _lootDroppedPub.Publish(new LootDroppedDTO(
+                        item.Definition.Name, item.Definition.Rarity));
+                    Debug.Log($"[CombatBridge] Loot: {item.Definition.Name} ({item.Definition.Rarity})");
+                }
+                else
+                {
+                    Debug.Log($"[CombatBridge] Inventory full, discarded: {item.Definition.Name}");
+                }
+            }
+
+            if (changed)
+                _inventoryChangedPub.Publish(new InventoryChangedDTO());
         }
 
         private void ProcessDamageEvents()

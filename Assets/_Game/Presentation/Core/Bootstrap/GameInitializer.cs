@@ -1,7 +1,10 @@
 using System;
+using MessagePipe;
 using VContainer.Unity;
 using Game.Application.Ports;
+using Game.Application.Stats;
 using Game.Domain.Characters;
+using Game.Domain.DTOs.Inventory;
 using UnityEngine;
 using InventoryModel = Game.Domain.Inventory.Inventory;
 
@@ -11,6 +14,10 @@ namespace Game.Presentation.Core.Bootstrap
     {
         private readonly IPlayerProgressRepository _progressRepo;
         private readonly IInventoryRepository _inventoryRepo;
+        private readonly CalculateHeroStatsUseCase _calcStats;
+        private readonly ISubscriber<InventoryChangedDTO> _inventoryChangedSub;
+
+        private IDisposable _autoSaveSub;
 
         public HeroState Hero { get; private set; }
         public InventoryModel Inventory { get; private set; }
@@ -18,10 +25,14 @@ namespace Game.Presentation.Core.Bootstrap
 
         public GameInitializer(
             IPlayerProgressRepository progressRepo,
-            IInventoryRepository inventoryRepo)
+            IInventoryRepository inventoryRepo,
+            CalculateHeroStatsUseCase calcStats,
+            ISubscriber<InventoryChangedDTO> inventoryChangedSub)
         {
             _progressRepo = progressRepo;
             _inventoryRepo = inventoryRepo;
+            _calcStats = calcStats;
+            _inventoryChangedSub = inventoryChangedSub;
         }
 
         public void Initialize()
@@ -32,7 +43,17 @@ namespace Game.Presentation.Core.Bootstrap
             Hero = new HeroState(Progress.HeroId ?? "default_hero");
             Inventory = _inventoryRepo.Load();
 
-            _inventoryRepo.Save(Inventory);
+            if (Inventory.Equipped.Count > 0)
+            {
+                _calcStats.Execute(Hero, Inventory.Equipped);
+                Debug.Log($"[GameInitializer] Restored {Inventory.Equipped.Count} equipped items, stats recalculated.");
+            }
+
+            _autoSaveSub = _inventoryChangedSub.Subscribe(_ =>
+            {
+                _inventoryRepo.Save(Inventory);
+                _progressRepo.Save(Progress);
+            });
 
             var cam = Camera.main;
             if (cam != null)
@@ -43,11 +64,13 @@ namespace Game.Presentation.Core.Bootstrap
                 cam.farClipPlane = 100f;
             }
 
-            Debug.Log($"[GameInitializer] Hero '{Hero.Id}' ready. Tier: {Progress.CurrentTier}, Map: {Progress.CurrentMap}, Battle: {Progress.CurrentBattle}. Inventory: {Inventory.Items.Count}/{Inventory.Capacity}");
+            Debug.Log($"[GameInitializer] Hero '{Hero.Id}' ready. Tier: {Progress.CurrentTier}, Map: {Progress.CurrentMap}, Battle: {Progress.CurrentBattle}. Inventory: {Inventory.Items.Count}/{Inventory.Capacity}, Equipped: {Inventory.Equipped.Count}");
         }
 
         public void Dispose()
         {
+            _autoSaveSub?.Dispose();
+
             if (Progress != null)
                 _progressRepo.Save(Progress);
             if (Inventory != null)

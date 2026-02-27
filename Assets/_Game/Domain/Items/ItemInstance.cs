@@ -17,6 +17,13 @@ namespace Game.Domain.Items
             RolledModifiers = rolledModifiers;
         }
 
+        public ItemInstance(string uid, ItemDefinition definition, List<Modifier> rolledModifiers)
+        {
+            Uid = uid;
+            Definition = definition;
+            RolledModifiers = rolledModifiers;
+        }
+
         public IEnumerable<Modifier> GetAllModifiers()
         {
             foreach (var m in Definition.ImplicitModifiers) yield return m;
