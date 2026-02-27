@@ -132,8 +132,8 @@ namespace Game.Presentation.Combat
                 for (int i = 0; i < spawn.Count; i++)
                 {
                     float xSpread = (i - (spawn.Count - 1) / 2f) * 1.0f;
-                    xSpread += Random.Range(-0.3f, 0.3f);
-                    float ySpawn = Random.Range(5.5f, 7f);
+                    xSpread += UnityEngine.Random.Range(-0.3f, 0.3f);
+                    float ySpawn = UnityEngine.Random.Range(5.5f, 7f);
 
                     var entity = _entityManager.CreateEntity(
                         typeof(EnemyTag),
