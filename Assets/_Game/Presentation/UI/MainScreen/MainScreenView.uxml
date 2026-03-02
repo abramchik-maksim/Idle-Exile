@@ -12,6 +12,7 @@
                 <ui:VisualElement name="hero-health-bar" class="health-bar" style="width: 100%; margin-top: 4px;">
                     <ui:VisualElement name="hero-health-fill" class="health-bar__fill" style="width: 100%;" />
                 </ui:VisualElement>
+                <ui:VisualElement name="buff-bar" style="flex-direction: row; flex-wrap: wrap; margin-top: 4px;" picking-mode="Ignore" />
             </ui:VisualElement>
 
             <!-- Bottom: loot notification -->

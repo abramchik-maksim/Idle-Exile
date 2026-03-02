@@ -88,6 +88,7 @@ namespace Game.Presentation.Core.Bootstrap
             builder.Register<SendTestMessageUseCase>(Lifetime.Transient);
             builder.Register<EquipSkillUseCase>(Lifetime.Transient);
             builder.Register<UnequipSkillUseCase>(Lifetime.Transient);
+            builder.Register<UtilitySkillRunner>(Lifetime.Singleton);
 
             // --- Views (MonoBehaviours from scene hierarchy) ---
             builder.RegisterComponentInHierarchy<MainScreenView>();

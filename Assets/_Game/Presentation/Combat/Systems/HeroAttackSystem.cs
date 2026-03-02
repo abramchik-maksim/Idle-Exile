@@ -30,7 +30,8 @@ namespace Game.Presentation.Combat.Systems
 
             foreach (var (cooldown, heroPos, stats)
                 in SystemAPI.Query<RefRW<AttackCooldown>, RefRO<Position2D>, RefRO<CombatStats>>()
-                    .WithAll<HeroTag>())
+                    .WithAll<HeroTag>()
+                    .WithAll<AttackEnabled>())
             {
                 cooldown.ValueRW.Timer -= dt;
                 if (cooldown.ValueRW.Timer > 0f) continue;

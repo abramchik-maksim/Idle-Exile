@@ -1,14 +1,20 @@
 using System;
+using System.Collections.Generic;
 using MessagePipe;
 using UnityEngine;
 using VContainer;
 using Unity.Entities;
 using Unity.Mathematics;
 using Game.Application.Ports;
+using Game.Application.Skills;
 using Game.Domain.Combat;
 using Game.Domain.Combat.Progression;
 using Game.Domain.DTOs.Combat;
+using Game.Domain.DTOs.Inventory;
+using Game.Domain.DTOs.Skills;
 using Game.Domain.DTOs.Stats;
+using Game.Domain.Items;
+using Game.Domain.Skills;
 using Game.Domain.Stats;
 using Game.Presentation.Combat.Components;
 using Game.Presentation.Combat.Rendering;
@@ -23,13 +29,20 @@ namespace Game.Presentation.Combat
         private DamageNumberPool _damagePool;
         private IPublisher<DamageDealtDTO> _damageDealtPub;
         private ISubscriber<HeroStatsChangedDTO> _heroStatsChangedSub;
+        private ISubscriber<SkillEquippedDTO> _skillEquippedSub;
+        private ISubscriber<SkillUnequippedDTO> _skillUnequippedSub;
+        private ISubscriber<SkillsChangedDTO> _skillsChangedSub;
+        private ISubscriber<ItemEquippedDTO> _itemEquippedSub;
+        private ISubscriber<ItemUnequippedDTO> _itemUnequippedSub;
 
         private EntityManager _entityManager;
         private EntityQuery _aliveEnemyQuery;
         private DamageEventBufferSystem _damageBufferSystem;
         private Entity _heroEntity;
-        private IDisposable _statsSubscription;
+        private readonly List<IDisposable> _subscriptions = new();
         private int _nextActorId;
+
+        private UtilitySkillRunner _utilityRunner;
 
         public bool IsReady { get; private set; }
 
@@ -38,21 +51,42 @@ namespace Game.Presentation.Combat
             IGameStateProvider gameState,
             ICombatConfigProvider combatConfig,
             DamageNumberPool damagePool,
+            UtilitySkillRunner utilityRunner,
             IPublisher<DamageDealtDTO> damageDealtPub,
-            ISubscriber<HeroStatsChangedDTO> heroStatsChangedSub)
+            ISubscriber<HeroStatsChangedDTO> heroStatsChangedSub,
+            ISubscriber<SkillEquippedDTO> skillEquippedSub,
+            ISubscriber<SkillUnequippedDTO> skillUnequippedSub,
+            ISubscriber<SkillsChangedDTO> skillsChangedSub,
+            ISubscriber<ItemEquippedDTO> itemEquippedSub,
+            ISubscriber<ItemUnequippedDTO> itemUnequippedSub)
         {
             _gameState = gameState;
             _combatConfig = combatConfig;
             _damagePool = damagePool;
+            _utilityRunner = utilityRunner;
             _damageDealtPub = damageDealtPub;
             _heroStatsChangedSub = heroStatsChangedSub;
+            _skillEquippedSub = skillEquippedSub;
+            _skillUnequippedSub = skillUnequippedSub;
+            _skillsChangedSub = skillsChangedSub;
+            _itemEquippedSub = itemEquippedSub;
+            _itemUnequippedSub = itemUnequippedSub;
 
-            _statsSubscription = _heroStatsChangedSub.Subscribe(OnHeroStatsChanged);
+            _subscriptions.Add(_heroStatsChangedSub.Subscribe(OnHeroStatsChanged));
+            _subscriptions.Add(_skillEquippedSub.Subscribe(_ => { RefreshAttackState(); ReinitializeUtilityRunner(); }));
+            _subscriptions.Add(_skillUnequippedSub.Subscribe(_ => { RefreshAttackState(); ReinitializeUtilityRunner(); }));
+            _subscriptions.Add(_skillsChangedSub.Subscribe(_ => { RefreshAttackState(); ReinitializeUtilityRunner(); }));
+            _subscriptions.Add(_itemEquippedSub.Subscribe(_ => RefreshAttackState()));
+            _subscriptions.Add(_itemUnequippedSub.Subscribe(_ => RefreshAttackState()));
         }
 
         private void Update()
         {
             TryInitialize();
+
+            if (!IsReady) return;
+
+            TickUtilitySkills(Time.deltaTime);
         }
 
         private void LateUpdate()
@@ -79,7 +113,13 @@ namespace Game.Presentation.Combat
             _damageBufferSystem = world.GetExistingSystemManaged<DamageEventBufferSystem>();
 
             SpawnHeroEntity();
+
+            _utilityRunner.OnBuffsChanged += ApplyBuffBonuses;
+            _utilityRunner.Initialize(_gameState.Loadout);
+
             IsReady = true;
+
+            RefreshAttackState();
 
             Debug.Log("[CombatBridge] ECS bridge initialized.");
         }
@@ -116,6 +156,110 @@ namespace Game.Presentation.Combat
             _entityManager.SetComponentData(_heroEntity, new ActorId { Value = _nextActorId++ });
 
             Debug.Log($"[CombatBridge] Hero entity created. Damage: {hero.Stats.GetFinal(StatType.PhysicalDamage)}, AS: {attackSpeed}");
+        }
+
+        private void ReinitializeUtilityRunner()
+        {
+            if (_utilityRunner == null) return;
+            _utilityRunner.Initialize(_gameState.Loadout);
+            ApplyBuffBonuses();
+        }
+
+        private void TickUtilitySkills(float dt)
+        {
+            if (_utilityRunner == null) return;
+
+            _utilityRunner.Tick(dt);
+
+            float healPerSec = _utilityRunner.GetHealPerSecond();
+            if (healPerSec > 0f && _entityManager.Exists(_heroEntity))
+            {
+                var stats = _entityManager.GetComponentData<CombatStats>(_heroEntity);
+                stats.CurrentHealth = math.min(stats.CurrentHealth + healPerSec * dt, stats.MaxHealth);
+                _entityManager.SetComponentData(_heroEntity, stats);
+            }
+        }
+
+        private void ApplyBuffBonuses()
+        {
+            if (!IsReady || !_entityManager.Exists(_heroEntity)) return;
+
+            var hero = _gameState.Hero;
+            var mainSkill = _gameState.Loadout?.MainSkill;
+
+            float baseDmg = hero.Stats.GetFinal(StatType.PhysicalDamage);
+            float baseAtkSpd = hero.Stats.GetFinal(StatType.AttackSpeed);
+            float baseArmor = hero.Stats.GetFinal(StatType.Armor);
+
+            float dmgMult = mainSkill?.Definition.DamageMultiplierPercent / 100f ?? 1f;
+            float asMult = mainSkill?.Definition.AttackSpeedMultiplierPercent / 100f ?? 1f;
+
+            var bonuses = _utilityRunner.GetBuffBonuses();
+
+            float finalDmg = baseDmg * dmgMult;
+            float finalAs = baseAtkSpd * asMult;
+            float finalArmor = baseArmor;
+
+            if (bonuses.TryGetValue(StatType.AttackSpeed, out float asBonus))
+                finalAs += baseAtkSpd * asBonus;
+            if (bonuses.TryGetValue(StatType.Armor, out float armorBonus))
+                finalArmor += armorBonus;
+
+            var stats = _entityManager.GetComponentData<CombatStats>(_heroEntity);
+            stats.PhysicalDamage = finalDmg;
+            stats.AttackSpeed = finalAs;
+            stats.Armor = finalArmor;
+            _entityManager.SetComponentData(_heroEntity, stats);
+
+            float cooldown = finalAs > 0 ? 1f / finalAs : 1f;
+            var cd = _entityManager.GetComponentData<AttackCooldown>(_heroEntity);
+            cd.Cooldown = cooldown;
+            _entityManager.SetComponentData(_heroEntity, cd);
+        }
+
+        private void RefreshAttackState()
+        {
+            if (!IsReady || !_entityManager.Exists(_heroEntity)) return;
+
+            bool canAttack = CanHeroAttack();
+            bool hasComponent = _entityManager.HasComponent<AttackEnabled>(_heroEntity);
+
+            if (canAttack && !hasComponent)
+            {
+                _entityManager.AddComponent<AttackEnabled>(_heroEntity);
+                ApplyBuffBonuses();
+                Debug.Log("[CombatBridge] Attack ENABLED.");
+            }
+            else if (!canAttack && hasComponent)
+            {
+                _entityManager.RemoveComponent<AttackEnabled>(_heroEntity);
+                Debug.Log("[CombatBridge] Attack DISABLED — no valid main skill or weapon.");
+            }
+            else if (canAttack)
+            {
+                ApplyBuffBonuses();
+            }
+        }
+
+        private bool CanHeroAttack()
+        {
+            var loadout = _gameState.Loadout;
+            var mainSkill = loadout?.MainSkill;
+            if (mainSkill == null) return false;
+
+            var requiredWeapon = mainSkill.Definition.RequiredWeapon;
+            if (requiredWeapon == WeaponType.None) return true;
+
+            var inventory = _gameState.Inventory;
+            if (!inventory.Equipped.TryGetValue(EquipmentSlotType.MainHand, out var weapon))
+                return false;
+
+            return weapon.Definition.WeaponType == requiredWeapon;
+        }
+
+        private void ApplyMainSkillMultipliers()
+        {
+            ApplyBuffBonuses();
         }
 
         public void SpawnWave(WaveDefinition wave, float tierScaling)
@@ -189,6 +333,8 @@ namespace Game.Presentation.Combat
             cd.Cooldown = cooldown;
             _entityManager.SetComponentData(_heroEntity, cd);
 
+            RefreshAttackState();
+
             Debug.Log($"[CombatBridge] Hero stats updated. Damage: {physDmg}, AS: {atkSpd}");
         }
 
@@ -215,7 +361,10 @@ namespace Game.Presentation.Combat
 
         private void OnDestroy()
         {
-            _statsSubscription?.Dispose();
+            foreach (var sub in _subscriptions)
+                sub.Dispose();
+            _subscriptions.Clear();
+
             if (IsReady)
                 _aliveEnemyQuery.Dispose();
         }

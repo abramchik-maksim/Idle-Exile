@@ -5,16 +5,18 @@ using VContainer.Unity;
 using Game.Application.Ports;
 using Game.Application.Skills;
 using Game.Domain.DTOs.Skills;
+using Game.Domain.Skills;
 using Game.Presentation.UI.Combat;
 using UnityEngine;
 
 namespace Game.Presentation.UI.Presenters
 {
-    public sealed class SkillSlotsPresenter : IStartable, IDisposable
+    public sealed class SkillSlotsPresenter : IStartable, ITickable, IDisposable
     {
         private readonly SkillSlotsView _view;
         private readonly IGameStateProvider _gameState;
         private readonly UnequipSkillUseCase _unequipSkillUseCase;
+        private readonly UtilitySkillRunner _utilityRunner;
         private readonly IPublisher<SkillUnequippedDTO> _skillUnequippedPub;
         private readonly IPublisher<SkillsChangedDTO> _skillsChangedPub;
         private readonly ISubscriber<SkillEquippedDTO> _skillEquippedSub;
@@ -27,6 +29,7 @@ namespace Game.Presentation.UI.Presenters
             SkillSlotsView view,
             IGameStateProvider gameState,
             UnequipSkillUseCase unequipSkillUseCase,
+            UtilitySkillRunner utilityRunner,
             IPublisher<SkillUnequippedDTO> skillUnequippedPub,
             IPublisher<SkillsChangedDTO> skillsChangedPub,
             ISubscriber<SkillEquippedDTO> skillEquippedSub,
@@ -36,6 +39,7 @@ namespace Game.Presentation.UI.Presenters
             _view = view;
             _gameState = gameState;
             _unequipSkillUseCase = unequipSkillUseCase;
+            _utilityRunner = utilityRunner;
             _skillUnequippedPub = skillUnequippedPub;
             _skillsChangedPub = skillsChangedPub;
             _skillEquippedSub = skillEquippedSub;
@@ -54,6 +58,16 @@ namespace Game.Presentation.UI.Presenters
             RefreshSlots();
 
             Debug.Log("[SkillSlotsPresenter] Initialized.");
+        }
+
+        public void Tick()
+        {
+            for (int i = 0; i < 4; i++)
+            {
+                int slotIndex = SkillLoadout.FirstUtilitySlotIndex + i;
+                float cooldown = _utilityRunner.GetCooldownNormalized(i);
+                _view.UpdateCooldown(slotIndex, cooldown);
+            }
         }
 
         private void HandleSlotRightClicked(int slotIndex)

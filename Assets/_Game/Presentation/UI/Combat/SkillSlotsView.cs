@@ -2,12 +2,15 @@ using System;
 using UnityEngine.UIElements;
 using Game.Domain.Skills;
 using Game.Presentation.UI.Base;
+using Game.Presentation.UI.Tooltip;
 
 namespace Game.Presentation.UI.Combat
 {
     public sealed class SkillSlotsView : LayoutView
     {
         private readonly VisualElement[] _slots = new VisualElement[SkillLoadout.TotalSlots];
+        private readonly SkillInstance[] _currentSkills = new SkillInstance[SkillLoadout.TotalSlots];
+        private readonly RadialFillElement[] _cooldownOverlays = new RadialFillElement[SkillLoadout.TotalSlots];
 
         public event Action<int> OnSlotRightClicked;
 
@@ -17,15 +20,28 @@ namespace Game.Presentation.UI.Combat
             {
                 _slots[i] = Q($"slot-{i}");
 
+                var overlay = new RadialFillElement();
+                _slots[i].Add(overlay);
+                _cooldownOverlays[i] = overlay;
+
                 int capturedIndex = i;
                 _slots[i].RegisterCallback<PointerUpEvent>(evt =>
                 {
                     if (evt.button == 1)
                     {
+                        SkillTooltip.Hide();
                         OnSlotRightClicked?.Invoke(capturedIndex);
                         evt.StopPropagation();
                     }
                 });
+
+                _slots[i].RegisterCallback<PointerEnterEvent>(_ =>
+                {
+                    var skill = _currentSkills[capturedIndex];
+                    if (skill != null)
+                        SkillTooltip.Show(_slots[capturedIndex], skill, Root);
+                });
+                _slots[i].RegisterCallback<PointerLeaveEvent>(_ => SkillTooltip.Hide());
             }
         }
 
@@ -35,8 +51,10 @@ namespace Game.Presentation.UI.Combat
             {
                 var slot = _slots[i];
                 var skill = loadout.GetSlot(i);
+                _currentSkills[i] = skill;
 
-                slot.Clear();
+                while (slot.childCount > 1)
+                    slot.RemoveAt(0);
 
                 if (skill == null)
                 {
@@ -45,7 +63,8 @@ namespace Game.Presentation.UI.Combat
                     emptyLabel.style.fontSize = 10;
                     emptyLabel.style.color = new StyleColor(new UnityEngine.Color(0.4f, 0.4f, 0.4f));
                     emptyLabel.style.unityTextAlign = UnityEngine.TextAnchor.MiddleCenter;
-                    slot.Add(emptyLabel);
+                    slot.Insert(0, emptyLabel);
+                    _cooldownOverlays[i].FillAmount = 0f;
                 }
                 else
                 {
@@ -56,9 +75,15 @@ namespace Game.Presentation.UI.Combat
                     nameLabel.style.color = new StyleColor(new UnityEngine.Color(0.9f, 0.85f, 0.7f));
                     nameLabel.style.unityTextAlign = UnityEngine.TextAnchor.MiddleCenter;
                     nameLabel.style.whiteSpace = WhiteSpace.Normal;
-                    slot.Add(nameLabel);
+                    slot.Insert(0, nameLabel);
                 }
             }
+        }
+
+        public void UpdateCooldown(int slotIndex, float normalizedCooldown)
+        {
+            if (slotIndex < 0 || slotIndex >= SkillLoadout.TotalSlots) return;
+            _cooldownOverlays[slotIndex].FillAmount = normalizedCooldown;
         }
     }
 }

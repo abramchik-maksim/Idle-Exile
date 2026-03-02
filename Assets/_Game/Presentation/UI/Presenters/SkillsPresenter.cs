@@ -54,6 +54,9 @@ namespace Game.Presentation.UI.Presenters
         {
             _view.OnMainSkillRightClicked += HandleEquipMainSkill;
             _view.OnUtilitySkillRightClicked += HandleEquipUtilitySkill;
+            _view.OnSkillDroppedOnSlot += HandleSkillDroppedOnSlot;
+            _view.OnLoadoutSlotRightClicked += HandleUnequipSlot;
+            _view.OnLoadoutSlotDraggedOff += HandleUnequipSlot;
 
             _subscriptions.Add(_skillsChangedSub.Subscribe(_ => RefreshAll()));
             _subscriptions.Add(_skillEquippedSub.Subscribe(_ => RefreshAll()));
@@ -62,6 +65,33 @@ namespace Game.Presentation.UI.Presenters
             RefreshAll();
 
             Debug.Log("[SkillsPresenter] Initialized.");
+        }
+
+        private void HandleSkillDroppedOnSlot(string skillUid, int slotIndex)
+        {
+            var skills = _gameState.Skills;
+            var loadout = _gameState.Loadout;
+            var inventory = _gameState.Inventory;
+
+            var result = _equipSkillUseCase.Execute(skills, loadout, inventory, skillUid, slotIndex);
+            if (!result.Success)
+            {
+                Debug.Log($"[SkillsPresenter] Failed to equip skill {skillUid} to slot {slotIndex}");
+                return;
+            }
+
+            _skillEquippedPub.Publish(new SkillEquippedDTO(skillUid, result.SlotIndex));
+            _skillsChangedPub.Publish(new SkillsChangedDTO());
+        }
+
+        private void HandleUnequipSlot(int slotIndex)
+        {
+            var loadout = _gameState.Loadout;
+            var result = _unequipSkillUseCase.Execute(loadout, slotIndex);
+            if (!result.Success) return;
+
+            _skillUnequippedPub.Publish(new SkillUnequippedDTO(slotIndex));
+            _skillsChangedPub.Publish(new SkillsChangedDTO());
         }
 
         private void HandleEquipMainSkill(string skillUid)
@@ -101,7 +131,9 @@ namespace Game.Presentation.UI.Presenters
         private void RefreshAll()
         {
             var skills = _gameState.Skills;
+            var loadout = _gameState.Loadout;
 
+            _view.RenderLoadout(loadout);
             _view.RenderMainSkills(skills.GetByCategory(SkillCategory.Main));
             _view.RenderUtilitySkills(
                 skills.GetBySubCategory(UtilitySubCategory.Recovery),

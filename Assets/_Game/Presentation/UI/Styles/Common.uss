@@ -573,3 +573,73 @@
 .skill-slot--empty {
     opacity: 0.5;
 }
+
+/* --- Skill drag-drop hints --- */
+
+.skill-slot--drop-hint {
+    border-color: rgb(60, 180, 80);
+    border-width: 2px;
+    background-color: rgba(40, 120, 50, 0.15);
+}
+
+.skill-slot--drop-hover {
+    border-color: rgb(80, 220, 100);
+    border-width: 3px;
+    background-color: rgba(50, 160, 60, 0.3);
+}
+
+/* --- Skill loadout bar (inside Skills tab) --- */
+
+.skill-loadout-bar {
+    flex-direction: row;
+    align-items: center;
+    padding: 8px 16px;
+    margin: 4px 16px 8px 16px;
+    background-color: rgba(20, 20, 30, 0.6);
+    border-color: var(--color-border);
+    border-width: 1px;
+    border-radius: 4px;
+}
+
+.skill-loadout-bar__label {
+    font-size: var(--font-size-sm);
+    color: var(--color-text-dim);
+    margin-right: 12px;
+    -unity-font-style: bold;
+}
+
+/* --- Buff icons (under health bar) --- */
+
+.buff-icon {
+    width: 28px;
+    height: 28px;
+    background-color: rgba(20, 20, 30, 0.8);
+    border-width: 2px;
+    border-radius: 4px;
+    margin-right: 3px;
+    margin-bottom: 2px;
+    align-items: center;
+    justify-content: center;
+    cursor: link;
+}
+
+.buff-icon:hover {
+    background-color: rgba(30, 30, 45, 0.9);
+}
+
+.buff-icon__label {
+    font-size: 12px;
+    color: rgb(220, 220, 220);
+    -unity-font-style: bold;
+    -unity-text-align: middle-center;
+}
+
+.buff-icon__timer {
+    font-size: 8px;
+    color: rgb(160, 160, 160);
+    -unity-text-align: middle-center;
+    position: absolute;
+    bottom: 1px;
+    left: 0;
+    right: 0;
+}

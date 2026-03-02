@@ -1,0 +1,345 @@
+# Idle Exile — Game Design Document
+
+## Game Overview
+
+**Genre:** 2D Idle RPG
+**Platform:** PC (Unity 6, URP)
+**Core Loop:** Automatic combat → loot → equip gear → progress through tiers
+
+The player watches an auto-battling hero fight waves of enemies on the left third of the screen, while managing equipment, skills, and stats on the right two-thirds via tabbed UI panels.
+
+---
+
+## Screen Layout
+
+```
+┌───────────────────┬────────────────────────────────────────┐
+│                   │  [Character]  [Equipment]  [Skills]    │
+│   Combat Area     │────────────────────────────────────────│
+│   (left 1/3)      │                                        │
+│                   │       Active Tab Content (2/3)         │
+│   Hero ●          │                                        │
+│   Enemies ▼▼▼     │                                        │
+│   Projectiles →   │                                        │
+│                   │                                        │
+│ ┌───────────────┐ │                                        │
+│ │ ■  □ □ □ □    │ │                                        │
+│ │ Skill Slots   │ │                                        │
+│ └───────────────┘ │                                        │
+└───────────────────┴────────────────────────────────────────┘
+```
+
+---
+
+## Stat System
+
+### Hero Stats
+
+| Stat               | Base Value | Description                                |
+|--------------------|------------|--------------------------------------------|
+| Max Health         | 100        | Maximum hit points                         |
+| Current Health     | 100        | Current hit points                         |
+| Physical Damage    | 10         | Base damage per attack                     |
+| Attack Speed       | 1.0        | Attacks per second                         |
+| Critical Chance    | 5%         | Chance to deal a critical hit              |
+| Critical Multiplier| 150%       | Damage multiplier on critical hit          |
+| Armor              | 5          | Flat physical damage reduction             |
+| Evasion            | 0          | Chance to dodge incoming attacks           |
+| Movement Speed     | 3          | Hero movement speed                        |
+| Health Regen       | 0          | Health regenerated per second              |
+
+### Modifier Types
+
+Stats are modified by two types of modifiers:
+- **Flat** — adds a flat value (e.g., +15 Physical Damage)
+- **Increased** — percentage-based increase (e.g., +20% Attack Speed)
+
+Modifiers come from equipped items (implicit + rolled) and are recalculated when equipment changes.
+
+---
+
+## Item System
+
+### Rarity Tiers
+
+| Rarity  | Color     | Modifiers        | Visual                          |
+|---------|-----------|------------------|---------------------------------|
+| Normal  | White     | Implicit only    | Standard border                 |
+| Magic   | Blue      | + 1–2 rolled     | Blue border + background tint   |
+| Rare    | Yellow    | + 3–4 rolled     | Yellow border + glow effect     |
+| Unique  | Orange    | Fixed special set | Orange border + glow effect     |
+
+### Equipment Slots (10 total)
+
+| Slot         | Type    | Notes                                       |
+|--------------|---------|---------------------------------------------|
+| Helmet       | Armor   | Head protection                              |
+| Body Armor   | Armor   | Chest protection                             |
+| Gloves       | Armor   | Hand protection                              |
+| Boots        | Armor   | Foot protection, often has Movement Speed    |
+| Amulet       | Jewelry | Offensive/defensive stats                    |
+| Belt         | Jewelry | Defensive utility                            |
+| Ring × 2     | Jewelry | Two ring slots for stat stacking             |
+| Main Hand    | Weapon  | Primary weapon (damage source)               |
+| Off Hand     | Weapon  | Secondary weapon or shield                   |
+
+### Weapon Handedness
+
+| Handedness  | Behavior                                                    |
+|-------------|-------------------------------------------------------------|
+| Versatile   | Can equip in Main Hand or Off Hand                          |
+| Two-Handed  | Occupies Main Hand, blocks Off Hand slot (visually dimmed)  |
+| Off Hand    | Can only be placed in Off Hand slot                         |
+
+### Weapon Types
+
+| Type   | Associated Main Skills |
+|--------|------------------------|
+| Bow    | Arrow Shot             |
+| Sword  | (future)               |
+| Axe    | (future)               |
+| Staff  | (future)               |
+| Dagger | (future)               |
+
+### Current Items
+
+| Item ID        | Name          | Slot      | Rarity | Weapon Type | Handedness | Key Stats                      |
+|----------------|---------------|-----------|--------|-------------|------------|--------------------------------|
+| basic_bow      | Basic Bow     | MainHand  | Normal | Bow         | Versatile  | +10 Phys Dmg, +0.5 Atk Spd    |
+| iron_sword     | Iron Sword    | MainHand  | Normal | Sword       | Versatile  | +15 Phys Dmg                   |
+| iron_saber     | Iron Saber    | MainHand  | Magic  | Sword       | Versatile  | +12 Phys Dmg, +0.3 Atk Spd    |
+| super_sword    | Super Sword   | MainHand  | Rare   | Sword       | Versatile  | +25 Phys Dmg, +1.0 Atk Spd    |
+| iron_helmet    | Iron Helmet   | Helmet    | Normal | —           | —          | +5 Armor                       |
+| leather_vest   | Leather Vest  | BodyArmor | Normal | —           | —          | +8 Armor                       |
+| worn_gloves    | Worn Gloves   | Gloves    | Normal | —           | —          | +3 Armor                       |
+| simple_boots   | Simple Boots  | Boots     | Normal | —           | —          | +2 Armor, +0.5 Move Spd        |
+
+### Loot System
+
+Items drop from defeated enemies during combat:
+- **Base drop chance:** 30% + 2.5% per battle index (capped at 65%)
+- **Bonus per tier:** +10% per tier
+- **Modifier rolls:** Random values between 1–10
+- Items roll random modifiers based on rarity tier
+
+### Item Interactions
+
+| Action              | Trigger                  | Result                              |
+|---------------------|--------------------------|-------------------------------------|
+| Equip (drag)        | Drag item to slot        | Equips item, highlights valid slots |
+| Equip (click)       | Right-click in inventory | Auto-equips to first available slot |
+| Unequip             | Right-click equipped     | Returns item to inventory           |
+| Compare             | Left-click in inventory  | Side-by-side tooltip comparison     |
+| Sell (drag)         | Drag to sell zone        | Removes item from inventory         |
+| Delete All          | Delete All button        | Clears all inventory items          |
+
+---
+
+## Skill System
+
+### Skill Categories
+
+Skills are divided into two categories with distinct purposes:
+
+#### Main Skills (1 slot)
+The hero's primary attack. Determines how the hero deals damage.
+
+| Property                    | Description                                            |
+|-----------------------------|--------------------------------------------------------|
+| Required Weapon             | Hero must have this weapon type equipped to attack     |
+| Damage Multiplier (%)       | Scales base physical damage                            |
+| Attack Speed Multiplier (%) | Scales base attack speed                               |
+| Effects                     | Special mechanics: AoE, Split, Chain, Penetration      |
+
+#### Utility Skills (4 slots)
+Support abilities that provide buffs, healing, or defensive effects.
+
+| Property        | Description                                    |
+|-----------------|------------------------------------------------|
+| Sub-Category    | Recovery / Defense / Enhancement               |
+| Cooldown        | Time between activations (seconds)             |
+| Effect Type     | What the skill does (heal, buff, etc.)         |
+| Effect Value    | Magnitude of the effect                        |
+
+### Skill Loadout (5 slots)
+
+```
+┌──────────┐ ┌────────┐ ┌────────┐ ┌────────┐ ┌────────┐
+│  Main    │ │ Util 1 │ │ Util 2 │ │ Util 3 │ │ Util 4 │
+│  Skill   │ │        │ │        │ │        │ │        │
+│ (larger) │ │        │ │        │ │        │ │        │
+└──────────┘ └────────┘ └────────┘ └────────┘ └────────┘
+  Slot 0      Slot 1     Slot 2     Slot 3     Slot 4
+```
+
+- Slot 0 (Main): Only accepts Main skills
+- Slots 1–4 (Utility): Only accept Utility skills
+- Skills can be equipped via drag-and-drop or right-click
+
+### Combat Gating Rules
+
+1. **No main skill equipped → hero does not attack**
+2. **Main skill requires a weapon type (e.g., Bow) → that weapon must be equipped in Main Hand**
+3. **Weapon unequipped while main skill requires it → hero stops attacking immediately**
+4. **Weapon re-equipped → hero resumes attacking**
+
+### Current Skills
+
+#### Main Skills
+
+| Skill ID          | Name        | Weapon | Dmg Mult | Atk Spd Mult | Effects |
+|-------------------|-------------|--------|----------|--------------|---------|
+| basic_arrow_shot  | Arrow Shot  | Bow    | 100%     | 100%         | None    |
+
+#### Utility Skills
+
+| Skill ID       | Name         | Sub-Category | Cooldown | Effect         | Value |
+|----------------|--------------|--------------|----------|----------------|-------|
+| heal_over_time | Regeneration | Recovery     | 10s      | Heal Over Time | 5     |
+| iron_skin      | Iron Skin    | Defense      | 15s      | Buff Armor     | +50   |
+| wind_step      | Wind Step    | Defense      | 12s      | Buff Evasion   | +30   |
+| battle_fury    | Battle Fury  | Enhancement  | 20s      | Buff Atk Speed | +25%  |
+
+### Skill Effect Types
+
+| Effect           | Category    | Description                              |
+|------------------|-------------|------------------------------------------|
+| AoE              | Main        | Damages all enemies in an area           |
+| Split            | Main        | Projectile splits on hit                 |
+| Chain             | Main        | Projectile chains to nearby enemies      |
+| Penetration      | Main        | Projectile passes through enemies        |
+| Heal Over Time   | Utility     | Restores health over duration            |
+| Buff Armor       | Utility     | Temporarily increases armor              |
+| Buff Evasion     | Utility     | Temporarily increases evasion            |
+| Buff Attack Speed| Utility     | Temporarily increases attack speed       |
+
+### Skills Tab UI
+
+The Skills tab presents two entry points:
+1. **Main** — opens main skills view with crafting placeholder + owned skills
+2. **Utility** — opens utility skills organized by sub-category (Recovery / Defense / Enhancement)
+
+Both views include an embedded loadout bar showing all 5 skill slots as drag-and-drop targets.
+
+### Future: Skill Crafting
+
+Main skills will be craftable (system TBD). The Skills → Main view has a reserved "Crafting (coming soon)" area for this feature.
+
+---
+
+## Starting Preset
+
+New players begin with:
+
+| Item/Skill         | Type         | Auto-Equipped | Slot      |
+|--------------------|--------------|---------------|-----------|
+| Basic Bow          | Item (Weapon)| Yes           | Main Hand |
+| Arrow Shot         | Main Skill   | Yes           | Slot 0    |
+| Regeneration       | Utility Skill| Yes           | Slot 1    |
+| Iron Skin          | Utility Skill| Yes           | Slot 2    |
+
+---
+
+## Combat System
+
+### Progression Hierarchy
+
+```
+Tier (Act I, Act II, ...)
+ └── Map (Twilight Shore, ...)
+      └── Battle (1–10 per map)
+           └── Wave (2–4 per battle, invisible to player)
+                └── Enemy Spawns
+```
+
+The player sees: **Tier Name** + **Battle N / Total**. Waves are internal pacing; they auto-advance once all enemies in a wave are defeated.
+
+### Battle Flow
+
+1. Battle starts → first wave spawns after short delay
+2. Enemies march downward; hero auto-fires projectiles at nearest enemy
+3. Projectiles are homing and deal damage on hit
+4. When all enemies in a wave die → next wave spawns (after delay)
+5. When all waves cleared → battle completes
+6. Rewards granted → next battle auto-starts
+7. After final battle in map → advance to next map/tier
+
+### Enemies
+
+| Enemy    | HP  | Damage | Armor | Speed | Appears In         |
+|----------|-----|--------|-------|-------|-------------------|
+| Skeleton | 30  | 5      | 2     | 2.0   | Battles 0–9       |
+| Zombie   | 50  | 8      | 4     | 1.2   | Battles 5+ (boss) |
+| Ghost    | 20  | 10     | 0     | 3.0   | Battles 7+ (adds) |
+
+### Scaling
+
+- **Tier scaling:** `1.0 + tierIndex × 0.5` (multiplies enemy HP, damage, armor)
+- **Wave count:** `min(2 + battleIndex/4, 4)` waves per battle
+- **Enemy count:** `min(2 + battleIndex/3 + waveIndex, 8)` enemies per wave
+
+### Rewards
+
+| Reward Type | Formula                               | Frequency        |
+|-------------|---------------------------------------|-------------------|
+| Experience  | 10 + battleIndex × 5                  | Every battle      |
+| Gold        | 5 + battleIndex × 2                   | Every 3rd battle  |
+| Item Drop   | 30–65% chance per enemy kill          | Random per enemy  |
+
+### Damage Model
+
+- Hero fires projectiles at nearest enemy
+- Damage = hero's Physical Damage (modified by main skill multiplier)
+- Attack rate = hero's Attack Speed (modified by main skill multiplier)
+- Projectiles are homing, speed = 12 units/second
+- Damage numbers appear at hit position (larger + yellow for crits)
+
+### Visual Representation
+
+All combat entities are rendered as instanced quads (no GameObjects):
+- **Hero:** Blue quad
+- **Enemy:** Red quad
+- **Projectile:** Yellow quad
+
+Damage numbers use pooled world-space TextMeshPro elements.
+
+---
+
+## UI Tabs
+
+### Character Tab
+Displays all hero stats grouped by category:
+- Offense: Physical Damage, Attack Speed, Crit Chance, Crit Multiplier
+- Defense: Max Health, Armor, Evasion
+- Utility: Movement Speed, Health Regen
+
+Stats update in real-time when equipment changes.
+
+### Equipment Tab
+Two-column equipment display (10 slots) + scrollable inventory grid below.
+- Drag items from inventory to equipment slots
+- Right-click to quick-equip/unequip
+- Click to compare with currently equipped
+- Sell zone for disposing items
+- Item count display (current / capacity)
+
+### Skills Tab
+Category chooser (Main / Utility) → sub-view with embedded loadout bar.
+- Drag skills from grid to loadout slots
+- Right-click skill in grid to auto-equip
+- Right-click loadout slot to unequip
+- Visual skill slot highlighting during drag
+
+---
+
+## Future Systems (Planned)
+
+- **Skill crafting** — create and upgrade main skills
+- **Skill persistence** — save/load skill collection and loadout
+- **Utility skill activation** — auto-use utility skills with cooldowns during combat
+- **Additional tiers/maps** — expanded progression content
+- **Currency system** — gold economy for purchases
+- **Experience/leveling** — hero level progression
+- **Boss encounters** — special battles with unique mechanics
+- **Item enchanting** — upgrade existing items
+- **Achievement system** — milestone rewards

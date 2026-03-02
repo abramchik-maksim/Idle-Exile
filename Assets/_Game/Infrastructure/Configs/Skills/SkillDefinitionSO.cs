@@ -26,6 +26,8 @@ namespace Game.Infrastructure.Configs.Skills
 
         [Header("Utility Skill")]
         public float cooldown;
+        [Tooltip("Duration of the buff/effect. If 0, defaults to cooldown × 0.5")]
+        public float effectDuration;
         public SkillEffectType effectType;
         public float effectValue;
 
@@ -42,6 +44,7 @@ namespace Game.Infrastructure.Configs.Skills
                 attackSpeedMultiplierPercent: attackSpeedMultiplierPercent,
                 effects: effects,
                 cooldown: cooldown,
+                effectDuration: effectDuration,
                 effectType: effectType,
                 effectValue: effectValue
             );

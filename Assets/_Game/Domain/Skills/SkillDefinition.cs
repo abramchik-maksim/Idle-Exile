@@ -18,6 +18,7 @@ namespace Game.Domain.Skills
 
         // Utility skill fields
         public float Cooldown { get; }
+        public float EffectDuration { get; }
         public SkillEffectType EffectType { get; }
         public float EffectValue { get; }
 
@@ -32,6 +33,7 @@ namespace Game.Domain.Skills
             float attackSpeedMultiplierPercent = 100f,
             IReadOnlyList<SkillEffectType> effects = null,
             float cooldown = 0f,
+            float effectDuration = 0f,
             SkillEffectType effectType = SkillEffectType.None,
             float effectValue = 0f)
         {
@@ -45,6 +47,7 @@ namespace Game.Domain.Skills
             AttackSpeedMultiplierPercent = attackSpeedMultiplierPercent;
             Effects = effects ?? new List<SkillEffectType>();
             Cooldown = cooldown;
+            EffectDuration = effectDuration > 0 ? effectDuration : cooldown * 0.5f;
             EffectType = effectType;
             EffectValue = effectValue;
         }
