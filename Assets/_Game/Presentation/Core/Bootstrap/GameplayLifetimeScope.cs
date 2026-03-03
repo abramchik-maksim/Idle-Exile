@@ -24,6 +24,7 @@ using Game.Presentation.Combat.Rendering;
 using Game.Presentation.UI.Combat;
 using Game.Presentation.UI.MainScreen;
 using Game.Presentation.UI.Cheats;
+using Game.Presentation.UI.GameMenu;
 using Game.Presentation.UI.Presenters;
 using Game.Presentation.UI.Services;
 
@@ -97,6 +98,7 @@ namespace Game.Presentation.Core.Bootstrap
             builder.RegisterComponentInHierarchy<SkillsTabView>();
             builder.RegisterComponentInHierarchy<SkillSlotsView>();
             builder.RegisterComponentInHierarchy<CheatsView>();
+            builder.RegisterComponentInHierarchy<GameMenuView>();
 
             // --- Combat (MonoBehaviours from scene hierarchy) ---
             builder.RegisterComponentInHierarchy<CombatBridge>();
@@ -110,6 +112,7 @@ namespace Game.Presentation.Core.Bootstrap
             builder.RegisterEntryPoint<SkillsPresenter>();
             builder.RegisterEntryPoint<SkillSlotsPresenter>();
             builder.RegisterEntryPoint<CheatsPresenter>();
+            builder.RegisterEntryPoint<GameMenuPresenter>();
             builder.RegisterEntryPoint<CombatPresenter>();
             builder.RegisterEntryPoint<BattleFlowController>();
 

@@ -8,6 +8,7 @@ using Game.Presentation.UI.Base;
 using Game.Presentation.UI.MainScreen;
 using Game.Presentation.UI.Cheats;
 using Game.Presentation.UI.Combat;
+using Game.Presentation.UI.GameMenu;
 using Game.Presentation.Combat;
 using Game.Presentation.Combat.Rendering;
 
@@ -25,6 +26,7 @@ namespace Game.Presentation.Core.Editor
             new("EquipmentTab", "Assets/_Game/Presentation/UI/MainScreen/EquipmentTabView.uxml", typeof(EquipmentTabView), 5, false),
             new("SkillsTab", "Assets/_Game/Presentation/UI/MainScreen/SkillsTabView.uxml", typeof(SkillsTabView), 5, false),
             new("SkillSlots", "Assets/_Game/Presentation/UI/Combat/SkillSlotsView.uxml", typeof(SkillSlotsView), 10, true),
+            new("GameMenu", "Assets/_Game/Presentation/UI/GameMenu/GameMenuView.uxml", typeof(GameMenuView), 90, true),
             new("Cheats", "Assets/_Game/Presentation/UI/Cheats/CheatsView.uxml", typeof(CheatsView), 100, true),
         };
 

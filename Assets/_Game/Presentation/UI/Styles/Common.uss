@@ -643,3 +643,48 @@
     left: 0;
     right: 0;
 }
+
+/* === Game Menu === */
+
+.menu-toggle-btn {
+    width: 40px;
+    height: 40px;
+    font-size: 24px;
+    color: var(--color-text);
+    background-color: rgba(28, 28, 38, 0.85);
+    border-color: var(--color-border);
+    border-width: 1px;
+    border-radius: 4px;
+    -unity-text-align: middle-center;
+    cursor: link;
+    padding: 0;
+}
+
+.menu-toggle-btn:hover {
+    background-color: rgb(55, 55, 75);
+    border-color: var(--color-border-highlight);
+}
+
+.menu-overlay {
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.6);
+    align-items: center;
+    justify-content: center;
+}
+
+.menu-panel {
+    min-width: 240px;
+    padding: 16px 24px;
+    align-items: stretch;
+}
+
+.menu-btn {
+    margin-top: var(--spacing-md);
+    padding: 10px 16px;
+    font-size: var(--font-size-md);
+    -unity-text-align: middle-center;
+}
