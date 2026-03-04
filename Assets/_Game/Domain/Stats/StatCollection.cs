@@ -11,7 +11,7 @@ namespace Game.Domain.Stats
         private readonly Dictionary<StatType, float> _baseValues = new();
         private readonly List<Modifier> _modifiers = new();
 
-        public IReadOnlyList<Modifier> Modifiers => _modifiers;
+        public IReadOnlyList<Modifier> Modifiers => _modifiers.AsReadOnly();
 
         public void SetBase(StatType stat, float value) => _baseValues[stat] = value;
 

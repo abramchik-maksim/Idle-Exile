@@ -17,9 +17,6 @@ namespace Game.Infrastructure.Configs.Combat
         private readonly float _dropChancePerBattle;
         private readonly float _maxDropChance;
         private readonly float _bonusDropChancePerTier;
-        private readonly float _minModValue;
-        private readonly float _maxModValue;
-
         public ScriptableObjectCombatConfigProvider(CombatDatabaseSO database, LootTableSO lootTable)
         {
             BuildFromDatabase(database);
@@ -28,8 +25,6 @@ namespace Game.Infrastructure.Configs.Combat
             _dropChancePerBattle = lootTable.dropChancePerBattle;
             _maxDropChance = lootTable.maxDropChance;
             _bonusDropChancePerTier = lootTable.bonusDropChancePerTier;
-            _minModValue = lootTable.minModValue;
-            _maxModValue = lootTable.maxModValue;
         }
 
         public TierDefinition GetTier(int tierIndex) =>
@@ -76,9 +71,6 @@ namespace Game.Infrastructure.Configs.Combat
 
         public float GetBonusDropChance(int tierIndex) =>
             tierIndex * _bonusDropChancePerTier;
-
-        public float GetMinModValue() => _minModValue;
-        public float GetMaxModValue() => _maxModValue;
 
         private void BuildFromDatabase(CombatDatabaseSO db)
         {

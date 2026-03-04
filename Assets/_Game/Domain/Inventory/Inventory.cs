@@ -10,7 +10,7 @@ namespace Game.Domain.Inventory
         private readonly Dictionary<EquipmentSlotType, ItemInstance> _equipped = new();
 
         public int Capacity { get; }
-        public IReadOnlyList<ItemInstance> Items => _items;
+        public IReadOnlyList<ItemInstance> Items => _items.AsReadOnly();
         public IReadOnlyDictionary<EquipmentSlotType, ItemInstance> Equipped => _equipped;
         public bool IsFull => _items.Count >= Capacity;
 

@@ -46,8 +46,6 @@ namespace Game.Presentation.Core.Bootstrap
             builder.RegisterBuildCallback(c => GlobalMessagePipe.SetProvider(c.AsServiceProvider()));
 
             builder.RegisterMessageBroker<TestMessageDTO>(options);
-            builder.RegisterMessageBroker<CombatStartedDTO>(options);
-            builder.RegisterMessageBroker<CombatEndedDTO>(options);
             builder.RegisterMessageBroker<EnemyKilledDTO>(options);
             builder.RegisterMessageBroker<DamageDealtDTO>(options);
             builder.RegisterMessageBroker<ItemAddedDTO>(options);
@@ -84,13 +82,14 @@ namespace Game.Presentation.Core.Bootstrap
             builder.Register<EquipItemUseCase>(Lifetime.Transient);
             builder.Register<UnequipItemUseCase>(Lifetime.Transient);
             builder.Register<AddItemToInventoryUseCase>(Lifetime.Transient);
-            builder.Register<GenerateLootUseCase>(Lifetime.Transient);
             builder.Register<ProgressBattleUseCase>(Lifetime.Transient);
             builder.Register<GrantBattleRewardUseCase>(Lifetime.Transient);
             builder.Register<SendTestMessageUseCase>(Lifetime.Transient);
             builder.Register<EquipSkillUseCase>(Lifetime.Transient);
             builder.Register<UnequipSkillUseCase>(Lifetime.Transient);
             builder.Register<UtilitySkillRunner>(Lifetime.Singleton);
+            builder.Register<WaveSpawner>(Lifetime.Singleton);
+            builder.Register<DamageEventProcessor>(Lifetime.Singleton);
 
             // --- Views (MonoBehaviours from scene hierarchy) ---
             builder.RegisterComponentInHierarchy<MainScreenView>();

@@ -5,6 +5,8 @@ namespace Game.Domain.Combat
 {
     public static class DamageCalculator
     {
+        public const float ArmorDivisor = 10f;
+
         public static DamageResult Calculate(
             StatCollection attacker,
             StatCollection defender,
@@ -18,11 +20,16 @@ namespace Game.Domain.Combat
             bool isCrit = nextRandom() < critChance;
             float raw = baseDamage * (isCrit ? critMulti : 1f);
 
-            float armor = defender.GetFinal(StatType.Armor);
-            float reduction = armor / (armor + 10f * raw);
-            float mitigated = raw * (1f - reduction);
+            float mitigated = ApplyArmorReduction(raw, defender.GetFinal(StatType.Armor));
 
             return new DamageResult(raw, Math.Max(mitigated, 0f), isCrit, damageType);
+        }
+
+        public static float ApplyArmorReduction(float rawDamage, float armor)
+        {
+            if (rawDamage <= 0f) return 0f;
+            float reduction = armor / (armor + ArmorDivisor * rawDamage);
+            return rawDamage * (1f - reduction);
         }
     }
 }

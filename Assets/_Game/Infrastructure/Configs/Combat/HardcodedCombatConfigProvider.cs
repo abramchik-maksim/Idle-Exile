@@ -60,8 +60,6 @@ namespace Game.Infrastructure.Configs.Combat
             Math.Min(0.3f + battleIndex * 0.025f, 0.65f);
 
         public float GetBonusDropChance(int tierIndex) => tierIndex * 0.1f;
-        public float GetMinModValue() => 1f;
-        public float GetMaxModValue() => 10f;
 
         private void BuildEnemies()
         {

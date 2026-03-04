@@ -15,6 +15,11 @@ namespace Game.Presentation.UI.Presenters
         private const string PrefEffects = "Settings_ShowEffectIndicators";
         private const string PrefDamageNumbers = "Settings_ShowDamageNumbers";
 
+        private Action<bool> _onHpBarsChanged;
+        private Action<bool> _onEffectIndicatorsChanged;
+        private Action<bool> _onDamageNumbersChanged;
+        private Action _onCloseClicked;
+
         public SettingsPresenter(SettingsView view, ICombatDisplaySettings displaySettings)
         {
             _view = view;
@@ -30,25 +35,30 @@ namespace Game.Presentation.UI.Presenters
             ApplySettings(hp, fx, dmg);
             _view.SetValues(hp, fx, dmg);
 
-            _view.OnHpBarsChanged += val =>
+            _onHpBarsChanged = val =>
             {
                 _displaySettings.ShowHpBars = val;
                 PlayerPrefs.SetInt(PrefHpBars, val ? 1 : 0);
             };
 
-            _view.OnEffectIndicatorsChanged += val =>
+            _onEffectIndicatorsChanged = val =>
             {
                 _displaySettings.ShowEffectIndicators = val;
                 PlayerPrefs.SetInt(PrefEffects, val ? 1 : 0);
             };
 
-            _view.OnDamageNumbersChanged += val =>
+            _onDamageNumbersChanged = val =>
             {
                 _displaySettings.ShowDamageNumbers = val;
                 PlayerPrefs.SetInt(PrefDamageNumbers, val ? 1 : 0);
             };
 
-            _view.OnCloseClicked += () => _view.CloseSettings();
+            _onCloseClicked = () => _view.CloseSettings();
+
+            _view.OnHpBarsChanged += _onHpBarsChanged;
+            _view.OnEffectIndicatorsChanged += _onEffectIndicatorsChanged;
+            _view.OnDamageNumbersChanged += _onDamageNumbersChanged;
+            _view.OnCloseClicked += _onCloseClicked;
         }
 
         public void OpenSettings()
@@ -65,6 +75,11 @@ namespace Game.Presentation.UI.Presenters
 
         public void Dispose()
         {
+            _view.OnHpBarsChanged -= _onHpBarsChanged;
+            _view.OnEffectIndicatorsChanged -= _onEffectIndicatorsChanged;
+            _view.OnDamageNumbersChanged -= _onDamageNumbersChanged;
+            _view.OnCloseClicked -= _onCloseClicked;
+
             PlayerPrefs.Save();
         }
     }

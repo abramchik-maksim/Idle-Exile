@@ -65,51 +65,31 @@ namespace Game.Presentation.Combat.Rendering
 
         private void Awake()
         {
-            _quadMesh = CreateQuadMesh();
-            _circleMesh = CreateCircleMesh(CircleSegments);
-            _coneMesh = CreateConeMesh(ConeSegments, ConeAngleDeg);
+            _quadMesh = CombatMeshFactory.CreateQuad();
+            _circleMesh = CombatMeshFactory.CreateCircle(CircleSegments);
+            _coneMesh = CombatMeshFactory.CreateCone(ConeSegments, ConeAngleDeg);
+            _slashMesh = CombatMeshFactory.CreateSlash();
             _matrices = new Matrix4x4[MaxInstances];
 
-            if (_heroMaterial == null)
-                _heroMaterial = CreateDefaultMaterial(new Color(0.2f, 0.4f, 0.9f));
-            if (_enemyMaterial == null)
-                _enemyMaterial = CreateDefaultMaterial(new Color(0.9f, 0.2f, 0.2f));
-            if (_projectileMaterial == null)
-                _projectileMaterial = CreateDefaultMaterial(new Color(1f, 0.9f, 0.3f));
-            if (_enemyProjectileMaterial == null)
-                _enemyProjectileMaterial = CreateDefaultMaterial(new Color(1f, 0.5f, 0.1f));
-            if (_meleeAoEMaterial == null)
-                _meleeAoEMaterial = CreateTransparentMaterial(new Color(0.9f, 0.15f, 0.1f, 0.25f));
-            if (_spellAoEMaterial == null)
-                _spellAoEMaterial = CreateTransparentMaterial(new Color(0.6f, 0.1f, 0.8f, 0.25f));
-            if (_castBarBgMaterial == null)
-                _castBarBgMaterial = CreateDefaultMaterial(new Color(0.15f, 0.15f, 0.15f));
-            if (_castBarFillMaterial == null)
-                _castBarFillMaterial = CreateDefaultMaterial(new Color(0.8f, 0.4f, 0.9f));
-            if (_hpBarBgMaterial == null)
-                _hpBarBgMaterial = CreateDefaultMaterial(new Color(0.2f, 0.05f, 0.05f));
-            if (_hpBarFillMaterial == null)
-                _hpBarFillMaterial = CreateDefaultMaterial(new Color(0.1f, 0.8f, 0.15f));
-            if (_igniteMaterial == null)
-                _igniteMaterial = CreateDefaultMaterial(new Color(1f, 0.5f, 0f));
-            if (_chillMaterial == null)
-                _chillMaterial = CreateDefaultMaterial(new Color(0.4f, 0.7f, 1f));
-            if (_shockMaterial == null)
-                _shockMaterial = CreateDefaultMaterial(new Color(1f, 1f, 0.3f));
-            if (_bleedMaterial == null)
-                _bleedMaterial = CreateDefaultMaterial(new Color(0.8f, 0.1f, 0.1f));
-            if (_stunMaterial == null)
-                _stunMaterial = CreateDefaultMaterial(new Color(0.5f, 0.5f, 0.5f));
-            if (_silenceMaterial == null)
-                _silenceMaterial = CreateDefaultMaterial(new Color(0.6f, 0.2f, 0.8f));
-            if (_cloneMaterial == null)
-                _cloneMaterial = CreateDefaultMaterial(new Color(0.3f, 0.7f, 0.5f));
-            if (_heroSlashMaterial == null)
-                _heroSlashMaterial = CreateTransparentMaterial(new Color(1f, 1f, 1f, 0.85f));
-            if (_enemySlashMaterial == null)
-                _enemySlashMaterial = CreateTransparentMaterial(new Color(0.9f, 0.15f, 0.1f, 0.85f));
-
-            _slashMesh = CreateSlashMesh();
+            _heroMaterial = CombatMaterialFactory.EnsureOrCreate(_heroMaterial, new Color(0.2f, 0.4f, 0.9f));
+            _enemyMaterial = CombatMaterialFactory.EnsureOrCreate(_enemyMaterial, new Color(0.9f, 0.2f, 0.2f));
+            _projectileMaterial = CombatMaterialFactory.EnsureOrCreate(_projectileMaterial, new Color(1f, 0.9f, 0.3f));
+            _enemyProjectileMaterial = CombatMaterialFactory.EnsureOrCreate(_enemyProjectileMaterial, new Color(1f, 0.5f, 0.1f));
+            _meleeAoEMaterial = CombatMaterialFactory.EnsureOrCreate(_meleeAoEMaterial, new Color(0.9f, 0.15f, 0.1f, 0.25f), true);
+            _spellAoEMaterial = CombatMaterialFactory.EnsureOrCreate(_spellAoEMaterial, new Color(0.6f, 0.1f, 0.8f, 0.25f), true);
+            _castBarBgMaterial = CombatMaterialFactory.EnsureOrCreate(_castBarBgMaterial, new Color(0.15f, 0.15f, 0.15f));
+            _castBarFillMaterial = CombatMaterialFactory.EnsureOrCreate(_castBarFillMaterial, new Color(0.8f, 0.4f, 0.9f));
+            _hpBarBgMaterial = CombatMaterialFactory.EnsureOrCreate(_hpBarBgMaterial, new Color(0.2f, 0.05f, 0.05f));
+            _hpBarFillMaterial = CombatMaterialFactory.EnsureOrCreate(_hpBarFillMaterial, new Color(0.1f, 0.8f, 0.15f));
+            _igniteMaterial = CombatMaterialFactory.EnsureOrCreate(_igniteMaterial, new Color(1f, 0.5f, 0f));
+            _chillMaterial = CombatMaterialFactory.EnsureOrCreate(_chillMaterial, new Color(0.4f, 0.7f, 1f));
+            _shockMaterial = CombatMaterialFactory.EnsureOrCreate(_shockMaterial, new Color(1f, 1f, 0.3f));
+            _bleedMaterial = CombatMaterialFactory.EnsureOrCreate(_bleedMaterial, new Color(0.8f, 0.1f, 0.1f));
+            _stunMaterial = CombatMaterialFactory.EnsureOrCreate(_stunMaterial, new Color(0.5f, 0.5f, 0.5f));
+            _silenceMaterial = CombatMaterialFactory.EnsureOrCreate(_silenceMaterial, new Color(0.6f, 0.2f, 0.8f));
+            _cloneMaterial = CombatMaterialFactory.EnsureOrCreate(_cloneMaterial, new Color(0.3f, 0.7f, 0.5f));
+            _heroSlashMaterial = CombatMaterialFactory.EnsureOrCreate(_heroSlashMaterial, new Color(1f, 1f, 1f, 0.85f), true);
+            _enemySlashMaterial = CombatMaterialFactory.EnsureOrCreate(_enemySlashMaterial, new Color(0.9f, 0.15f, 0.1f, 0.85f), true);
         }
 
         private void LateUpdate()
@@ -478,138 +458,7 @@ namespace Game.Presentation.Combat.Rendering
             }
         }
 
-        private static Mesh CreateQuadMesh()
-        {
-            var mesh = new Mesh
-            {
-                name = "CombatQuad",
-                vertices = new[]
-                {
-                    new Vector3(-0.5f, -0.5f, 0f),
-                    new Vector3(0.5f, -0.5f, 0f),
-                    new Vector3(0.5f, 0.5f, 0f),
-                    new Vector3(-0.5f, 0.5f, 0f)
-                },
-                uv = new[]
-                {
-                    new Vector2(0, 0), new Vector2(1, 0),
-                    new Vector2(1, 1), new Vector2(0, 1)
-                },
-                triangles = new[] { 0, 2, 1, 0, 3, 2 }
-            };
-            mesh.RecalculateNormals();
-            mesh.RecalculateBounds();
-            return mesh;
-        }
-
-        private static Mesh CreateConeMesh(int segments, float angleDeg)
-        {
-            float halfAngle = angleDeg * 0.5f * Mathf.Deg2Rad;
-            float startAngle = Mathf.PI * 0.5f - halfAngle;
-
-            var vertices = new Vector3[segments + 2];
-            var triangles = new int[segments * 3];
-            var uvs = new Vector2[segments + 2];
-
-            vertices[0] = Vector3.zero;
-            uvs[0] = new Vector2(0.5f, 0.5f);
-
-            float angleStep = (halfAngle * 2f) / segments;
-            for (int i = 0; i <= segments; i++)
-            {
-                float a = startAngle + i * angleStep;
-                vertices[i + 1] = new Vector3(Mathf.Cos(a) * 0.5f, Mathf.Sin(a) * 0.5f, 0f);
-                uvs[i + 1] = new Vector2(Mathf.Cos(a) * 0.5f + 0.5f, Mathf.Sin(a) * 0.5f + 0.5f);
-            }
-
-            for (int i = 0; i < segments; i++)
-            {
-                triangles[i * 3] = 0;
-                triangles[i * 3 + 1] = i + 2;
-                triangles[i * 3 + 2] = i + 1;
-            }
-
-            var mesh = new Mesh
-            {
-                name = "CombatCone",
-                vertices = vertices,
-                uv = uvs,
-                triangles = triangles
-            };
-            mesh.RecalculateNormals();
-            mesh.RecalculateBounds();
-            return mesh;
-        }
-
-        private static Mesh CreateCircleMesh(int segments)
-        {
-            var vertices = new Vector3[segments + 1];
-            var triangles = new int[segments * 3];
-            var uvs = new Vector2[segments + 1];
-
-            vertices[0] = Vector3.zero;
-            uvs[0] = new Vector2(0.5f, 0.5f);
-
-            float angleStep = 2f * Mathf.PI / segments;
-            for (int i = 0; i < segments; i++)
-            {
-                float angle = i * angleStep;
-                vertices[i + 1] = new Vector3(Mathf.Cos(angle) * 0.5f, Mathf.Sin(angle) * 0.5f, 0f);
-                uvs[i + 1] = new Vector2(Mathf.Cos(angle) * 0.5f + 0.5f, Mathf.Sin(angle) * 0.5f + 0.5f);
-
-                triangles[i * 3] = 0;
-                triangles[i * 3 + 1] = (i + 1) % segments + 1;
-                triangles[i * 3 + 2] = i + 1;
-            }
-
-            var mesh = new Mesh
-            {
-                name = "CombatCircle",
-                vertices = vertices,
-                uv = uvs,
-                triangles = triangles
-            };
-            mesh.RecalculateNormals();
-            mesh.RecalculateBounds();
-            return mesh;
-        }
-
-        private static Material CreateDefaultMaterial(Color color)
-        {
-            var shader = Shader.Find("Universal Render Pipeline/Unlit");
-            if (shader == null)
-                shader = Shader.Find("Unlit/Color");
-
-            var mat = new Material(shader);
-            mat.color = color;
-            if (mat.HasProperty("_BaseColor"))
-                mat.SetColor("_BaseColor", color);
-            mat.enableInstancing = true;
-            return mat;
-        }
-
-        private static Material CreateTransparentMaterial(Color color)
-        {
-            var shader = Shader.Find("Universal Render Pipeline/Unlit");
-            if (shader == null)
-                shader = Shader.Find("Unlit/Color");
-
-            var mat = new Material(shader);
-            mat.color = color;
-            if (mat.HasProperty("_BaseColor"))
-                mat.SetColor("_BaseColor", color);
-
-            mat.SetFloat("_Surface", 1f);
-            mat.SetFloat("_Blend", 0f);
-            mat.SetFloat("_SrcBlend", (float)UnityEngine.Rendering.BlendMode.SrcAlpha);
-            mat.SetFloat("_DstBlend", (float)UnityEngine.Rendering.BlendMode.OneMinusSrcAlpha);
-            mat.SetFloat("_ZWrite", 0f);
-            mat.renderQueue = (int)UnityEngine.Rendering.RenderQueue.Transparent;
-            mat.EnableKeyword("_SURFACE_TYPE_TRANSPARENT");
-            mat.enableInstancing = true;
-
-            return mat;
-        }
+        
 
         private void DrawHeroSlashes()
         {
@@ -666,30 +515,6 @@ namespace Game.Presentation.Combat.Rendering
 
             Graphics.DrawMeshInstanced(_slashMesh, 0, _enemySlashMaterial, _matrices, batchCount);
             slashes.Dispose();
-        }
-
-        private static Mesh CreateSlashMesh()
-        {
-            var mesh = new Mesh
-            {
-                name = "SlashLine",
-                vertices = new[]
-                {
-                    new Vector3(-0.5f, -0.5f, 0f),
-                    new Vector3( 0.5f, -0.5f, 0f),
-                    new Vector3( 0.5f,  0.5f, 0f),
-                    new Vector3(-0.5f,  0.5f, 0f)
-                },
-                uv = new[]
-                {
-                    new Vector2(0, 0), new Vector2(1, 0),
-                    new Vector2(1, 1), new Vector2(0, 1)
-                },
-                triangles = new[] { 0, 2, 1, 0, 3, 2 }
-            };
-            mesh.RecalculateNormals();
-            mesh.RecalculateBounds();
-            return mesh;
         }
 
         private void OnDestroy()

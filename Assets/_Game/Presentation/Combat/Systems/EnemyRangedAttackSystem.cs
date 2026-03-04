@@ -1,5 +1,6 @@
 using Game.Domain.Combat;
 using Game.Presentation.Combat.Components;
+using Unity.Collections;
 using Unity.Entities;
 using Unity.Mathematics;
 
@@ -9,6 +10,13 @@ namespace Game.Presentation.Combat.Systems
     [UpdateAfter(typeof(EnemyMovementSystem))]
     public partial class EnemyRangedAttackSystem : SystemBase
     {
+        private struct PendingProjectile
+        {
+            public float2 Origin;
+            public Entity Target;
+            public float Damage;
+        }
+
         protected override void OnCreate()
         {
             RequireForUpdate<EnemyTag>();
@@ -17,6 +25,7 @@ namespace Game.Presentation.Combat.Systems
         protected override void OnUpdate()
         {
             float dt = SystemAPI.Time.DeltaTime;
+            var pending = new NativeList<PendingProjectile>(4, Allocator.Temp);
 
             foreach (var (pos, behavior, target, cooldown, stats, status)
                 in SystemAPI.Query<RefRO<Position2D>, RefRO<EnemyBehavior>, RefRO<TargetEntity>,
@@ -46,21 +55,38 @@ namespace Game.Presentation.Combat.Systems
 
                 cooldown.ValueRW.Timer = cooldown.ValueRO.Cooldown;
 
-                var proj = EntityManager.CreateEntity(
-                    typeof(EnemyProjectileTag),
-                    typeof(Position2D),
-                    typeof(ProjectileData)
-                );
-
-                EntityManager.SetComponentData(proj, new Position2D { Value = pos.ValueRO.Value });
-                EntityManager.SetComponentData(proj, new ProjectileData
+                pending.Add(new PendingProjectile
                 {
+                    Origin = pos.ValueRO.Value,
                     Target = targetEntity,
-                    Speed = 8f,
-                    Damage = stats.ValueRO.PhysicalDamage,
-                    IsCritical = false
+                    Damage = stats.ValueRO.PhysicalDamage
                 });
             }
+
+            if (pending.Length > 0)
+            {
+                var ecb = new EntityCommandBuffer(Allocator.Temp);
+
+                for (int i = 0; i < pending.Length; i++)
+                {
+                    var p = pending[i];
+                    var proj = ecb.CreateEntity();
+                    ecb.AddComponent(proj, new EnemyProjectileTag());
+                    ecb.AddComponent(proj, new Position2D { Value = p.Origin });
+                    ecb.AddComponent(proj, new ProjectileData
+                    {
+                        Target = p.Target,
+                        Speed = 8f,
+                        Damage = p.Damage,
+                        IsCritical = false
+                    });
+                }
+
+                ecb.Playback(EntityManager);
+                ecb.Dispose();
+            }
+
+            pending.Dispose();
         }
     }
 }

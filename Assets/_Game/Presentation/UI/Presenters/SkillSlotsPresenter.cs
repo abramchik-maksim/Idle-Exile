@@ -88,6 +88,8 @@ namespace Game.Presentation.UI.Presenters
 
         public void Dispose()
         {
+            _view.OnSlotRightClicked -= HandleSlotRightClicked;
+
             foreach (var sub in _subscriptions)
                 sub.Dispose();
             _subscriptions.Clear();

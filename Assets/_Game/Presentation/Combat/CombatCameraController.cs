@@ -14,6 +14,12 @@ namespace Game.Presentation.Combat
         [Tooltip("Camera Y offset so the hero (at y=-1.7) sits at ~25% screen height")]
         [SerializeField] private float _cameraYOffset = 1.5f;
 
+        [Header("Viewport")]
+        [SerializeField] private float _viewportWidth = 1f / 3f;
+        [SerializeField] private float _nearClip = 0.1f;
+        [SerializeField] private float _farClip = 100f;
+        [SerializeField] private float _defaultZ = -10f;
+
         private Camera _cam;
         private float _targetOrthoSize;
         private bool _ready;
@@ -56,11 +62,12 @@ namespace Game.Presentation.Combat
             _cam = Camera.main;
             if (_cam == null || !_cam.orthographic) return false;
 
-            _targetOrthoSize = _cam.orthographicSize;
+            _cam.transform.position = new Vector3(0f, _cameraYOffset, _defaultZ);
+            _cam.rect = new Rect(0f, 0f, _viewportWidth, 1f);
+            _cam.nearClipPlane = _nearClip;
+            _cam.farClipPlane = _farClip;
 
-            var pos = _cam.transform.position;
-            pos.y = _cameraYOffset;
-            _cam.transform.position = pos;
+            _targetOrthoSize = _cam.orthographicSize;
 
             _ready = true;
             return true;

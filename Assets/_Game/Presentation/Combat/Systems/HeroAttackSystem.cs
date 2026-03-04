@@ -1,3 +1,4 @@
+using Game.Domain.Combat;
 using Game.Presentation.Combat.Components;
 using Unity.Collections;
 using Unity.Entities;
@@ -127,10 +128,7 @@ namespace Game.Presentation.Combat.Systems
                 var hit = meleeHits[i];
 
                 var targetStats = EntityManager.GetComponentData<CombatStats>(hit.Target);
-                float armor = targetStats.Armor;
-                float reduction = armor / (armor + 10f * hit.Damage);
-                float finalDmg = hit.Damage * (1f - reduction);
-                finalDmg = math.max(finalDmg, 0f);
+                float finalDmg = DamageCalculator.ApplyArmorReduction(hit.Damage, targetStats.Armor);
 
                 targetStats.CurrentHealth -= finalDmg;
                 EntityManager.SetComponentData(hit.Target, targetStats);

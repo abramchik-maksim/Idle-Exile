@@ -116,6 +116,10 @@ namespace Game.Presentation.UI.Presenters
 
         public void Dispose()
         {
+            _cheatsView.OnSendTestClicked -= HandleSendTest;
+            _cheatsView.OnGenerateItemClicked -= HandleGenerateItem;
+            _cheatsView.OnResetSaveClicked -= HandleResetSave;
+
             foreach (var sub in _subscriptions)
                 sub.Dispose();
             _subscriptions.Clear();

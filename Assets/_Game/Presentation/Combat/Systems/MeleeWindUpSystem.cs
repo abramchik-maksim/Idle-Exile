@@ -1,3 +1,4 @@
+using Game.Domain.Combat;
 using Game.Presentation.Combat.Components;
 using Unity.Collections;
 using Unity.Entities;
@@ -66,11 +67,7 @@ namespace Game.Presentation.Combat.Systems
                     }
 
                     var targetStats = tStats[i];
-                    float armor = targetStats.Armor;
-                    float rawDmg = damage;
-                    float reduction = armor / (armor + 10f * rawDmg);
-                    float finalDmg = rawDmg * (1f - reduction);
-                    finalDmg = math.max(finalDmg, 0f);
+                    float finalDmg = DamageCalculator.ApplyArmorReduction(damage, targetStats.Armor);
 
                     targetStats.CurrentHealth -= finalDmg;
 

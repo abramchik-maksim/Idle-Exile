@@ -45,8 +45,8 @@ The player watches an auto-battling hero fight waves of enemies on the left thir
 | Critical Multiplier| 150%       | Damage multiplier on critical hit          |
 | Armor              | 5          | Flat physical damage reduction             |
 | Evasion            | 0          | Chance to dodge incoming attacks           |
-| Movement Speed     | 3          | Hero movement speed                        |
-| Health Regen       | 0          | Health regenerated per second              |
+| Movement Speed     | 1          | Hero movement speed                        |
+| Health Regen       | 1          | Health regenerated per second              |
 
 ### Modifier Types
 
@@ -199,6 +199,7 @@ Support abilities that provide buffs, healing, or defensive effects.
 | iron_skin      | Iron Skin    | Defense      | 15s      | Buff Armor     | +50   |
 | wind_step      | Wind Step    | Defense      | 12s      | Buff Evasion   | +30   |
 | battle_fury    | Battle Fury  | Enhancement  | 20s      | Buff Atk Speed | +25%  |
+| summon_clone   | Shadow Clone | Enhancement  | 30s      | Summon Clone   | 50%   |
 
 ### Skill Effect Types
 
@@ -212,6 +213,7 @@ Support abilities that provide buffs, healing, or defensive effects.
 | Buff Armor       | Utility     | Temporarily increases armor              |
 | Buff Evasion     | Utility     | Temporarily increases evasion            |
 | Buff Attack Speed| Utility     | Temporarily increases attack speed       |
+| Summon Clone   | Utility     | Spawns a clone that draws aggro and attacks enemies |
 
 ### Skills Tab UI
 
@@ -264,13 +266,60 @@ The player sees: **Tier Name** + **Battle N / Total**. Waves are internal pacing
 6. Rewards granted → next battle auto-starts
 7. After final battle in map → advance to next map/tier
 
+### Enemy Archetypes
+
+Enemies are categorized into three behavior archetypes:
+
+| Archetype | Behavior | Attack Style |
+|-----------|----------|-------------|
+| Melee | Moves to target, stops at AttackRange, wind-up AoE hit | Semi-transparent red circle around attacker during wind-up, damages all targetable entities in radius |
+| Ranged | Moves to AttackRange (5–8 units), fires homing projectiles | Orange enemy projectiles, slower than hero projectiles (speed = 8) |
+| Caster | Stays at max range, casts spells with cast bar | Cast bar above enemy, interruptible by Silence/Stun/Knockback/Kill. Creates AoE damage zone on target position |
+
 ### Enemies
 
-| Enemy    | HP  | Damage | Armor | Speed | Appears In         |
-|----------|-----|--------|-------|-------|-------------------|
-| Skeleton | 30  | 5      | 2     | 2.0   | Battles 0–9       |
-| Zombie   | 50  | 8      | 4     | 1.2   | Battles 5+ (boss) |
-| Ghost    | 20  | 10     | 0     | 3.0   | Battles 7+ (adds) |
+| Enemy    | HP  | Damage | Armor | Speed | Archetype | AttackRange | Appears In         |
+|----------|-----|--------|-------|-------|-----------|-------------|-------------------|
+| Skeleton | 30  | 5      | 2     | 2.0   | Melee     | 1.0         | Battles 0–9       |
+| Zombie   | 50  | 8      | 4     | 1.2   | Melee     | 1.2         | Battles 5+ (boss) |
+| Ghost    | 20  | 10     | 0     | 3.0   | Ranged    | 6.0         | Battles 7+ (adds) |
+
+### Targeting System
+
+Enemies select targets using aggro-weighted formula: `score = aggroWeight / distance`
+
+| Targetable Object | Aggro Weight | Notes |
+|-------------------|-------------|-------|
+| Hero | 10 | Default target |
+| Clone (utility skill) | 15 | Draws enemy attention away from hero |
+
+### Ailment System
+
+All ailments have a proc chance defined on skills and gear bonuses.
+
+#### Elemental Ailments
+
+| Ailment | Stacking | Effect | Duration |
+|---------|----------|--------|----------|
+| Ignite | 1 stack (re-applied overwrites) | DoT = 300% of triggering hit damage | 3 seconds (6 ticks × 0.5s) |
+| Chill | Up to 10 stacks | -5% MoveSpeed/AttackSpeed/CastSpeed per stack. At 10 stacks: reset + Freeze (3s Stun) | Persistent while stacked |
+| Shock | Up to 10 stacks | +5% damage taken per stack | Persistent while stacked |
+
+#### Physical Ailments
+
+| Ailment | Stacking | Effect | Duration |
+|---------|----------|--------|----------|
+| Bleed | Infinite (independent timers) | DoT = 60% of triggering hit damage | 5 seconds (10 ticks × 0.5s) |
+
+#### Control Effects
+
+| Effect | Action | Interrupts Cast? |
+|--------|--------|-----------------|
+| Silence | Cannot start/continue casting | Yes |
+| Stun | Cannot move, attack, or cast | Yes |
+| Slow | Reduces MoveSpeed by % | No |
+| Knockback | Pushback + brief Stun (0.5s) | Yes |
+| Freeze | = Stun for 3s (from 10 Chill stacks) | Yes |
 
 ### Scaling
 
@@ -293,15 +342,24 @@ The player sees: **Tier Name** + **Battle N / Total**. Waves are internal pacing
 - Attack rate = hero's Attack Speed (modified by main skill multiplier)
 - Projectiles are homing, speed = 12 units/second
 - Damage numbers appear at hit position (larger + yellow for crits)
+- Enemies attack hero (melee AoE, ranged projectiles, or caster spells)
+- Armor reduction formula: `reduction = armor / (armor + 10 × rawDamage)`
 
 ### Visual Representation
 
 All combat entities are rendered as instanced quads (no GameObjects):
 - **Hero:** Blue quad
 - **Enemy:** Red quad
-- **Projectile:** Yellow quad
+- **Hero Projectile:** Yellow quad
+- **Enemy Projectile:** Orange quad
+- **Clone:** Green quad (slightly smaller than hero)
+- **Melee AoE Zone:** Semi-transparent red circle (during wind-up)
+- **Spell AoE Zone:** Semi-transparent purple circle (during cast delay)
+- **HP Bars:** Green fill on dark red background (above enemy, hidden at full HP)
+- **Cast Bars:** Purple fill on dark background (above casting enemy)
+- **Effect Icons:** Colored squares below HP bar (orange=Ignite, blue=Chill, yellow=Shock, red=Bleed, gray=Stun, purple=Silence)
 
-Damage numbers use pooled world-space TextMeshPro elements.
+Damage numbers use pooled world-space TextMeshPro elements. All visual indicators can be toggled via Settings.
 
 ---
 
@@ -332,14 +390,27 @@ Category chooser (Main / Utility) → sub-view with embedded loadout bar.
 
 ---
 
+## Settings
+
+Accessible via Game Menu → Settings button. Toggles:
+- **Show HP Bars** (default: ON) — enemy HP bars above enemies
+- **Show Effect Indicators** (default: ON) — ailment/CC icons below HP bars
+- **Show Damage Numbers** (default: ON) — floating damage numbers
+
+Settings persist via PlayerPrefs.
+
+---
+
 ## Future Systems (Planned)
 
 - **Skill crafting** — create and upgrade main skills
 - **Skill persistence** — save/load skill collection and loadout
-- **Utility skill activation** — auto-use utility skills with cooldowns during combat
 - **Additional tiers/maps** — expanded progression content
 - **Currency system** — gold economy for purchases
 - **Experience/leveling** — hero level progression
-- **Boss encounters** — special battles with unique mechanics
+- **Boss encounters** — special battles with unique mechanics (Ignite deals 1/3 damage to bosses)
 - **Item enchanting** — upgrade existing items
 - **Achievement system** — milestone rewards
+- **Enemy subtypes** — Volatile (explodes on death), Aura casters (buff allies), Necromancers (revive dead)
+- **Ailment visuals** — 2D sprite animations for Ignite/Chill/Shock/Bleed effects
+- **Ranged kiting** — rare enemy variant that retreats when target is too close

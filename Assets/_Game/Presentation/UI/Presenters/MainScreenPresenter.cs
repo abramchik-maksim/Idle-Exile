@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using VContainer.Unity;
 using Game.Presentation.UI.MainScreen;
 
@@ -12,7 +11,6 @@ namespace Game.Presentation.UI.Presenters
         private readonly EquipmentTabView _equipmentTabView;
         private readonly SkillsTabView _skillsTabView;
 
-        private readonly List<IDisposable> _subscriptions = new();
         private int _activeTab;
 
         public MainScreenPresenter(
@@ -52,9 +50,7 @@ namespace Game.Presentation.UI.Presenters
 
         public void Dispose()
         {
-            foreach (var sub in _subscriptions)
-                sub.Dispose();
-            _subscriptions.Clear();
+            _mainScreenView.OnTabSelected -= HandleTabSelected;
         }
     }
 }

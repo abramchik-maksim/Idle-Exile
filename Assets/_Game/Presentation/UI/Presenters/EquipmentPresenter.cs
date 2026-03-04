@@ -187,6 +187,15 @@ namespace Game.Presentation.UI.Presenters
 
         public void Dispose()
         {
+            _view.OnItemDroppedOnSlot -= HandleEquipItem;
+            _view.OnItemRightClicked -= HandleEquipItemByUid;
+            _view.OnSlotRightClicked -= HandleUnequipSlot;
+            _view.OnSlotDraggedOff -= HandleUnequipSlot;
+            _view.OnItemCompareRequested -= HandleCompare;
+            _view.OnDeleteAllClicked -= HandleDeleteAll;
+            _view.OnItemSellDropped -= HandleSellItem;
+            _view.OnEquipmentSellDropped -= HandleSellEquipped;
+
             foreach (var sub in _subscriptions)
                 sub.Dispose();
             _subscriptions.Clear();

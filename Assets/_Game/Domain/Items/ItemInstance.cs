@@ -8,20 +8,20 @@ namespace Game.Domain.Items
     {
         public string Uid { get; }
         public ItemDefinition Definition { get; }
-        public List<Modifier> RolledModifiers { get; }
+        public IReadOnlyList<Modifier> RolledModifiers { get; }
 
         public ItemInstance(ItemDefinition definition, List<Modifier> rolledModifiers)
         {
             Uid = Guid.NewGuid().ToString("N");
             Definition = definition;
-            RolledModifiers = rolledModifiers;
+            RolledModifiers = rolledModifiers.AsReadOnly();
         }
 
         public ItemInstance(string uid, ItemDefinition definition, List<Modifier> rolledModifiers)
         {
             Uid = uid;
             Definition = definition;
-            RolledModifiers = rolledModifiers;
+            RolledModifiers = rolledModifiers.AsReadOnly();
         }
 
         public IEnumerable<Modifier> GetAllModifiers()

@@ -15,7 +15,5 @@ namespace Game.Application.Ports
 
         float GetDropChance(int battleIndex, int tierIndex);
         float GetBonusDropChance(int tierIndex);
-        float GetMinModValue();
-        float GetMaxModValue();
     }
 }

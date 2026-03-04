@@ -7,7 +7,7 @@ namespace Game.Domain.Skills
     {
         private readonly List<SkillInstance> _skills = new();
 
-        public IReadOnlyList<SkillInstance> Skills => _skills;
+        public IReadOnlyList<SkillInstance> Skills => _skills.AsReadOnly();
 
         public SkillCollection() { }
 

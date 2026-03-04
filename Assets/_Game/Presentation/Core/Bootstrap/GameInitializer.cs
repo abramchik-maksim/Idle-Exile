@@ -49,7 +49,11 @@ namespace Game.Presentation.Core.Bootstrap
             Debug.Log("[GameInitializer] Starting game...");
 
             Progress = _progressRepo.Load();
-            Hero = new HeroState(Progress.HeroId ?? "default_hero");
+
+            var baseStats = _startingPreset != null && _startingPreset.heroBaseStats.Count > 0
+                ? _startingPreset.GetBaseStatsDictionary()
+                : null;
+            Hero = new HeroState(Progress.HeroId ?? "default_hero", baseStats);
             Inventory = _inventoryRepo.Load();
             Skills = new SkillCollection();
             Loadout = new SkillLoadout();
@@ -70,15 +74,6 @@ namespace Game.Presentation.Core.Bootstrap
                 _inventoryRepo.Save(Inventory);
                 _progressRepo.Save(Progress);
             });
-
-            var cam = Camera.main;
-            if (cam != null)
-            {
-                cam.transform.position = new Vector3(0f, 0f, -10f);
-                cam.rect = new Rect(0f, 0f, 1f / 3f, 1f);
-                cam.nearClipPlane = 0.1f;
-                cam.farClipPlane = 100f;
-            }
 
             Debug.Log($"[GameInitializer] Hero '{Hero.Id}' ready. Tier: {Progress.CurrentTier}, Map: {Progress.CurrentMap}, Battle: {Progress.CurrentBattle}. " +
                       $"Inventory: {Inventory.Items.Count}/{Inventory.Capacity}, Equipped: {Inventory.Equipped.Count}. " +

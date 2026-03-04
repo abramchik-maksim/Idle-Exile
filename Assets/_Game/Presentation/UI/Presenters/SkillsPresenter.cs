@@ -143,6 +143,12 @@ namespace Game.Presentation.UI.Presenters
 
         public void Dispose()
         {
+            _view.OnMainSkillRightClicked -= HandleEquipMainSkill;
+            _view.OnUtilitySkillRightClicked -= HandleEquipUtilitySkill;
+            _view.OnSkillDroppedOnSlot -= HandleSkillDroppedOnSlot;
+            _view.OnLoadoutSlotRightClicked -= HandleUnequipSlot;
+            _view.OnLoadoutSlotDraggedOff -= HandleUnequipSlot;
+
             foreach (var sub in _subscriptions)
                 sub.Dispose();
             _subscriptions.Clear();
