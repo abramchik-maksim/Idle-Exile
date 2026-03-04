@@ -10,6 +10,7 @@ namespace Game.Domain.Skills
         HealOverTime,
         BuffArmor,
         BuffEvasion,
-        BuffAttackSpeed
+        BuffAttackSpeed,
+        SummonClone
     }
 }

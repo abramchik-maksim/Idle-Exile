@@ -1,0 +1,37 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements"
+         xmlns:uie="UnityEditor.UIElements"
+         xsi="http://www.w3.org/2001/XMLSchema-instance"
+         engine="UnityEngine.UIElements"
+         editor="UnityEditor.UIElements">
+
+    <Style src="../Styles/Common.uss" />
+
+    <ui:VisualElement name="settings-root" picking-mode="Ignore" style="position: absolute; left: 0; top: 0; right: 0; bottom: 0;">
+
+        <ui:VisualElement name="settings-overlay" class="menu-overlay" style="display: none;">
+            <ui:VisualElement name="settings-panel" class="panel menu-panel" style="min-width: 320px;">
+                <ui:Label text="Settings" class="panel-header" style="-unity-text-align: middle-center;" />
+
+                <ui:VisualElement style="padding: 12px; flex-direction: column;">
+                    <ui:VisualElement style="flex-direction: row; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                        <ui:Label text="Show HP Bars" style="font-size: 14px; color: rgb(200, 200, 200);" />
+                        <ui:Toggle name="toggle-hp-bars" value="true" />
+                    </ui:VisualElement>
+
+                    <ui:VisualElement style="flex-direction: row; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                        <ui:Label text="Show Effect Indicators" style="font-size: 14px; color: rgb(200, 200, 200);" />
+                        <ui:Toggle name="toggle-effect-indicators" value="true" />
+                    </ui:VisualElement>
+
+                    <ui:VisualElement style="flex-direction: row; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                        <ui:Label text="Show Damage Numbers" style="font-size: 14px; color: rgb(200, 200, 200);" />
+                        <ui:Toggle name="toggle-damage-numbers" value="true" />
+                    </ui:VisualElement>
+                </ui:VisualElement>
+
+                <ui:Button name="btn-settings-close" text="Close" class="btn menu-btn" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+
+    </ui:VisualElement>
+</ui:UXML>

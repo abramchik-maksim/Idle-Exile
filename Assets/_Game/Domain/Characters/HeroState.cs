@@ -24,7 +24,7 @@ namespace Game.Domain.Characters
             Stats.SetBase(StatType.CriticalMultiplier, 1.5f);
             Stats.SetBase(StatType.Armor, 5f);
             Stats.SetBase(StatType.Evasion, 0f);
-            Stats.SetBase(StatType.MovementSpeed, 3f);
+            Stats.SetBase(StatType.MovementSpeed, 1f);
             Stats.SetBase(StatType.HealthRegen, 1f);
         }
     }

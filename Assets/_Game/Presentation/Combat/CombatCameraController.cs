@@ -10,6 +10,10 @@ namespace Game.Presentation.Combat
         [SerializeField] private float _maxOrthoSize = 12f;
         [SerializeField] private float _smoothSpeed = 10f;
 
+        [Header("Vertical Offset")]
+        [Tooltip("Camera Y offset so the hero (at y=-1.7) sits at ~25% screen height")]
+        [SerializeField] private float _cameraYOffset = 1.5f;
+
         private Camera _cam;
         private float _targetOrthoSize;
         private bool _ready;
@@ -36,6 +40,13 @@ namespace Game.Presentation.Combat
                     Time.deltaTime * _smoothSpeed
                 );
             }
+
+            var pos = _cam.transform.position;
+            if (Mathf.Abs(pos.y - _cameraYOffset) > 0.001f)
+            {
+                pos.y = Mathf.Lerp(pos.y, _cameraYOffset, Time.deltaTime * _smoothSpeed);
+                _cam.transform.position = pos;
+            }
         }
 
         private bool EnsureCamera()
@@ -46,6 +57,11 @@ namespace Game.Presentation.Combat
             if (_cam == null || !_cam.orthographic) return false;
 
             _targetOrthoSize = _cam.orthographicSize;
+
+            var pos = _cam.transform.position;
+            pos.y = _cameraYOffset;
+            _cam.transform.position = pos;
+
             _ready = true;
             return true;
         }

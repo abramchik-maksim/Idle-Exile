@@ -1,3 +1,4 @@
+using Game.Domain.Combat;
 using Game.Domain.Combat.Progression;
 using UnityEngine;
 
@@ -13,7 +14,17 @@ namespace Game.Infrastructure.Configs.Combat
         public float baseArmor = 2f;
         public float baseSpeed = 2f;
 
+        [Header("Behavior")]
+        public EnemyArchetype archetype = EnemyArchetype.Melee;
+        public float attackRange = 1f;
+        public float attackSpeed = 0.8f;
+
+        [Header("Caster (only for Caster archetype)")]
+        [Tooltip("Assign a Spell Definition SO. Only used when Archetype = Caster.")]
+        public SpellDefinitionSO spell;
+
         public EnemyDefinition ToDomain() =>
-            new(id, displayName, baseHealth, baseDamage, baseArmor, baseSpeed);
+            new(id, displayName, baseHealth, baseDamage, baseArmor, baseSpeed,
+                archetype, attackRange, attackSpeed, spell != null ? spell.ToDomain() : null);
     }
 }

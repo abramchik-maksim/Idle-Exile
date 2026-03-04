@@ -31,6 +31,7 @@ namespace Game.Application.Skills
         private float _healAccumulator;
 
         public event Action OnBuffsChanged;
+        public event Action<float, float> OnCloneRequested;
 
         public void Initialize(SkillLoadout loadout)
         {
@@ -131,6 +132,9 @@ namespace Game.Application.Skills
                         break;
                     case SkillEffectType.HealOverTime:
                         _healAccumulator = def.EffectValue;
+                        break;
+                    case SkillEffectType.SummonClone:
+                        OnCloneRequested?.Invoke(def.EffectValue, def.EffectDuration);
                         break;
                 }
             }

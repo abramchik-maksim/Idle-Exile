@@ -18,3 +18,8 @@ MonoBehaviour:
   baseDamage: 10
   baseArmor: 0
   baseSpeed: 3
+  archetype: 1
+  attackRange: 5
+  attackSpeed: 0.8
+  castDuration: 0
+  spellId: 0

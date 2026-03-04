@@ -23,6 +23,14 @@ namespace Game.Presentation.Combat.Systems
                 ecb.DestroyEntity(entity);
             }
 
+            foreach (var (_, entity)
+                in SystemAPI.Query<RefRO<DeadTag>>()
+                    .WithAll<CloneTag>()
+                    .WithEntityAccess())
+            {
+                ecb.DestroyEntity(entity);
+            }
+
             ecb.Playback(EntityManager);
             ecb.Dispose();
         }

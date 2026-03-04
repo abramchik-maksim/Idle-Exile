@@ -17,6 +17,7 @@ MonoBehaviour:
   rarity: 1
   slot: 10
   handedness: 1
+  weaponType: 2
   iconAddress: Assets/_Game/Content/UI/Weapon/fc1441.png
   implicitModifiers:
   - stat: 2

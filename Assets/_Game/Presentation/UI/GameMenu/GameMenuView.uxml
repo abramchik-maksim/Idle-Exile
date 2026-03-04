@@ -6,10 +6,10 @@
 
     <Style src="../Styles/Common.uss" />
 
-    <ui:VisualElement name="game-menu-root" class="full-screen" style="flex-direction: column;">
+    <ui:VisualElement name="game-menu-root" class="full-screen" picking-mode="Ignore" style="flex-direction: column;">
 
         <!-- Top-right menu button -->
-        <ui:VisualElement style="flex-direction: row; justify-content: flex-end; padding: 8px;">
+        <ui:VisualElement picking-mode="Ignore" style="flex-direction: row; justify-content: flex-end; padding: 8px;">
             <ui:Button name="btn-menu" text="&#x2630;" class="menu-toggle-btn" />
         </ui:VisualElement>
 

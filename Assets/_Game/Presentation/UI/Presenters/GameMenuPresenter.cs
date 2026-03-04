@@ -1,6 +1,7 @@
 using System;
 using VContainer.Unity;
 using Game.Presentation.UI.GameMenu;
+using Game.Presentation.UI.Settings;
 using UnityEngine;
 
 namespace Game.Presentation.UI.Presenters
@@ -8,10 +9,12 @@ namespace Game.Presentation.UI.Presenters
     public sealed class GameMenuPresenter : IStartable, IDisposable
     {
         private readonly GameMenuView _view;
+        private readonly SettingsView _settingsView;
 
-        public GameMenuPresenter(GameMenuView view)
+        public GameMenuPresenter(GameMenuView view, SettingsView settingsView)
         {
             _view = view;
+            _settingsView = settingsView;
         }
 
         public void Start()
@@ -23,7 +26,7 @@ namespace Game.Presentation.UI.Presenters
         private void HandleSettings()
         {
             _view.CloseMenu();
-            Debug.Log("[GameMenuPresenter] Settings requested (not yet implemented).");
+            _settingsView.OpenSettings();
         }
 
         private void HandleQuit()

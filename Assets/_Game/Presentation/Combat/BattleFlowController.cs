@@ -146,10 +146,36 @@ namespace Game.Presentation.Combat
 
         private void UpdateWaveActive()
         {
+            if (_bridge.IsHeroDead())
+            {
+                OnHeroDied();
+                return;
+            }
+
             if (_bridge.GetAliveEnemyCount() > 0) return;
 
             _currentWaveIndex++;
             StartWaveDelay();
+        }
+
+        private void OnHeroDied()
+        {
+            var progress = _gameState.Progress;
+
+            Debug.Log($"[BattleFlow] Hero died at battle {progress.CurrentBattle}! Retreating...");
+
+            _bridge.DespawnAllEnemies();
+            _bridge.RestoreHeroHealth();
+            _bridge.ResetHeroPosition();
+
+            if (progress.CurrentBattle > 0)
+            {
+                progress.CurrentBattle--;
+                _currentBattle = _combatConfig.GetBattle(
+                    progress.CurrentTier, progress.CurrentMap, progress.CurrentBattle);
+            }
+
+            StartBattle();
         }
 
         private void OnBattleComplete()
@@ -164,6 +190,8 @@ namespace Game.Presentation.Combat
             ));
 
             Debug.Log($"[BattleFlow] Battle {_currentBattle.Id} completed!");
+
+            _bridge.ResetHeroPosition();
 
             GrantRewards(progress.CurrentBattle, progress.CurrentTier);
 

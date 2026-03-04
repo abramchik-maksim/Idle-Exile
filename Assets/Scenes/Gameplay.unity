@@ -119,6 +119,77 @@ NavMeshSettings:
     debug:
       m_Flags: 0
   m_NavMeshData: {fileID: 0}
+--- !u!1 &233501191
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 233501194}
+  - component: {fileID: 233501193}
+  - component: {fileID: 233501192}
+  m_Layer: 0
+  m_Name: '[View] Settings'
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &233501192
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 233501191}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 92baeb620964eab45b0f4fd3371b6150, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Game.Presentation.UI::Game.Presentation.UI.Settings.SettingsView
+  _uiDocument: {fileID: 0}
+  _visibleOnStart: 1
+  _sortOrder: 95
+--- !u!114 &233501193
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 233501191}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 19102, guid: 0000000000000000e000000000000000, type: 0}
+  m_Name: 
+  m_EditorClassIdentifier: UnityEngine.dll::UnityEngine.UIElements.UIDocument
+  m_PanelSettings: {fileID: 11400000, guid: d1c6f013a6e01a64faa4f438ef2d37eb, type: 2}
+  m_ParentUI: {fileID: 0}
+  sourceAsset: {fileID: 9197481963319205126, guid: 4c401ae6a6d4ec0428a71f682d22983f, type: 3}
+  m_SortingOrder: 95
+  m_Position: 0
+  m_WorldSpaceSizeMode: 1
+  m_WorldSpaceWidth: 1920
+  m_WorldSpaceHeight: 1080
+  m_PivotReferenceSize: 0
+  m_Pivot: 0
+  m_WorldSpaceCollider: {fileID: 0}
+--- !u!4 &233501194
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 233501191}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &397682284
 GameObject:
   m_ObjectHideFlags: 0
@@ -594,6 +665,77 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &1455306463
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1455306466}
+  - component: {fileID: 1455306465}
+  - component: {fileID: 1455306464}
+  m_Layer: 0
+  m_Name: '[View] GameMenu'
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1455306464
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1455306463}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fc4ab61d25a0f794d9c5873d99272c16, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Game.Presentation.UI::Game.Presentation.UI.GameMenu.GameMenuView
+  _uiDocument: {fileID: 0}
+  _visibleOnStart: 1
+  _sortOrder: 90
+--- !u!114 &1455306465
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1455306463}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 19102, guid: 0000000000000000e000000000000000, type: 0}
+  m_Name: 
+  m_EditorClassIdentifier: UnityEngine.dll::UnityEngine.UIElements.UIDocument
+  m_PanelSettings: {fileID: 11400000, guid: d1c6f013a6e01a64faa4f438ef2d37eb, type: 2}
+  m_ParentUI: {fileID: 0}
+  sourceAsset: {fileID: 9197481963319205126, guid: 69602ced2b6794b448eb85fddbec54ed, type: 3}
+  m_SortingOrder: 90
+  m_Position: 0
+  m_WorldSpaceSizeMode: 1
+  m_WorldSpaceWidth: 1920
+  m_WorldSpaceHeight: 1080
+  m_PivotReferenceSize: 0
+  m_Pivot: 0
+  m_WorldSpaceCollider: {fileID: 0}
+--- !u!4 &1455306466
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1455306463}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1757771442
 GameObject:
   m_ObjectHideFlags: 0
@@ -946,9 +1088,24 @@ MonoBehaviour:
   _heroMaterial: {fileID: 0}
   _enemyMaterial: {fileID: 0}
   _projectileMaterial: {fileID: 0}
+  _enemyProjectileMaterial: {fileID: 0}
+  _meleeAoEMaterial: {fileID: 0}
+  _spellAoEMaterial: {fileID: 0}
+  _castBarBgMaterial: {fileID: 0}
+  _castBarFillMaterial: {fileID: 0}
+  _hpBarBgMaterial: {fileID: 0}
+  _hpBarFillMaterial: {fileID: 0}
+  _igniteMaterial: {fileID: 0}
+  _chillMaterial: {fileID: 0}
+  _shockMaterial: {fileID: 0}
+  _bleedMaterial: {fileID: 0}
+  _stunMaterial: {fileID: 0}
+  _silenceMaterial: {fileID: 0}
+  _cloneMaterial: {fileID: 0}
   _heroScale: 0.8
   _enemyScale: 0.6
   _projectileScale: 0.15
+  _enemyProjectileScale: 0.15
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
@@ -962,3 +1119,5 @@ SceneRoots:
   - {fileID: 975280797}
   - {fileID: 1757771445}
   - {fileID: 1906392510}
+  - {fileID: 1455306466}
+  - {fileID: 233501194}

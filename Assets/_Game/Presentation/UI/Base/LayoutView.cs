@@ -44,6 +44,8 @@ namespace Game.Presentation.UI.Base
             Root = _uiDocument.rootVisualElement;
             if (Root == null) return;
 
+            Root.pickingMode = PickingMode.Ignore;
+
             _initialized = true;
             OnBind();
 

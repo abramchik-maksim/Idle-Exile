@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using MessagePipe;
 using UnityEngine;
 using VContainer;
+using Unity.Collections;
 using Unity.Entities;
 using Unity.Mathematics;
 using Game.Application.Ports;
@@ -22,11 +23,12 @@ using Game.Presentation.Combat.Systems;
 
 namespace Game.Presentation.Combat
 {
-    public sealed class CombatBridge : MonoBehaviour
+    public sealed class CombatBridge : MonoBehaviour, IHeroHealthProvider
     {
         private IGameStateProvider _gameState;
         private ICombatConfigProvider _combatConfig;
         private DamageNumberPool _damagePool;
+        private CombatRenderer _combatRenderer;
         private IPublisher<DamageDealtDTO> _damageDealtPub;
         private ISubscriber<HeroStatsChangedDTO> _heroStatsChangedSub;
         private ISubscriber<SkillEquippedDTO> _skillEquippedSub;
@@ -51,6 +53,7 @@ namespace Game.Presentation.Combat
             IGameStateProvider gameState,
             ICombatConfigProvider combatConfig,
             DamageNumberPool damagePool,
+            CombatRenderer combatRenderer,
             UtilitySkillRunner utilityRunner,
             IPublisher<DamageDealtDTO> damageDealtPub,
             ISubscriber<HeroStatsChangedDTO> heroStatsChangedSub,
@@ -63,6 +66,7 @@ namespace Game.Presentation.Combat
             _gameState = gameState;
             _combatConfig = combatConfig;
             _damagePool = damagePool;
+            _combatRenderer = combatRenderer;
             _utilityRunner = utilityRunner;
             _damageDealtPub = damageDealtPub;
             _heroStatsChangedSub = heroStatsChangedSub;
@@ -115,6 +119,7 @@ namespace Game.Presentation.Combat
             SpawnHeroEntity();
 
             _utilityRunner.OnBuffsChanged += ApplyBuffBonuses;
+            _utilityRunner.OnCloneRequested += SpawnClone;
             _utilityRunner.Initialize(_gameState.Loadout);
 
             IsReady = true;
@@ -124,6 +129,8 @@ namespace Game.Presentation.Combat
             Debug.Log("[CombatBridge] ECS bridge initialized.");
         }
 
+        private static readonly float2 HeroStartPosition = new(0f, -1.7f);
+
         private void SpawnHeroEntity()
         {
             var hero = _gameState.Hero;
@@ -132,13 +139,18 @@ namespace Game.Presentation.Combat
                 typeof(Position2D),
                 typeof(CombatStats),
                 typeof(AttackCooldown),
-                typeof(ActorId)
+                typeof(ActorId),
+                typeof(Targetable),
+                typeof(StatusEffects),
+                typeof(AilmentState),
+                typeof(HeroAttackRange)
             );
+            _entityManager.AddBuffer<BleedStack>(_heroEntity);
 
             float attackSpeed = hero.Stats.GetFinal(StatType.AttackSpeed);
             float cooldown = attackSpeed > 0 ? 1f / attackSpeed : 1f;
 
-            _entityManager.SetComponentData(_heroEntity, new Position2D { Value = new float2(0f, -1.7f) });
+            _entityManager.SetComponentData(_heroEntity, new Position2D { Value = HeroStartPosition });
             _entityManager.SetComponentData(_heroEntity, new CombatStats
             {
                 MaxHealth = hero.Stats.GetFinal(StatType.MaxHealth),
@@ -154,8 +166,41 @@ namespace Game.Presentation.Combat
                 Timer = cooldown
             });
             _entityManager.SetComponentData(_heroEntity, new ActorId { Value = _nextActorId++ });
+            _entityManager.SetComponentData(_heroEntity, new Targetable { AggroWeight = 10f });
+
+            UpdateHeroAttackRange();
 
             Debug.Log($"[CombatBridge] Hero entity created. Damage: {hero.Stats.GetFinal(StatType.PhysicalDamage)}, AS: {attackSpeed}");
+        }
+
+        private void UpdateHeroAttackRange()
+        {
+            if (!_entityManager.Exists(_heroEntity)) return;
+
+            var loadout = _gameState.Loadout;
+            var mainSkill = loadout?.MainSkill;
+
+            bool isMelee = false;
+            float range = 50f;
+
+            if (mainSkill != null)
+            {
+                var wt = mainSkill.Definition.RequiredWeapon;
+                isMelee = wt == WeaponType.Sword || wt == WeaponType.Axe || wt == WeaponType.Dagger;
+                range = isMelee ? 1.5f : 50f;
+            }
+
+            _entityManager.SetComponentData(_heroEntity, new HeroAttackRange
+            {
+                Value = range,
+                IsMelee = (byte)(isMelee ? 1 : 0)
+            });
+        }
+
+        public void ResetHeroPosition()
+        {
+            if (!IsReady || !_entityManager.Exists(_heroEntity)) return;
+            _entityManager.SetComponentData(_heroEntity, new Position2D { Value = HeroStartPosition });
         }
 
         private void ReinitializeUtilityRunner()
@@ -221,6 +266,8 @@ namespace Game.Presentation.Combat
         {
             if (!IsReady || !_entityManager.Exists(_heroEntity)) return;
 
+            UpdateHeroAttackRange();
+
             bool canAttack = CanHeroAttack();
             bool hasComponent = _entityManager.HasComponent<AttackEnabled>(_heroEntity);
 
@@ -279,36 +326,147 @@ namespace Game.Presentation.Combat
                     xSpread += UnityEngine.Random.Range(-0.3f, 0.3f);
                     float ySpawn = UnityEngine.Random.Range(5.5f, 7f);
 
+                    var archetype = enemyDef.Archetype;
+                    bool isCaster = archetype == EnemyArchetype.Caster;
+
                     var entity = _entityManager.CreateEntity(
                         typeof(EnemyTag),
                         typeof(Position2D),
                         typeof(CombatStats),
-                        typeof(ActorId)
+                        typeof(AttackCooldown),
+                        typeof(ActorId),
+                        typeof(EnemyBehavior),
+                        typeof(TargetEntity),
+                        typeof(StatusEffects),
+                        typeof(AilmentState)
                     );
+
+                    _entityManager.AddBuffer<BleedStack>(entity);
+
+                    if (isCaster && enemyDef.Spell != null)
+                        _entityManager.AddComponentData(entity, new CastState
+                        {
+                            CastDuration = enemyDef.Spell.CastDuration,
+                            DamageMultiplier = enemyDef.Spell.DamageMultiplier,
+                            AoERadius = enemyDef.Spell.AoERadius,
+                            DetonationDelay = enemyDef.Spell.DetonationDelay
+                        });
 
                     _entityManager.SetComponentData(entity, new Position2D
                     {
                         Value = new float2(xSpread, ySpawn)
                     });
 
+                    float atkSpeed = enemyDef.AttackSpeed;
+                    float atkCooldown = atkSpeed > 0f ? 1f / atkSpeed : 1f;
+
                     _entityManager.SetComponentData(entity, new CombatStats
                     {
                         MaxHealth = enemyDef.BaseHealth * tierScaling,
                         CurrentHealth = enemyDef.BaseHealth * tierScaling,
                         PhysicalDamage = enemyDef.BaseDamage * tierScaling,
-                        AttackSpeed = 0.8f,
+                        AttackSpeed = atkSpeed,
                         Armor = enemyDef.BaseArmor * tierScaling,
                         MoveSpeed = enemyDef.BaseSpeed
                     });
 
+                    _entityManager.SetComponentData(entity, new AttackCooldown
+                    {
+                        Cooldown = atkCooldown,
+                        Timer = atkCooldown
+                    });
+
                     _entityManager.SetComponentData(entity, new ActorId { Value = _nextActorId++ });
+
+                    _entityManager.SetComponentData(entity, new EnemyBehavior
+                    {
+                        Archetype = archetype,
+                        AttackRange = enemyDef.AttackRange
+                    });
                 }
             }
 
             Debug.Log($"[CombatBridge] Wave spawned ({wave.Spawns.Count} groups).");
         }
 
+        private void SpawnClone(float damagePercent, float duration)
+        {
+            if (!IsReady || !_entityManager.Exists(_heroEntity)) return;
+
+            var heroPos = _entityManager.GetComponentData<Position2D>(_heroEntity).Value;
+            var heroStats = _entityManager.GetComponentData<CombatStats>(_heroEntity);
+
+            float2 offset = new float2(
+                UnityEngine.Random.Range(-1f, 1f),
+                UnityEngine.Random.Range(0.5f, 1.5f)
+            );
+
+            var clone = _entityManager.CreateEntity(
+                typeof(CloneTag),
+                typeof(Position2D),
+                typeof(CombatStats),
+                typeof(Targetable),
+                typeof(ActorId),
+                typeof(StatusEffects),
+                typeof(AilmentState)
+            );
+
+            _entityManager.AddBuffer<BleedStack>(clone);
+
+            _entityManager.SetComponentData(clone, new Position2D { Value = heroPos + offset });
+            _entityManager.SetComponentData(clone, new CombatStats
+            {
+                MaxHealth = heroStats.MaxHealth * 0.3f,
+                CurrentHealth = heroStats.MaxHealth * 0.3f,
+                PhysicalDamage = heroStats.PhysicalDamage * (damagePercent / 100f),
+                AttackSpeed = heroStats.AttackSpeed,
+                Armor = 0f,
+                MoveSpeed = heroStats.MoveSpeed
+            });
+            _entityManager.SetComponentData(clone, new Targetable { AggroWeight = 15f });
+            _entityManager.SetComponentData(clone, new ActorId { Value = _nextActorId++ });
+
+            Debug.Log($"[CombatBridge] Clone spawned (Dmg: {damagePercent}%, Duration: {duration}s).");
+        }
+
         public int GetAliveEnemyCount() => _aliveEnemyQuery.CalculateEntityCount();
+
+        public bool IsHeroDead()
+        {
+            if (!IsReady || !_entityManager.Exists(_heroEntity)) return false;
+            var stats = _entityManager.GetComponentData<CombatStats>(_heroEntity);
+            return stats.CurrentHealth <= 0f;
+        }
+
+        public void RestoreHeroHealth()
+        {
+            if (!IsReady || !_entityManager.Exists(_heroEntity)) return;
+            var stats = _entityManager.GetComponentData<CombatStats>(_heroEntity);
+            stats.CurrentHealth = stats.MaxHealth;
+            _entityManager.SetComponentData(_heroEntity, stats);
+        }
+
+        public void DespawnAllEnemies()
+        {
+            if (!IsReady) return;
+            var enemies = _aliveEnemyQuery.ToEntityArray(Allocator.Temp);
+            for (int i = 0; i < enemies.Length; i++)
+            {
+                if (!_entityManager.HasComponent<DeadTag>(enemies[i]))
+                    _entityManager.AddComponent<DeadTag>(enemies[i]);
+            }
+            enemies.Dispose();
+        }
+
+        public float GetHeroHealthPercent()
+        {
+            if (!IsReady || !_entityManager.Exists(_heroEntity)) return 1f;
+
+            var stats = _entityManager.GetComponentData<CombatStats>(_heroEntity);
+            return stats.MaxHealth > 0f
+                ? math.clamp(stats.CurrentHealth / stats.MaxHealth, 0f, 1f)
+                : 1f;
+        }
 
         private void OnHeroStatsChanged(HeroStatsChangedDTO dto)
         {
@@ -344,11 +502,14 @@ namespace Game.Presentation.Combat
 
             foreach (var evt in _damageBufferSystem.FrameEvents)
             {
-                _damagePool.Show(
-                    new Vector3(evt.WorldX, evt.WorldY, 0f),
-                    evt.Amount,
-                    evt.IsCritical
-                );
+                if (_combatRenderer.ShowDamageNumbers)
+                {
+                    _damagePool.Show(
+                        new Vector3(evt.WorldX, evt.WorldY, 0f),
+                        evt.Amount,
+                        evt.IsCritical
+                    );
+                }
 
                 _damageDealtPub.Publish(new DamageDealtDTO(
                     new DamageResult(evt.Amount, evt.Amount, evt.IsCritical, DamageType.Physical),

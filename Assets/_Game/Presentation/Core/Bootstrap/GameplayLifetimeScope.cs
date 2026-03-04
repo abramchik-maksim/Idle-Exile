@@ -27,6 +27,7 @@ using Game.Presentation.UI.Cheats;
 using Game.Presentation.UI.GameMenu;
 using Game.Presentation.UI.Presenters;
 using Game.Presentation.UI.Services;
+using Game.Presentation.UI.Settings;
 
 namespace Game.Presentation.Core.Bootstrap
 {
@@ -99,10 +100,11 @@ namespace Game.Presentation.Core.Bootstrap
             builder.RegisterComponentInHierarchy<SkillSlotsView>();
             builder.RegisterComponentInHierarchy<CheatsView>();
             builder.RegisterComponentInHierarchy<GameMenuView>();
+            builder.RegisterComponentInHierarchy<SettingsView>();
 
             // --- Combat (MonoBehaviours from scene hierarchy) ---
-            builder.RegisterComponentInHierarchy<CombatBridge>();
-            builder.RegisterComponentInHierarchy<CombatRenderer>();
+            builder.RegisterComponentInHierarchy<CombatBridge>().AsImplementedInterfaces().AsSelf();
+            builder.RegisterComponentInHierarchy<CombatRenderer>().AsImplementedInterfaces().AsSelf();
             builder.RegisterComponentInHierarchy<DamageNumberPool>();
 
             // --- Presenters & Controllers (EntryPoints) ---
@@ -112,6 +114,7 @@ namespace Game.Presentation.Core.Bootstrap
             builder.RegisterEntryPoint<SkillsPresenter>();
             builder.RegisterEntryPoint<SkillSlotsPresenter>();
             builder.RegisterEntryPoint<CheatsPresenter>();
+            builder.RegisterEntryPoint<SettingsPresenter>();
             builder.RegisterEntryPoint<GameMenuPresenter>();
             builder.RegisterEntryPoint<CombatPresenter>();
             builder.RegisterEntryPoint<BattleFlowController>();
