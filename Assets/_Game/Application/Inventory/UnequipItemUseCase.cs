@@ -30,12 +30,12 @@ namespace Game.Application.Inventory
         public bool Success { get; }
         public EquipmentSlotType? Slot { get; }
         public ItemInstance UnequippedItem { get; }
-        public Dictionary<StatType, float> FinalStats { get; }
+        public IReadOnlyDictionary<StatType, float> FinalStats { get; }
 
         public UnequipItemResult(bool success,
             EquipmentSlotType? slot = null,
             ItemInstance unequippedItem = null,
-            Dictionary<StatType, float> finalStats = null)
+            IReadOnlyDictionary<StatType, float> finalStats = null)
         {
             Success = success;
             Slot = slot;

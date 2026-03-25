@@ -11,6 +11,9 @@ namespace Game.Presentation.UI.Combat
         private readonly VisualElement[] _slots = new VisualElement[SkillLoadout.TotalSlots];
         private readonly SkillInstance[] _currentSkills = new SkillInstance[SkillLoadout.TotalSlots];
         private readonly RadialFillElement[] _cooldownOverlays = new RadialFillElement[SkillLoadout.TotalSlots];
+        private readonly EventCallback<PointerUpEvent>[] _rightClickCallbacks = new EventCallback<PointerUpEvent>[SkillLoadout.TotalSlots];
+        private readonly EventCallback<PointerEnterEvent>[] _pointerEnterCallbacks = new EventCallback<PointerEnterEvent>[SkillLoadout.TotalSlots];
+        private readonly EventCallback<PointerLeaveEvent>[] _pointerLeaveCallbacks = new EventCallback<PointerLeaveEvent>[SkillLoadout.TotalSlots];
 
         public event Action<int> OnSlotRightClicked;
 
@@ -25,7 +28,7 @@ namespace Game.Presentation.UI.Combat
                 _cooldownOverlays[i] = overlay;
 
                 int capturedIndex = i;
-                _slots[i].RegisterCallback<PointerUpEvent>(evt =>
+                _rightClickCallbacks[i] = evt =>
                 {
                     if (evt.button == 1)
                     {
@@ -33,15 +36,19 @@ namespace Game.Presentation.UI.Combat
                         OnSlotRightClicked?.Invoke(capturedIndex);
                         evt.StopPropagation();
                     }
-                });
+                };
 
-                _slots[i].RegisterCallback<PointerEnterEvent>(_ =>
+                _pointerEnterCallbacks[i] = _ =>
                 {
                     var skill = _currentSkills[capturedIndex];
                     if (skill != null)
                         SkillTooltip.Show(_slots[capturedIndex], skill, Root);
-                });
-                _slots[i].RegisterCallback<PointerLeaveEvent>(_ => SkillTooltip.Hide());
+                };
+                _pointerLeaveCallbacks[i] = _ => SkillTooltip.Hide();
+
+                _slots[i].RegisterCallback(_rightClickCallbacks[i]);
+                _slots[i].RegisterCallback(_pointerEnterCallbacks[i]);
+                _slots[i].RegisterCallback(_pointerLeaveCallbacks[i]);
             }
         }
 
@@ -84,6 +91,17 @@ namespace Game.Presentation.UI.Combat
         {
             if (slotIndex < 0 || slotIndex >= SkillLoadout.TotalSlots) return;
             _cooldownOverlays[slotIndex].FillAmount = normalizedCooldown;
+        }
+
+        public override void Dispose()
+        {
+            for (int i = 0; i < SkillLoadout.TotalSlots; i++)
+            {
+                if (_slots[i] == null) continue;
+                if (_rightClickCallbacks[i] != null) _slots[i].UnregisterCallback(_rightClickCallbacks[i]);
+                if (_pointerEnterCallbacks[i] != null) _slots[i].UnregisterCallback(_pointerEnterCallbacks[i]);
+                if (_pointerLeaveCallbacks[i] != null) _slots[i].UnregisterCallback(_pointerLeaveCallbacks[i]);
+            }
         }
     }
 }

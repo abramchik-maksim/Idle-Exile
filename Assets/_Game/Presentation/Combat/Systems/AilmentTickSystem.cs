@@ -27,12 +27,13 @@ namespace Game.Presentation.Combat.Systems
                     .WithNone<DeadTag>()
                     .WithEntityAccess())
             {
-                float totalDot = 0f;
+                float igniteDmg = 0f;
+                float bleedDmg = 0f;
 
                 if (ailment.ValueRO.IgniteTimer > 0f)
                 {
                     ailment.ValueRW.IgniteTimer -= dt;
-                    totalDot += ailment.ValueRO.IgniteDamagePerTick * dt / AilmentCalculator.AilmentTickInterval;
+                    igniteDmg = ailment.ValueRO.IgniteDamagePerTick * dt / AilmentCalculator.AilmentTickInterval;
 
                     if (ailment.ValueRO.IgniteTimer <= 0f)
                     {
@@ -41,7 +42,9 @@ namespace Game.Presentation.Combat.Systems
                     }
                 }
 
-                totalDot += ailment.ValueRO.BleedTotalDps * dt;
+                bleedDmg = ailment.ValueRO.BleedTotalDps * dt;
+
+                float totalDot = igniteDmg + bleedDmg;
 
                 if (totalDot > 0f)
                 {
@@ -52,18 +55,49 @@ namespace Game.Presentation.Combat.Systems
                         && !EntityManager.HasComponent<DeadTag>(entity))
                         ecb.AddComponent<DeadTag>(entity);
 
-                    int actorId = EntityManager.HasComponent<ActorId>(entity)
-                        ? EntityManager.GetComponentData<ActorId>(entity).Value
-                        : -1;
+                    ailment.ValueRW.IgniteDisplayAccum += igniteDmg;
+                    ailment.ValueRW.BleedDisplayAccum += bleedDmg;
+                    ailment.ValueRW.DotDisplayTimer += dt;
 
-                    _damageBuffer.EventQueue.Enqueue(new DamageEvent
+                    if (ailment.ValueRO.DotDisplayTimer >= AilmentCalculator.AilmentTickInterval)
                     {
-                        Amount = totalDot,
-                        WorldX = pos.ValueRO.Value.x,
-                        WorldY = pos.ValueRO.Value.y,
-                        IsCritical = false,
-                        TargetActorId = actorId
-                    });
+                        ailment.ValueRW.DotDisplayTimer -= AilmentCalculator.AilmentTickInterval;
+
+                        int actorId = EntityManager.HasComponent<ActorId>(entity)
+                            ? EntityManager.GetComponentData<ActorId>(entity).Value
+                            : -1;
+                        bool fromHero = !isHero;
+
+                        if (ailment.ValueRO.IgniteDisplayAccum > 0f)
+                        {
+                            _damageBuffer.EventQueue.Enqueue(new DamageEvent
+                            {
+                                Amount = ailment.ValueRO.IgniteDisplayAccum,
+                                WorldX = pos.ValueRO.Value.x,
+                                WorldY = pos.ValueRO.Value.y,
+                                IsCritical = false,
+                                TargetActorId = actorId,
+                                IsFromHero = fromHero,
+                                DamageCategory = 1
+                            });
+                            ailment.ValueRW.IgniteDisplayAccum = 0f;
+                        }
+
+                        if (ailment.ValueRO.BleedDisplayAccum > 0f)
+                        {
+                            _damageBuffer.EventQueue.Enqueue(new DamageEvent
+                            {
+                                Amount = ailment.ValueRO.BleedDisplayAccum,
+                                WorldX = pos.ValueRO.Value.x,
+                                WorldY = pos.ValueRO.Value.y,
+                                IsCritical = false,
+                                TargetActorId = actorId,
+                                IsFromHero = fromHero,
+                                DamageCategory = 2
+                            });
+                            ailment.ValueRW.BleedDisplayAccum = 0f;
+                        }
+                    }
                 }
 
                 if (AilmentCalculator.ShouldFreeze(ailment.ValueRO.ChillStacks))

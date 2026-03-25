@@ -82,7 +82,9 @@ namespace Game.Presentation.Combat.Systems
                         WorldX = tPositions[i].Value.x,
                         WorldY = tPositions[i].Value.y,
                         IsCritical = false,
-                        TargetActorId = actorId
+                        TargetActorId = actorId,
+                        IsFromHero = false,
+                        DamageCategory = 0
                     });
                 }
             }

@@ -28,8 +28,62 @@
                 <ui:VisualElement name="loadout-slots-main" style="flex-direction: row; align-items: flex-end;" />
             </ui:VisualElement>
 
-            <ui:VisualElement style="flex-grow: 1; justify-content: center; align-items: center;">
-                <ui:Label text="Crafting (coming soon)" style="font-size: 20px; color: rgb(120, 120, 120); -unity-font-style: italic;" />
+            <!-- Crafting content: 3-column layout -->
+            <ui:VisualElement name="crafting-content" style="flex-direction: row; flex-grow: 1;">
+
+                <!-- LEFT: Skill Gem Inventory -->
+                <ui:VisualElement name="gem-panel" class="panel" style="width: 260px; margin: 8px;">
+                    <ui:Label text="Skill Gems" class="stat-group-header" style="margin-top: 0;" />
+                    <ui:VisualElement name="gem-filter-bar" style="flex-direction: row; flex-wrap: wrap; margin-bottom: 8px;">
+                        <ui:Button name="filter-all" text="All" class="btn" style="font-size: 10px; padding: 2px 6px; margin: 1px;" />
+                        <ui:Button name="filter-fire" text="Fire" class="btn" style="font-size: 10px; padding: 2px 6px; margin: 1px;" />
+                        <ui:Button name="filter-cold" text="Cold" class="btn" style="font-size: 10px; padding: 2px 6px; margin: 1px;" />
+                        <ui:Button name="filter-lightning" text="Ltng" class="btn" style="font-size: 10px; padding: 2px 6px; margin: 1px;" />
+                        <ui:Button name="filter-physical" text="Phys" class="btn" style="font-size: 10px; padding: 2px 6px; margin: 1px;" />
+                    </ui:VisualElement>
+                    <ui:ScrollView name="gem-list" style="flex-grow: 1;" />
+                    <ui:VisualElement style="margin-top: 8px; border-top-color: rgb(60, 60, 80); border-top-width: 1px; padding-top: 8px;">
+                        <ui:Label name="removal-currency-label" text="Removal Orbs: 0" class="stat-label" style="font-size: 12px;" />
+                    </ui:VisualElement>
+                </ui:VisualElement>
+
+                <!-- CENTER: Crafting Bench -->
+                <ui:VisualElement name="crafting-bench" style="flex-grow: 1; align-items: center; justify-content: center; margin: 8px;">
+                    <ui:Label text="Select a Main Skill below" class="stat-label" style="color: rgb(130, 125, 115); margin-bottom: 8px;" />
+                    <ui:VisualElement name="skill-drop-slot" class="equipment-slot" style="width: 96px; height: 96px; margin-bottom: 16px;">
+                        <ui:Label name="skill-drop-label" text="No Skill" class="item-label--empty" style="font-size: 12px;" />
+                    </ui:VisualElement>
+                    <ui:Label text="Affixes" class="stat-group-header" style="margin-top: 0; align-self: center;" />
+                    <ui:VisualElement name="affix-slots-container" style="flex-direction: row; flex-wrap: wrap; justify-content: center; max-width: 250px;">
+                        <ui:VisualElement name="affix-slot-0" class="inventory-slot crafting-affix-slot" />
+                        <ui:VisualElement name="affix-slot-1" class="inventory-slot crafting-affix-slot" />
+                        <ui:VisualElement name="affix-slot-2" class="inventory-slot crafting-affix-slot" />
+                        <ui:VisualElement name="affix-slot-3" class="inventory-slot crafting-affix-slot" />
+                        <ui:VisualElement name="affix-slot-4" class="inventory-slot crafting-affix-slot" />
+                        <ui:VisualElement name="affix-slot-5" class="inventory-slot crafting-affix-slot" />
+                    </ui:VisualElement>
+                </ui:VisualElement>
+
+                <!-- RIGHT: Skill Tooltip (always visible) -->
+                <ui:VisualElement name="tooltip-panel" class="panel" style="width: 390px; margin: 8px;">
+                    <ui:Label text="Skill Details" class="stat-group-header" style="margin-top: 0;" />
+                    <ui:VisualElement name="tooltip-content" style="flex-grow: 1;">
+                        <ui:Label name="tooltip-empty" text="No skill selected" class="stat-label" style="color: rgb(130, 125, 115); margin-top: 16px; -unity-text-align: upper-center;" />
+                        <ui:VisualElement name="tooltip-details" style="display: none;">
+                            <ui:Label name="tooltip-skill-name" class="item-tooltip__title" />
+                            <ui:Label name="tooltip-skill-category" class="item-tooltip__slot" />
+                            <ui:VisualElement class="item-tooltip__separator" />
+                            <ui:Label text="Base Stats" style="font-size: 12px; color: rgb(130, 125, 115); margin-top: 4px; -unity-font-style: bold;" />
+                            <ui:Label name="tooltip-weapon" class="stat-label" style="font-size: 12px;" />
+                            <ui:Label name="tooltip-damage-mult" class="stat-label" style="font-size: 12px;" />
+                            <ui:Label name="tooltip-as-mult" class="stat-label" style="font-size: 12px;" />
+                            <ui:VisualElement class="item-tooltip__separator" />
+                            <ui:Label text="Affixes" style="font-size: 12px; color: rgb(160, 130, 60); margin-top: 4px; -unity-font-style: bold;" />
+                            <ui:VisualElement name="tooltip-affixes" />
+                        </ui:VisualElement>
+                    </ui:VisualElement>
+                </ui:VisualElement>
+
             </ui:VisualElement>
             <ui:VisualElement style="padding: 12px 16px;">
                 <ui:Label text="Owned Main Skills" class="panel-header" style="font-size: 16px;" />

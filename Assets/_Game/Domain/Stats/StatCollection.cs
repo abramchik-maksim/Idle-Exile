@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 
 namespace Game.Domain.Stats
@@ -23,13 +24,25 @@ namespace Game.Domain.Stats
         public void RemoveModifiersBySource(string source) =>
             _modifiers.RemoveAll(m => m.Source == source);
 
+        public void RemoveModifiersBySourcePrefix(string prefix) =>
+            _modifiers.RemoveAll(m => m.Source != null && m.Source.StartsWith(prefix));
+
         public void ClearModifiers() => _modifiers.Clear();
 
         public float GetFinal(StatType stat)
         {
+            return GetFinalWithExtraFlat(stat, 0f);
+        }
+
+        /// <summary>
+        /// Same as GetFinal but injects extraFlat into the flat sum before increases/more.
+        /// Used for double-dip "Gain X% of damage as element" conversions.
+        /// </summary>
+        public float GetFinalWithExtraFlat(StatType stat, float extraFlat)
+        {
             float baseVal = GetBase(stat);
 
-            float flatSum = 0f;
+            float flatSum = extraFlat;
             float increasedSum = 0f;
             float moreProduct = 1f;
 
@@ -54,7 +67,7 @@ namespace Game.Domain.Stats
             return (baseVal + flatSum) * (1f + increasedSum) * moreProduct;
         }
 
-        public Dictionary<StatType, float> GetAllFinal()
+        public IReadOnlyDictionary<StatType, float> GetAllFinal()
         {
             var statTypes = _baseValues.Keys
                 .Union(_modifiers.Select(m => m.Stat))
@@ -63,7 +76,7 @@ namespace Game.Domain.Stats
             var result = new Dictionary<StatType, float>();
             foreach (var st in statTypes)
                 result[st] = GetFinal(st);
-            return result;
+            return new ReadOnlyDictionary<StatType, float>(result);
         }
     }
 }

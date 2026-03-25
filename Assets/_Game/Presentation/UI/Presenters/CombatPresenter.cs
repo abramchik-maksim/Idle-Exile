@@ -56,7 +56,20 @@ namespace Game.Presentation.UI.Presenters
         public void Tick()
         {
             _mainScreenView.SetHealthPercent(_heroHealth.GetHeroHealthPercent());
-            _mainScreenView.RenderBuffs(_utilityRunner.GetActiveBuffs());
+            var activeBuffs = _utilityRunner.GetActiveBuffs();
+            var buffViewModels = new List<ActiveBuffViewModel>(activeBuffs.Count);
+            for (int i = 0; i < activeBuffs.Count; i++)
+            {
+                var buff = activeBuffs[i];
+                buffViewModels.Add(new ActiveBuffViewModel(
+                    buff.SkillName,
+                    buff.EffectType,
+                    buff.EffectValue,
+                    buff.RemainingTime,
+                    buff.TotalDuration));
+            }
+
+            _mainScreenView.RenderBuffs(buffViewModels);
         }
 
         public void Dispose()

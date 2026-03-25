@@ -61,6 +61,7 @@ namespace Game.Presentation.UI.Base
         public virtual void Show()
         {
             InitializeIfNeeded();
+            if (Root == null) return;
             Root.style.display = DisplayStyle.Flex;
             OnShow();
         }
@@ -68,6 +69,7 @@ namespace Game.Presentation.UI.Base
         public virtual void Hide()
         {
             InitializeIfNeeded();
+            if (Root == null) return;
             Root.style.display = DisplayStyle.None;
             OnHide();
         }

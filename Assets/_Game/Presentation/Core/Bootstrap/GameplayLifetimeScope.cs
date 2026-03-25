@@ -4,16 +4,15 @@ using VContainer;
 using VContainer.Unity;
 using Game.Application.Ports;
 using Game.Application.Combat;
-using Game.Application.Debug;
 using Game.Application.Inventory;
 using Game.Application.Loot;
 using Game.Application.Skills;
 using Game.Application.Stats;
 using Game.Domain.DTOs.Combat;
-using Game.Domain.DTOs.Debug;
 using Game.Domain.DTOs.Inventory;
 using Game.Domain.DTOs.Skills;
 using Game.Domain.DTOs.Stats;
+using Game.Domain.Skills.Crafting;
 using Game.Infrastructure.Configs;
 using Game.Infrastructure.Configs.Combat;
 using Game.Infrastructure.Configs.Skills;
@@ -37,6 +36,7 @@ namespace Game.Presentation.Core.Bootstrap
         [SerializeField] private CombatDatabaseSO _combatDatabase;
         [SerializeField] private LootTableSO _lootTable;
         [SerializeField] private SkillDatabaseSO _skillDatabase;
+        [SerializeField] private SkillGemDatabaseSO _skillGemDatabase;
         [SerializeField] private StartingPresetSO _startingPreset;
 
         protected override void Configure(IContainerBuilder builder)
@@ -45,7 +45,6 @@ namespace Game.Presentation.Core.Bootstrap
             var options = builder.RegisterMessagePipe();
             builder.RegisterBuildCallback(c => GlobalMessagePipe.SetProvider(c.AsServiceProvider()));
 
-            builder.RegisterMessageBroker<TestMessageDTO>(options);
             builder.RegisterMessageBroker<EnemyKilledDTO>(options);
             builder.RegisterMessageBroker<DamageDealtDTO>(options);
             builder.RegisterMessageBroker<ItemAddedDTO>(options);
@@ -61,6 +60,9 @@ namespace Game.Presentation.Core.Bootstrap
             builder.RegisterMessageBroker<SkillEquippedDTO>(options);
             builder.RegisterMessageBroker<SkillUnequippedDTO>(options);
             builder.RegisterMessageBroker<SkillsChangedDTO>(options);
+            builder.RegisterMessageBroker<SkillAffixAddedDTO>(options);
+            builder.RegisterMessageBroker<SkillAffixRemovedDTO>(options);
+            builder.RegisterMessageBroker<SkillGemUsedDTO>(options);
 
             // --- Infrastructure (Singletons) ---
             builder.Register<IRandomService>(c => new UnityRandomService(), Lifetime.Singleton);
@@ -70,6 +72,8 @@ namespace Game.Presentation.Core.Bootstrap
                 _ => new ScriptableObjectCombatConfigProvider(_combatDatabase, _lootTable), Lifetime.Singleton);
             builder.Register<ISkillConfigProvider>(
                 _ => new ScriptableObjectSkillConfigProvider(_skillDatabase), Lifetime.Singleton);
+            builder.Register<ISkillGemConfigProvider>(
+                _ => new ScriptableObjectSkillGemConfigProvider(_skillGemDatabase), Lifetime.Singleton);
             builder.Register<IPlayerProgressRepository, PlayerPrefsProgressRepository>(Lifetime.Singleton);
             builder.Register<IInventoryRepository>(c =>
                 new PlayerPrefsInventoryRepository(c.Resolve<IConfigProvider>()), Lifetime.Singleton);
@@ -81,12 +85,17 @@ namespace Game.Presentation.Core.Bootstrap
             builder.Register<CalculateHeroStatsUseCase>(Lifetime.Transient);
             builder.Register<EquipItemUseCase>(Lifetime.Transient);
             builder.Register<UnequipItemUseCase>(Lifetime.Transient);
+            builder.Register<ClearInventoryItemsUseCase>(Lifetime.Transient);
+            builder.Register<RemoveInventoryItemUseCase>(Lifetime.Transient);
             builder.Register<AddItemToInventoryUseCase>(Lifetime.Transient);
             builder.Register<ProgressBattleUseCase>(Lifetime.Transient);
             builder.Register<GrantBattleRewardUseCase>(Lifetime.Transient);
-            builder.Register<SendTestMessageUseCase>(Lifetime.Transient);
             builder.Register<EquipSkillUseCase>(Lifetime.Transient);
             builder.Register<UnequipSkillUseCase>(Lifetime.Transient);
+            builder.Register<ApplySkillGemUseCase>(Lifetime.Transient);
+            builder.Register<RemoveSkillAffixUseCase>(Lifetime.Transient);
+            builder.Register<SkillAffixRollingService>(Lifetime.Singleton);
+            builder.Register<SkillGemInventory>(Lifetime.Singleton);
             builder.Register<UtilitySkillRunner>(Lifetime.Singleton);
             builder.Register<WaveSpawner>(Lifetime.Singleton);
             builder.Register<DamageEventProcessor>(Lifetime.Singleton);
@@ -100,7 +109,7 @@ namespace Game.Presentation.Core.Bootstrap
             builder.RegisterComponentInHierarchy<CheatsView>();
             builder.RegisterComponentInHierarchy<GameMenuView>();
             builder.RegisterComponentInHierarchy<SettingsView>();
-
+            
             // --- Combat (MonoBehaviours from scene hierarchy) ---
             builder.RegisterComponentInHierarchy<CombatBridge>().AsImplementedInterfaces().AsSelf();
             builder.RegisterComponentInHierarchy<CombatRenderer>().AsImplementedInterfaces().AsSelf();
@@ -116,6 +125,7 @@ namespace Game.Presentation.Core.Bootstrap
             builder.RegisterEntryPoint<SettingsPresenter>();
             builder.RegisterEntryPoint<GameMenuPresenter>();
             builder.RegisterEntryPoint<CombatPresenter>();
+            builder.RegisterEntryPoint<SkillCraftingPresenter>();
             builder.RegisterEntryPoint<BattleFlowController>();
 
             // --- Game bootstrap ---

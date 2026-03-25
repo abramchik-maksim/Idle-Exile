@@ -7,7 +7,7 @@ namespace Game.Application.Stats
 {
     public sealed class CalculateHeroStatsUseCase
     {
-        public Dictionary<StatType, float> Execute(HeroState hero, IReadOnlyDictionary<EquipmentSlotType, ItemInstance> equipped)
+        public IReadOnlyDictionary<StatType, float> Execute(HeroState hero, IReadOnlyDictionary<EquipmentSlotType, ItemInstance> equipped)
         {
             hero.Stats.ClearModifiers();
 

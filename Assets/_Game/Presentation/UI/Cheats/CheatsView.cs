@@ -8,7 +8,8 @@ namespace Game.Presentation.UI.Cheats
     public sealed class CheatsView : LayoutView
     {
         private Button _btnGenerateItem;
-        private Button _btnSendTest;
+        private Button _btnAddSkillGem;
+        private Button _btnAddRemovalOrb;
         private Button _btnResetSave;
         private Label _feedbackLabel;
         private VisualElement _panel;
@@ -19,21 +20,24 @@ namespace Game.Presentation.UI.Cheats
         private Vector2 _dragOffset;
 
         public event Action OnGenerateItemClicked;
-        public event Action OnSendTestClicked;
+        public event Action OnAddSkillGemClicked;
+        public event Action OnAddRemovalOrbClicked;
         public event Action OnResetSaveClicked;
 
         protected override void OnBind()
         {
             _btnGenerateItem = Q<Button>("btn-generate-item");
-            _btnSendTest = Q<Button>("btn-send-test");
+            _btnAddSkillGem = Q<Button>("btn-add-skill-gem");
+            _btnAddRemovalOrb = Q<Button>("btn-add-removal-orb");
             _btnResetSave = Q<Button>("btn-reset-save");
             _feedbackLabel = Q<Label>("feedback-label");
             _panel = Q("cheats-panel");
             _header = Q("cheats-header");
 
-            _btnGenerateItem.clicked += () => OnGenerateItemClicked?.Invoke();
-            _btnSendTest.clicked += () => OnSendTestClicked?.Invoke();
-            _btnResetSave.clicked += () => OnResetSaveClicked?.Invoke();
+            _btnGenerateItem.clicked += RaiseGenerateItemClicked;
+            _btnAddSkillGem.clicked += RaiseAddSkillGemClicked;
+            _btnAddRemovalOrb.clicked += RaiseAddRemovalOrbClicked;
+            _btnResetSave.clicked += RaiseResetSaveClicked;
 
             _header.RegisterCallback<PointerDownEvent>(OnHeaderPointerDown);
             _header.RegisterCallback<PointerMoveEvent>(OnHeaderPointerMove);
@@ -95,5 +99,24 @@ namespace Game.Presentation.UI.Cheats
         {
             _feedbackLabel.text = text;
         }
+
+        public override void Dispose()
+        {
+            if (_btnGenerateItem != null) _btnGenerateItem.clicked -= RaiseGenerateItemClicked;
+            if (_btnAddSkillGem != null) _btnAddSkillGem.clicked -= RaiseAddSkillGemClicked;
+            if (_btnAddRemovalOrb != null) _btnAddRemovalOrb.clicked -= RaiseAddRemovalOrbClicked;
+            if (_btnResetSave != null) _btnResetSave.clicked -= RaiseResetSaveClicked;
+            if (_header != null)
+            {
+                _header.UnregisterCallback<PointerDownEvent>(OnHeaderPointerDown);
+                _header.UnregisterCallback<PointerMoveEvent>(OnHeaderPointerMove);
+                _header.UnregisterCallback<PointerUpEvent>(OnHeaderPointerUp);
+            }
+        }
+
+        private void RaiseGenerateItemClicked() => OnGenerateItemClicked?.Invoke();
+        private void RaiseAddSkillGemClicked() => OnAddSkillGemClicked?.Invoke();
+        private void RaiseAddRemovalOrbClicked() => OnAddRemovalOrbClicked?.Invoke();
+        private void RaiseResetSaveClicked() => OnResetSaveClicked?.Invoke();
     }
 }

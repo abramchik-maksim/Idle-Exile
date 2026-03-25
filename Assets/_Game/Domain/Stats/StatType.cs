@@ -11,6 +11,10 @@ namespace Game.Domain.Stats
         Armor,
         Evasion,
         MovementSpeed,
-        HealthRegen
+        HealthRegen,
+        FireDamage,
+        ColdDamage,
+        LightningDamage,
+        GlobalDamage
     }
 }

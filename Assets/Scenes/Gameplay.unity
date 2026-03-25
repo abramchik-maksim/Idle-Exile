@@ -541,6 +541,11 @@ MonoBehaviour:
   _minOrthoSize: 2
   _maxOrthoSize: 12
   _smoothSpeed: 8
+  _cameraYOffset: 1.5
+  _viewportWidth: 0.33333334
+  _nearClip: 0.1
+  _farClip: 100
+  _defaultZ: -10
 --- !u!1 &1113869052
 GameObject:
   m_ObjectHideFlags: 0
@@ -649,6 +654,7 @@ MonoBehaviour:
   _combatDatabase: {fileID: 11400000, guid: 7eb73163f15027444971d2b2f28153cf, type: 2}
   _lootTable: {fileID: 11400000, guid: 11be710897d17434ebc8fc848c35a665, type: 2}
   _skillDatabase: {fileID: 11400000, guid: d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5, type: 2}
+  _skillGemDatabase: {fileID: 11400000, guid: 1604889d7ca26e44a8a7226ac3162615, type: 2}
   _startingPreset: {fileID: 11400000, guid: e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6, type: 2}
 --- !u!4 &1184002394
 Transform:
@@ -1102,6 +1108,8 @@ MonoBehaviour:
   _stunMaterial: {fileID: 0}
   _silenceMaterial: {fileID: 0}
   _cloneMaterial: {fileID: 0}
+  _heroSlashMaterial: {fileID: 0}
+  _enemySlashMaterial: {fileID: 0}
   _heroScale: 0.8
   _enemyScale: 0.6
   _projectileScale: 0.15

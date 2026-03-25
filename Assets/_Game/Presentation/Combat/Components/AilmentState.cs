@@ -11,6 +11,10 @@ namespace Game.Presentation.Combat.Components
         public float IgniteTimer;
 
         public float BleedTotalDps;
+
+        public float DotDisplayTimer;
+        public float IgniteDisplayAccum;
+        public float BleedDisplayAccum;
     }
 
     public struct BleedStack : IBufferElementData

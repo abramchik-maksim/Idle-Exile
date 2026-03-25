@@ -63,7 +63,9 @@ namespace Game.Presentation.Combat.Systems
                     WorldX = targetPos.x,
                     WorldY = targetPos.y,
                     IsCritical = proj.ValueRO.IsCritical,
-                    TargetActorId = actorId
+                    TargetActorId = actorId,
+                    IsFromHero = false,
+                    DamageCategory = 0
                 });
 
                 ecb.DestroyEntity(entity);

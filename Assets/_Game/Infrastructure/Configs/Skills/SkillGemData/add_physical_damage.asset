@@ -1,0 +1,47 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 44e19a3b8ac4c76479dbc3b9cb878441, type: 3}
+  m_Name: add_physical_damage
+  m_EditorClassIdentifier: Game.Infrastructure::Game.Infrastructure.Configs.Skills.SkillAffixDefinitionSO
+  id: add_physical_damage
+  affixName: Add Physical Damage
+  type: 0
+  damageType: 0
+  ailmentType: 0
+  minimumRarity: 0
+  descriptionTemplate: Adds {0:F0}-{1:F0} Physical Damage
+  tierRanges:
+  - tier: 9
+    minValue1: 1
+    maxValue1: 3
+    minValue2: 3
+    maxValue2: 5
+  - tier: 8
+    minValue1: 3
+    maxValue1: 5
+    minValue2: 5
+    maxValue2: 8
+  - tier: 7
+    minValue1: 5
+    maxValue1: 7
+    minValue2: 8
+    maxValue2: 12
+  - tier: 6
+    minValue1: 7
+    maxValue1: 10
+    minValue2: 12
+    maxValue2: 16
+  - tier: 5
+    minValue1: 10
+    maxValue1: 14
+    minValue2: 16
+    maxValue2: 22

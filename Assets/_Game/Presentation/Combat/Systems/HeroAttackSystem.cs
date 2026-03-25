@@ -12,11 +12,13 @@ namespace Game.Presentation.Combat.Systems
     {
         private EntityQuery _enemyQuery;
         private DamageEventBufferSystem _damageBuffer;
+        private uint _rngState;
 
         private struct PendingMeleeHit
         {
             public Entity Target;
-            public float Damage;
+            public float TotalDamage;
+            public bool IsCritical;
             public float2 TargetPos;
             public float2 HeroPos;
             public float Distance;
@@ -27,7 +29,8 @@ namespace Game.Presentation.Combat.Systems
         {
             public float2 HeroPos;
             public Entity Target;
-            public float Damage;
+            public float TotalDamage;
+            public bool IsCritical;
         }
 
         protected override void OnCreate()
@@ -38,6 +41,7 @@ namespace Game.Presentation.Combat.Systems
                 ComponentType.Exclude<DeadTag>()
             );
             _damageBuffer = World.GetExistingSystemManaged<DamageEventBufferSystem>();
+            _rngState = (uint)System.Environment.TickCount;
             RequireForUpdate<HeroTag>();
         }
 
@@ -57,6 +61,15 @@ namespace Game.Presentation.Combat.Systems
             {
                 isMelee = range.ValueRO.IsMelee != 0;
                 attackRange = range.ValueRO.Value;
+                break;
+            }
+
+            HeroSkillAffixData affixData = default;
+            bool hasAffixData = false;
+            foreach (var affix in SystemAPI.Query<RefRO<HeroSkillAffixData>>().WithAll<HeroTag>())
+            {
+                affixData = affix.ValueRO;
+                hasAffixData = true;
                 break;
             }
 
@@ -88,6 +101,12 @@ namespace Game.Presentation.Combat.Systems
                 if (nearest == Entity.Null) continue;
 
                 float dist = math.sqrt(nearestDistSq);
+                float totalDamage = stats.ValueRO.PhysicalDamage + stats.ValueRO.FireDamage
+                    + stats.ValueRO.ColdDamage + stats.ValueRO.LightningDamage;
+                float critChance = math.clamp(stats.ValueRO.CriticalChance, 0f, 1f);
+                bool isCritical = NextRandom() < critChance;
+                if (isCritical)
+                    totalDamage *= math.max(1f, stats.ValueRO.CriticalMultiplier);
 
                 if (isMelee)
                 {
@@ -98,7 +117,8 @@ namespace Game.Presentation.Combat.Systems
                     meleeHits.Add(new PendingMeleeHit
                     {
                         Target = nearest,
-                        Damage = stats.ValueRO.PhysicalDamage,
+                        TotalDamage = totalDamage,
+                        IsCritical = isCritical,
                         TargetPos = enemyPositions[nearestIdx].Value,
                         HeroPos = heroPos.ValueRO.Value,
                         Distance = dist,
@@ -113,7 +133,8 @@ namespace Game.Presentation.Combat.Systems
                     {
                         HeroPos = heroPos.ValueRO.Value,
                         Target = nearest,
-                        Damage = stats.ValueRO.PhysicalDamage
+                        TotalDamage = totalDamage,
+                        IsCritical = isCritical
                     });
                 }
             }
@@ -128,13 +149,16 @@ namespace Game.Presentation.Combat.Systems
                 var hit = meleeHits[i];
 
                 var targetStats = EntityManager.GetComponentData<CombatStats>(hit.Target);
-                float finalDmg = DamageCalculator.ApplyArmorReduction(hit.Damage, targetStats.Armor);
+                float finalDmg = DamageCalculator.ApplyArmorReduction(hit.TotalDamage, targetStats.Armor);
 
                 targetStats.CurrentHealth -= finalDmg;
                 EntityManager.SetComponentData(hit.Target, targetStats);
 
                 if (targetStats.CurrentHealth <= 0f && !EntityManager.HasComponent<DeadTag>(hit.Target))
                     ecb.AddComponent<DeadTag>(hit.Target);
+
+                if (hasAffixData)
+                    ApplyAilmentsOnHit(hit.Target, hit.TotalDamage, affixData);
 
                 int actorId = EntityManager.HasComponent<ActorId>(hit.Target)
                     ? EntityManager.GetComponentData<ActorId>(hit.Target).Value
@@ -145,8 +169,10 @@ namespace Game.Presentation.Combat.Systems
                     Amount = finalDmg,
                     WorldX = hit.TargetPos.x,
                     WorldY = hit.TargetPos.y,
-                    IsCritical = false,
-                    TargetActorId = actorId
+                    IsCritical = hit.IsCritical,
+                    TargetActorId = actorId,
+                    IsFromHero = true,
+                    DamageCategory = 0
                 });
 
                 float2 attackDir = math.normalizesafe(hit.TargetPos - hit.HeroPos, new float2(0, 1));
@@ -173,8 +199,8 @@ namespace Game.Presentation.Combat.Systems
                 {
                     Target = p.Target,
                     Speed = 12f,
-                    Damage = p.Damage,
-                    IsCritical = false
+                    Damage = p.TotalDamage,
+                    IsCritical = p.IsCritical
                 });
             }
 
@@ -182,6 +208,56 @@ namespace Game.Presentation.Combat.Systems
             ecb.Dispose();
             meleeHits.Dispose();
             projectiles.Dispose();
+        }
+
+        private void ApplyAilmentsOnHit(Entity target, float hitDamage, HeroSkillAffixData affixData)
+        {
+            if (!EntityManager.HasComponent<AilmentState>(target)) return;
+
+            var ailment = EntityManager.GetComponentData<AilmentState>(target);
+            bool changed = false;
+
+            if (affixData.IgniteChance > 0f && NextRandom() < affixData.IgniteChance)
+            {
+                ailment.IgniteDamagePerTick = AilmentCalculator.GetIgniteDamagePerTick(hitDamage);
+                ailment.IgniteTimer = AilmentCalculator.IgniteDuration;
+                changed = true;
+            }
+
+            if (affixData.ChillChance > 0f && NextRandom() < affixData.ChillChance)
+            {
+                ailment.ChillStacks = math.min(ailment.ChillStacks + 1, AilmentCalculator.MaxChillStacks);
+                changed = true;
+            }
+
+            if (affixData.ShockChance > 0f && NextRandom() < affixData.ShockChance)
+            {
+                ailment.ShockStacks = math.min(ailment.ShockStacks + 1, AilmentCalculator.MaxShockStacks);
+                changed = true;
+            }
+
+            if (affixData.BleedChance > 0f && NextRandom() < affixData.BleedChance)
+            {
+                float dpt = AilmentCalculator.GetBleedDamagePerTick(hitDamage);
+                var buffer = EntityManager.GetBuffer<BleedStack>(target);
+                buffer.Add(new BleedStack
+                {
+                    DamagePerTick = dpt,
+                    RemainingDuration = AilmentCalculator.BleedDuration
+                });
+                changed = true;
+            }
+
+            if (changed)
+                EntityManager.SetComponentData(target, ailment);
+        }
+
+        private float NextRandom()
+        {
+            _rngState = _rngState * 747796405u + 2891336453u;
+            uint result = ((_rngState >> (int)((_rngState >> 28) + 4u)) ^ _rngState) * 277803737u;
+            result = (result >> 22) ^ result;
+            return result / (float)uint.MaxValue;
         }
     }
 }

@@ -31,24 +31,36 @@ namespace Game.Presentation.Combat
             _damageBufferSystem = bufferSystem;
         }
 
+        private static readonly Color ColorPhysical = Color.white;
+        private static readonly Color ColorIgnite = new(1f, 0.6f, 0.1f);   // orange
+        private static readonly Color ColorBleed = new(0.7f, 0.1f, 0.15f); // crimson
+
         public void ProcessFrame()
         {
             if (_damageBufferSystem == null) return;
 
             foreach (var evt in _damageBufferSystem.FrameEvents)
             {
-                if (_displaySettings.ShowDamageNumbers)
+                if (_displaySettings.ShowDamageNumbers && evt.IsFromHero)
                 {
+                    var color = evt.DamageCategory switch
+                    {
+                        1 => ColorIgnite,
+                        2 => ColorBleed,
+                        _ => ColorPhysical
+                    };
+
                     _damagePool.Show(
                         new Vector3(evt.WorldX, evt.WorldY, 0f),
                         evt.Amount,
-                        evt.IsCritical
+                        evt.IsCritical,
+                        color
                     );
                 }
 
                 _damageDealtPub.Publish(new DamageDealtDTO(
                     new DamageResult(evt.Amount, evt.Amount, evt.IsCritical, DamageType.Physical),
-                    true,
+                    evt.IsFromHero,
                     evt.WorldX,
                     evt.WorldY
                 ));

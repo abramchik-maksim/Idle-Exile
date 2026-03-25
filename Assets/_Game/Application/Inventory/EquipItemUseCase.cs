@@ -31,11 +31,11 @@ namespace Game.Application.Inventory
     {
         public bool Success { get; }
         public EquipmentSlotType? Slot { get; }
-        public Dictionary<StatType, float> FinalStats { get; }
+        public IReadOnlyDictionary<StatType, float> FinalStats { get; }
 
         public EquipItemResult(bool success,
             EquipmentSlotType? slot = null,
-            Dictionary<StatType, float> finalStats = null)
+            IReadOnlyDictionary<StatType, float> finalStats = null)
         {
             Success = success;
             Slot = slot;

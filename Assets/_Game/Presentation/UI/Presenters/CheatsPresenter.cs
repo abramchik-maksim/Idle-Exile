@@ -2,13 +2,12 @@ using System;
 using System.Collections.Generic;
 using MessagePipe;
 using VContainer.Unity;
-using Game.Application.Debug;
 using Game.Application.Inventory;
 using Game.Application.Loot;
 using Game.Application.Ports;
-using Game.Domain.DTOs.Debug;
 using Game.Domain.DTOs.Inventory;
 using Game.Domain.Items;
+using Game.Domain.Skills.Crafting;
 using Game.Presentation.UI.Cheats;
 using UnityEngine;
 
@@ -17,59 +16,45 @@ namespace Game.Presentation.UI.Presenters
     public sealed class CheatsPresenter : IStartable, IDisposable
     {
         private readonly CheatsView _cheatsView;
-        private readonly SendTestMessageUseCase _sendTestUC;
         private readonly AddItemToInventoryUseCase _addItemUC;
         private readonly ItemRollingService _itemRolling;
         private readonly IGameStateProvider _gameState;
-        private readonly ISubscriber<TestMessageDTO> _testMessageSub;
+        private readonly ISkillGemConfigProvider _gemConfig;
+        private readonly SkillGemInventory _gemInventory;
+        private readonly IRandomService _random;
         private readonly IPublisher<InventoryChangedDTO> _inventoryChangedPub;
         private readonly IPublisher<ItemAddedDTO> _itemAddedPub;
 
-        private readonly List<IDisposable> _subscriptions = new();
-        private int _counter;
-
         public CheatsPresenter(
             CheatsView cheatsView,
-            SendTestMessageUseCase sendTestUC,
             AddItemToInventoryUseCase addItemUC,
             ItemRollingService itemRolling,
             IGameStateProvider gameState,
-            ISubscriber<TestMessageDTO> testMessageSub,
+            ISkillGemConfigProvider gemConfig,
+            SkillGemInventory gemInventory,
+            IRandomService random,
             IPublisher<InventoryChangedDTO> inventoryChangedPub,
             IPublisher<ItemAddedDTO> itemAddedPub)
         {
             _cheatsView = cheatsView;
-            _sendTestUC = sendTestUC;
             _addItemUC = addItemUC;
             _itemRolling = itemRolling;
             _gameState = gameState;
-            _testMessageSub = testMessageSub;
+            _gemConfig = gemConfig;
+            _gemInventory = gemInventory;
+            _random = random;
             _inventoryChangedPub = inventoryChangedPub;
             _itemAddedPub = itemAddedPub;
         }
 
         public void Start()
         {
-            _cheatsView.OnSendTestClicked += HandleSendTest;
             _cheatsView.OnGenerateItemClicked += HandleGenerateItem;
+            _cheatsView.OnAddSkillGemClicked += HandleAddSkillGem;
+            _cheatsView.OnAddRemovalOrbClicked += HandleAddRemovalOrb;
             _cheatsView.OnResetSaveClicked += HandleResetSave;
 
-            _subscriptions.Add(
-                _testMessageSub.Subscribe(dto =>
-                {
-                    Debug.Log($"[CheatsPresenter] Received TestMessageDTO: {dto.Message}");
-                    _cheatsView.SetFeedback($"Received: {dto.Message}");
-                }));
-
-            Debug.Log("[CheatsPresenter] Initialized and listening.");
-        }
-
-        private void HandleSendTest()
-        {
-            _counter++;
-            string msg = $"Test #{_counter} at {DateTime.Now:HH:mm:ss}";
-            Debug.Log($"[CheatsPresenter] Publishing: {msg}");
-            _sendTestUC.Execute(msg);
+            Debug.Log("[CheatsPresenter] Initialized.");
         }
 
         private void HandleGenerateItem()
@@ -97,6 +82,30 @@ namespace Game.Presentation.UI.Presenters
             Debug.Log($"[CheatsPresenter] Generated item: {def.Name} ({def.Slot}) with {item.RolledModifiers.Count} mods");
         }
 
+        private void HandleAddSkillGem()
+        {
+            var allGems = _gemConfig.GetAllGems();
+            if (allGems.Count == 0)
+            {
+                _cheatsView.SetFeedback("No gem definitions available.");
+                return;
+            }
+
+            int index = _random.Next(0, allGems.Count);
+            var gem = allGems[index];
+
+            _gemInventory.Add(gem.Id, 3);
+            _cheatsView.SetFeedback($"Added 3x {gem.Name}\n({gem.Element} / {gem.Level})");
+            Debug.Log($"[CheatsPresenter] Added 3x {gem.Name} ({gem.Id})");
+        }
+
+        private void HandleAddRemovalOrb()
+        {
+            _gemInventory.AddRemovalCurrency(5);
+            _cheatsView.SetFeedback($"Added 5 Removal Orbs\nTotal: {_gemInventory.RemovalCurrencyCount}");
+            Debug.Log($"[CheatsPresenter] Added 5 Removal Orbs. Total: {_gemInventory.RemovalCurrencyCount}");
+        }
+
         private void HandleResetSave()
         {
             _gameState.Inventory.ClearAll();
@@ -116,13 +125,10 @@ namespace Game.Presentation.UI.Presenters
 
         public void Dispose()
         {
-            _cheatsView.OnSendTestClicked -= HandleSendTest;
             _cheatsView.OnGenerateItemClicked -= HandleGenerateItem;
+            _cheatsView.OnAddSkillGemClicked -= HandleAddSkillGem;
+            _cheatsView.OnAddRemovalOrbClicked -= HandleAddRemovalOrb;
             _cheatsView.OnResetSaveClicked -= HandleResetSave;
-
-            foreach (var sub in _subscriptions)
-                sub.Dispose();
-            _subscriptions.Clear();
         }
     }
 }

@@ -19,6 +19,8 @@ namespace Game.Presentation.UI.Presenters
         private readonly IIconProvider _iconProvider;
         private readonly EquipItemUseCase _equipItemUseCase;
         private readonly UnequipItemUseCase _unequipItemUseCase;
+        private readonly ClearInventoryItemsUseCase _clearInventoryItemsUseCase;
+        private readonly RemoveInventoryItemUseCase _removeInventoryItemUseCase;
         private readonly IPublisher<ItemEquippedDTO> _itemEquippedPub;
         private readonly IPublisher<ItemUnequippedDTO> _itemUnequippedPub;
         private readonly IPublisher<InventoryChangedDTO> _inventoryChangedPub;
@@ -35,6 +37,8 @@ namespace Game.Presentation.UI.Presenters
             IIconProvider iconProvider,
             EquipItemUseCase equipItemUseCase,
             UnequipItemUseCase unequipItemUseCase,
+            ClearInventoryItemsUseCase clearInventoryItemsUseCase,
+            RemoveInventoryItemUseCase removeInventoryItemUseCase,
             IPublisher<ItemEquippedDTO> itemEquippedPub,
             IPublisher<ItemUnequippedDTO> itemUnequippedPub,
             IPublisher<InventoryChangedDTO> inventoryChangedPub,
@@ -48,6 +52,8 @@ namespace Game.Presentation.UI.Presenters
             _iconProvider = iconProvider;
             _equipItemUseCase = equipItemUseCase;
             _unequipItemUseCase = unequipItemUseCase;
+            _clearInventoryItemsUseCase = clearInventoryItemsUseCase;
+            _removeInventoryItemUseCase = removeInventoryItemUseCase;
             _itemEquippedPub = itemEquippedPub;
             _itemUnequippedPub = itemUnequippedPub;
             _inventoryChangedPub = inventoryChangedPub;
@@ -131,9 +137,7 @@ namespace Game.Presentation.UI.Presenters
         private void HandleDeleteAll()
         {
             var inventory = _gameState.Inventory;
-            if (inventory.Items.Count == 0) return;
-
-            inventory.ClearItems();
+            if (!_clearInventoryItemsUseCase.Execute(inventory)) return;
             _inventoryChangedPub.Publish(new InventoryChangedDTO());
             UnityEngine.Debug.Log("[EquipmentPresenter] All inventory items deleted.");
         }
@@ -141,7 +145,7 @@ namespace Game.Presentation.UI.Presenters
         private void HandleSellItem(string uid)
         {
             var inventory = _gameState.Inventory;
-            if (!inventory.Remove(uid)) return;
+            if (!_removeInventoryItemUseCase.Execute(inventory, uid)) return;
 
             _inventoryChangedPub.Publish(new InventoryChangedDTO());
             UnityEngine.Debug.Log($"[EquipmentPresenter] Item sold: {uid}");
@@ -157,7 +161,7 @@ namespace Game.Presentation.UI.Presenters
             var result = _unequipItemUseCase.Execute(inventory, hero, slotType);
             if (!result.Success) return;
 
-            inventory.Remove(result.UnequippedItem.Uid);
+            _removeInventoryItemUseCase.Execute(inventory, result.UnequippedItem.Uid);
 
             _itemUnequippedPub.Publish(new ItemUnequippedDTO(result.Slot.Value));
             _inventoryChangedPub.Publish(new InventoryChangedDTO());

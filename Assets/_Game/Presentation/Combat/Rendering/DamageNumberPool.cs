@@ -23,7 +23,7 @@ namespace Game.Presentation.Combat.Rendering
             }
         }
 
-        public void Show(Vector3 worldPosition, float amount, bool isCritical)
+        public void Show(Vector3 worldPosition, float amount, bool isCritical, Color color)
         {
             DamageNumber dn;
 
@@ -50,7 +50,7 @@ namespace Game.Presentation.Combat.Rendering
                 0f
             );
 
-            dn.Show(worldPosition + offset, amount, isCritical, _duration, ReturnToPool);
+            dn.Show(worldPosition + offset, amount, isCritical, _duration, color, ReturnToPool);
         }
 
         private void ReturnToPool(DamageNumber dn)

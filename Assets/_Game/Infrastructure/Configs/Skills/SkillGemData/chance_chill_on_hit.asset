@@ -1,0 +1,47 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 44e19a3b8ac4c76479dbc3b9cb878441, type: 3}
+  m_Name: chance_chill_on_hit
+  m_EditorClassIdentifier: Game.Infrastructure::Game.Infrastructure.Configs.Skills.SkillAffixDefinitionSO
+  id: chance_chill_on_hit
+  affixName: Chance to Chill on Hit
+  type: 1
+  damageType: 2
+  ailmentType: 2
+  minimumRarity: 0
+  descriptionTemplate: "{0:F0}% Chance to Chill on Hit"
+  tierRanges:
+  - tier: 9
+    minValue1: 5
+    maxValue1: 8
+    minValue2: 0
+    maxValue2: 0
+  - tier: 8
+    minValue1: 8
+    maxValue1: 12
+    minValue2: 0
+    maxValue2: 0
+  - tier: 7
+    minValue1: 12
+    maxValue1: 18
+    minValue2: 0
+    maxValue2: 0
+  - tier: 6
+    minValue1: 18
+    maxValue1: 25
+    minValue2: 0
+    maxValue2: 0
+  - tier: 5
+    minValue1: 25
+    maxValue1: 35
+    minValue2: 0
+    maxValue2: 0

@@ -1,0 +1,47 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 44e19a3b8ac4c76479dbc3b9cb878441, type: 3}
+  m_Name: gain_phys_as_fire
+  m_EditorClassIdentifier: Game.Infrastructure::Game.Infrastructure.Configs.Skills.SkillAffixDefinitionSO
+  id: gain_phys_as_fire
+  affixName: Gain Physical as Fire
+  type: 2
+  damageType: 1
+  ailmentType: 0
+  minimumRarity: 1
+  descriptionTemplate: "Gain {0:F0}% of Physical Damage as Fire"
+  tierRanges:
+  - tier: 9
+    minValue1: 3
+    maxValue1: 5
+    minValue2: 0
+    maxValue2: 0
+  - tier: 8
+    minValue1: 5
+    maxValue1: 8
+    minValue2: 0
+    maxValue2: 0
+  - tier: 7
+    minValue1: 8
+    maxValue1: 12
+    minValue2: 0
+    maxValue2: 0
+  - tier: 6
+    minValue1: 12
+    maxValue1: 16
+    minValue2: 0
+    maxValue2: 0
+  - tier: 5
+    minValue1: 16
+    maxValue1: 20
+    minValue2: 0
+    maxValue2: 0

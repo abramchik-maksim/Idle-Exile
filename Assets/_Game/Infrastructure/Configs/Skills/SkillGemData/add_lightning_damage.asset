@@ -1,0 +1,47 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 44e19a3b8ac4c76479dbc3b9cb878441, type: 3}
+  m_Name: add_lightning_damage
+  m_EditorClassIdentifier: Game.Infrastructure::Game.Infrastructure.Configs.Skills.SkillAffixDefinitionSO
+  id: add_lightning_damage
+  affixName: Add Lightning Damage
+  type: 0
+  damageType: 3
+  ailmentType: 0
+  minimumRarity: 0
+  descriptionTemplate: Adds {0:F0}-{1:F0} Lightning Damage
+  tierRanges:
+  - tier: 9
+    minValue1: 1
+    maxValue1: 1
+    minValue2: 4
+    maxValue2: 6
+  - tier: 8
+    minValue1: 1
+    maxValue1: 3
+    minValue2: 6
+    maxValue2: 10
+  - tier: 7
+    minValue1: 2
+    maxValue1: 4
+    minValue2: 9
+    maxValue2: 14
+  - tier: 6
+    minValue1: 3
+    maxValue1: 6
+    minValue2: 13
+    maxValue2: 20
+  - tier: 5
+    minValue1: 4
+    maxValue1: 8
+    minValue2: 18
+    maxValue2: 28

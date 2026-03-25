@@ -20,12 +20,13 @@ namespace Game.Presentation.Combat.Rendering
             _text = gameObject.AddComponent<TextMeshPro>();
             _text.alignment = TextAlignmentOptions.Center;
             _text.sortingOrder = 100;
-            _text.fontSize = 5f;
+            _text.fontSize = 4f;
             _text.fontStyle = FontStyles.Bold;
             gameObject.SetActive(false);
         }
 
-        public void Show(Vector3 position, float amount, bool isCrit, float duration, Action<DamageNumber> onComplete)
+        public void Show(Vector3 position, float amount, bool isCrit, float duration,
+            Color color, Action<DamageNumber> onComplete)
         {
             _startPos = position;
             _duration = duration;
@@ -35,8 +36,8 @@ namespace Game.Presentation.Combat.Rendering
             transform.position = position;
 
             _text.text = Mathf.RoundToInt(amount).ToString();
-            _text.fontSize = isCrit ? 7f : 5f;
-            _startColor = isCrit ? new Color(1f, 0.85f, 0.1f) : Color.white;
+            _text.fontSize = isCrit ? 5.6f : 4f;
+            _startColor = isCrit ? new Color(1f, 0.85f, 0.1f) : color;
             _text.color = _startColor;
 
             gameObject.SetActive(true);

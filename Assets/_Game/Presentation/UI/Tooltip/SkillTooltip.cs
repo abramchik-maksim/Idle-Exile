@@ -1,7 +1,7 @@
 using UnityEngine;
 using UnityEngine.UIElements;
 using Game.Domain.Skills;
-using Game.Application.Skills;
+using Game.Presentation.UI.MainScreen;
 
 namespace Game.Presentation.UI.Tooltip
 {
@@ -161,7 +161,7 @@ namespace Game.Presentation.UI.Tooltip
             _ => $"{effect}: {value:F0}"
         };
 
-        public static void ShowBuffTooltip(VisualElement owner, UtilitySkillRunner.ActiveBuff buff, VisualElement root)
+        public static void ShowBuffTooltip(VisualElement owner, ActiveBuffViewModel buff, VisualElement root)
         {
             Hide();
 

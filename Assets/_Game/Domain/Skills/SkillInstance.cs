@@ -1,4 +1,5 @@
 using System;
+using Game.Domain.Skills.Crafting;
 
 namespace Game.Domain.Skills
 {
@@ -7,6 +8,7 @@ namespace Game.Domain.Skills
         public string Uid { get; }
         public SkillDefinition Definition { get; }
         public int Level { get; set; }
+        public SkillAffixSlots Affixes { get; } = new();
 
         public SkillInstance(SkillDefinition definition, int level = 1)
         {

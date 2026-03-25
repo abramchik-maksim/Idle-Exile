@@ -11,6 +11,9 @@ namespace Game.Presentation.UI.Settings
         private Toggle _toggleEffectIndicators;
         private Toggle _toggleDamageNumbers;
         private Button _btnClose;
+        private EventCallback<ChangeEvent<bool>> _onHpBarsChanged;
+        private EventCallback<ChangeEvent<bool>> _onEffectIndicatorsChanged;
+        private EventCallback<ChangeEvent<bool>> _onDamageNumbersChanged;
 
         public event Action<bool> OnHpBarsChanged;
         public event Action<bool> OnEffectIndicatorsChanged;
@@ -25,10 +28,14 @@ namespace Game.Presentation.UI.Settings
             _toggleDamageNumbers = Q<Toggle>("toggle-damage-numbers");
             _btnClose = Q<Button>("btn-settings-close");
 
-            _toggleHpBars.RegisterValueChangedCallback(evt => OnHpBarsChanged?.Invoke(evt.newValue));
-            _toggleEffectIndicators.RegisterValueChangedCallback(evt => OnEffectIndicatorsChanged?.Invoke(evt.newValue));
-            _toggleDamageNumbers.RegisterValueChangedCallback(evt => OnDamageNumbersChanged?.Invoke(evt.newValue));
-            _btnClose.clicked += () => OnCloseClicked?.Invoke();
+            _onHpBarsChanged = HandleHpBarsChanged;
+            _onEffectIndicatorsChanged = HandleEffectIndicatorsChanged;
+            _onDamageNumbersChanged = HandleDamageNumbersChanged;
+
+            _toggleHpBars.RegisterValueChangedCallback(_onHpBarsChanged);
+            _toggleEffectIndicators.RegisterValueChangedCallback(_onEffectIndicatorsChanged);
+            _toggleDamageNumbers.RegisterValueChangedCallback(_onDamageNumbersChanged);
+            _btnClose.clicked += HandleCloseClicked;
         }
 
         public void OpenSettings()
@@ -47,5 +54,22 @@ namespace Game.Presentation.UI.Settings
             _toggleEffectIndicators.SetValueWithoutNotify(effectIndicators);
             _toggleDamageNumbers.SetValueWithoutNotify(damageNumbers);
         }
+
+        public override void Dispose()
+        {
+            if (_toggleHpBars != null && _onHpBarsChanged != null)
+                _toggleHpBars.UnregisterValueChangedCallback(_onHpBarsChanged);
+            if (_toggleEffectIndicators != null && _onEffectIndicatorsChanged != null)
+                _toggleEffectIndicators.UnregisterValueChangedCallback(_onEffectIndicatorsChanged);
+            if (_toggleDamageNumbers != null && _onDamageNumbersChanged != null)
+                _toggleDamageNumbers.UnregisterValueChangedCallback(_onDamageNumbersChanged);
+            if (_btnClose != null)
+                _btnClose.clicked -= HandleCloseClicked;
+        }
+
+        private void HandleHpBarsChanged(ChangeEvent<bool> evt) => OnHpBarsChanged?.Invoke(evt.newValue);
+        private void HandleEffectIndicatorsChanged(ChangeEvent<bool> evt) => OnEffectIndicatorsChanged?.Invoke(evt.newValue);
+        private void HandleDamageNumbersChanged(ChangeEvent<bool> evt) => OnDamageNumbersChanged?.Invoke(evt.newValue);
+        private void HandleCloseClicked() => OnCloseClicked?.Invoke();
     }
 }

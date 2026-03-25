@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using Game.Domain.Items;
 
@@ -8,15 +9,17 @@ namespace Game.Domain.Inventory
     {
         private readonly List<ItemInstance> _items = new();
         private readonly Dictionary<EquipmentSlotType, ItemInstance> _equipped = new();
+        private readonly IReadOnlyDictionary<EquipmentSlotType, ItemInstance> _equippedReadonly;
 
         public int Capacity { get; }
         public IReadOnlyList<ItemInstance> Items => _items.AsReadOnly();
-        public IReadOnlyDictionary<EquipmentSlotType, ItemInstance> Equipped => _equipped;
+        public IReadOnlyDictionary<EquipmentSlotType, ItemInstance> Equipped => _equippedReadonly;
         public bool IsFull => _items.Count >= Capacity;
 
         public Inventory(int capacity = 32)
         {
             Capacity = capacity;
+            _equippedReadonly = new ReadOnlyDictionary<EquipmentSlotType, ItemInstance>(_equipped);
         }
 
         public Inventory(int capacity, List<ItemInstance> items,
@@ -25,6 +28,7 @@ namespace Game.Domain.Inventory
             Capacity = capacity;
             _items = new List<ItemInstance>(items);
             _equipped = new Dictionary<EquipmentSlotType, ItemInstance>(equipped);
+            _equippedReadonly = new ReadOnlyDictionary<EquipmentSlotType, ItemInstance>(_equipped);
         }
 
         public bool TryAdd(ItemInstance item)

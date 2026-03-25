@@ -4,7 +4,6 @@ using UnityEngine;
 using UnityEngine.UIElements;
 using Game.Domain.Items;
 using Game.Domain.Skills;
-using Game.Application.Skills;
 using Game.Presentation.UI.Base;
 using Game.Presentation.UI.Tooltip;
 
@@ -85,7 +84,7 @@ namespace Game.Presentation.UI.MainScreen
             OnTabSelected?.Invoke(index);
         }
 
-        public void RenderBuffs(List<UtilitySkillRunner.ActiveBuff> buffs)
+        public void RenderBuffs(IReadOnlyList<ActiveBuffViewModel> buffs)
         {
             if (_buffBar == null) return;
             _buffBar.Clear();
