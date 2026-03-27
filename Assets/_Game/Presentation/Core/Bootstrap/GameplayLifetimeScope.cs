@@ -85,9 +85,6 @@ namespace Game.Presentation.Core.Bootstrap
             builder.Register<CalculateHeroStatsUseCase>(Lifetime.Transient);
             builder.Register<EquipItemUseCase>(Lifetime.Transient);
             builder.Register<UnequipItemUseCase>(Lifetime.Transient);
-            builder.Register<ClearInventoryItemsUseCase>(Lifetime.Transient);
-            builder.Register<RemoveInventoryItemUseCase>(Lifetime.Transient);
-            builder.Register<AddItemToInventoryUseCase>(Lifetime.Transient);
             builder.Register<ProgressBattleUseCase>(Lifetime.Transient);
             builder.Register<GrantBattleRewardUseCase>(Lifetime.Transient);
             builder.Register<EquipSkillUseCase>(Lifetime.Transient);
@@ -96,6 +93,7 @@ namespace Game.Presentation.Core.Bootstrap
             builder.Register<RemoveSkillAffixUseCase>(Lifetime.Transient);
             builder.Register<SkillAffixRollingService>(Lifetime.Singleton);
             builder.Register<SkillGemInventory>(Lifetime.Singleton);
+            builder.Register<InventoryCommandService>(Lifetime.Singleton);
             builder.Register<UtilitySkillRunner>(Lifetime.Singleton);
             builder.Register<WaveSpawner>(Lifetime.Singleton);
             builder.Register<DamageEventProcessor>(Lifetime.Singleton);
@@ -109,7 +107,7 @@ namespace Game.Presentation.Core.Bootstrap
             builder.RegisterComponentInHierarchy<CheatsView>();
             builder.RegisterComponentInHierarchy<GameMenuView>();
             builder.RegisterComponentInHierarchy<SettingsView>();
-            
+
             // --- Combat (MonoBehaviours from scene hierarchy) ---
             builder.RegisterComponentInHierarchy<CombatBridge>().AsImplementedInterfaces().AsSelf();
             builder.RegisterComponentInHierarchy<CombatRenderer>().AsImplementedInterfaces().AsSelf();

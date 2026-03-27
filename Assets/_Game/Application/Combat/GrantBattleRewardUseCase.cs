@@ -21,7 +21,7 @@ namespace Game.Application.Combat
             _itemRolling = itemRolling;
         }
 
-        public List<ItemInstance> Execute(int battleIndex, int tierIndex)
+        public IReadOnlyList<ItemInstance> Execute(int battleIndex, int tierIndex)
         {
             var drops = new List<ItemInstance>();
 

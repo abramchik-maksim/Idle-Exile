@@ -18,7 +18,7 @@ namespace Game.Presentation.Combat
         private readonly ICombatConfigProvider _combatConfig;
         private readonly ProgressBattleUseCase _progressBattle;
         private readonly GrantBattleRewardUseCase _grantReward;
-        private readonly AddItemToInventoryUseCase _addItem;
+        private readonly InventoryCommandService _inventoryCommands;
         private readonly IPublisher<BattleStartedDTO> _battleStartedPub;
         private readonly IPublisher<BattleCompletedDTO> _battleCompletedPub;
         private readonly IPublisher<WaveStartedDTO> _waveStartedPub;
@@ -38,7 +38,7 @@ namespace Game.Presentation.Combat
             ICombatConfigProvider combatConfig,
             ProgressBattleUseCase progressBattle,
             GrantBattleRewardUseCase grantReward,
-            AddItemToInventoryUseCase addItem,
+            InventoryCommandService inventoryCommands,
             IPublisher<BattleStartedDTO> battleStartedPub,
             IPublisher<BattleCompletedDTO> battleCompletedPub,
             IPublisher<WaveStartedDTO> waveStartedPub,
@@ -50,7 +50,7 @@ namespace Game.Presentation.Combat
             _combatConfig = combatConfig;
             _progressBattle = progressBattle;
             _grantReward = grantReward;
-            _addItem = addItem;
+            _inventoryCommands = inventoryCommands;
             _battleStartedPub = battleStartedPub;
             _battleCompletedPub = battleCompletedPub;
             _waveStartedPub = waveStartedPub;
@@ -216,7 +216,7 @@ namespace Game.Presentation.Combat
 
             foreach (var item in drops)
             {
-                if (_addItem.Execute(inventory, item))
+                if (_inventoryCommands.TryAddItem(inventory, item))
                 {
                     changed = true;
                     _lootDroppedPub.Publish(new LootDroppedDTO(

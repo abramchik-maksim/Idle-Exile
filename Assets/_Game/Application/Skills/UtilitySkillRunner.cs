@@ -158,7 +158,7 @@ namespace Game.Application.Skills
 
         public IReadOnlyDictionary<StatType, float> GetBuffBonuses() => _buffBonuses;
 
-        public List<ActiveBuff> GetActiveBuffs()
+        public IReadOnlyList<ActiveBuff> GetActiveBuffs()
         {
             var result = new List<ActiveBuff>();
             for (int i = 0; i < 4; i++)

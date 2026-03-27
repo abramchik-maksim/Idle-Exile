@@ -23,7 +23,6 @@ namespace Game.Presentation.UI.Presenters
         private readonly IPublisher<SkillAffixRemovedDTO> _affixRemovedPub;
         private readonly IPublisher<SkillGemUsedDTO> _gemUsedPub;
 
-        private readonly List<IDisposable> _subscriptions = new();
         private SkillInstance _currentSkill;
         private SkillGemElement _currentFilter = SkillGemElement.Generic;
 
@@ -69,9 +68,6 @@ namespace Game.Presentation.UI.Presenters
             _view.OnCraftSkillRemoved -= HandleSkillRemoved;
             _view.OnFilterChanged -= HandleFilterChanged;
             _gemInventory.OnChanged -= HandleGemInventoryChanged;
-
-            foreach (var sub in _subscriptions) sub.Dispose();
-            _subscriptions.Clear();
         }
 
         private void HandleSkillPlaced(string skillUid)

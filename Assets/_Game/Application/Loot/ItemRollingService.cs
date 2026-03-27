@@ -26,7 +26,7 @@ namespace Game.Application.Loot
             return new ItemInstance(def, mods);
         }
 
-        public List<Modifier> RollModifiers(ItemDefinition def)
+        private List<Modifier> RollModifiers(ItemDefinition def)
         {
             var mods = new List<Modifier>();
             int count = def.Rarity switch

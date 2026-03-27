@@ -16,7 +16,7 @@ namespace Game.Presentation.UI.Presenters
     public sealed class CheatsPresenter : IStartable, IDisposable
     {
         private readonly CheatsView _cheatsView;
-        private readonly AddItemToInventoryUseCase _addItemUC;
+        private readonly InventoryCommandService _inventoryCommands;
         private readonly ItemRollingService _itemRolling;
         private readonly IGameStateProvider _gameState;
         private readonly ISkillGemConfigProvider _gemConfig;
@@ -27,7 +27,7 @@ namespace Game.Presentation.UI.Presenters
 
         public CheatsPresenter(
             CheatsView cheatsView,
-            AddItemToInventoryUseCase addItemUC,
+            InventoryCommandService inventoryCommands,
             ItemRollingService itemRolling,
             IGameStateProvider gameState,
             ISkillGemConfigProvider gemConfig,
@@ -37,7 +37,7 @@ namespace Game.Presentation.UI.Presenters
             IPublisher<ItemAddedDTO> itemAddedPub)
         {
             _cheatsView = cheatsView;
-            _addItemUC = addItemUC;
+            _inventoryCommands = inventoryCommands;
             _itemRolling = itemRolling;
             _gameState = gameState;
             _gemConfig = gemConfig;
@@ -67,7 +67,7 @@ namespace Game.Presentation.UI.Presenters
             }
 
             var inventory = _gameState.Inventory;
-            if (!_addItemUC.Execute(inventory, item))
+            if (!_inventoryCommands.TryAddItem(inventory, item))
             {
                 _cheatsView.SetFeedback("Inventory is full!");
                 return;
