@@ -1,0 +1,35 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" editor-extension-mode="False">
+    <Style src="project://database/Assets/_Game/Presentation/UI/Styles/Common.uss?fileID=7433441132597879392&amp;guid=473bed200a4e46549a357d83741ed130&amp;type=3#Common"/>
+    <ui:VisualElement name="tree-talents-root" style="position: absolute; left: 33.33%; width: 66.67%; top: 52px; bottom: 0; flex-direction: column;">
+        <ui:VisualElement style="flex: 1; flex-direction: row; padding: 8px 10px 0 10px;">
+            <ui:VisualElement name="tree-panel" class="panel" style="width: 70%; margin-right: 8px;">
+                <ui:Label text="Tree Talents" class="panel-header" style="margin-bottom: 6px;" />
+                <ui:Label name="tree-level-label" text="Tree Level: 1" class="stat-label" />
+                <ui:VisualElement class="health-bar" style="margin-top: 4px; height: 12px;">
+                    <ui:VisualElement name="tree-xp-fill" class="health-bar__fill" style="width: 0%;" />
+                </ui:VisualElement>
+                <ui:Label name="tree-xp-label" text="0 / 100" class="stat-label" style="font-size: 11px; margin-top: 2px;" />
+                <ui:ScrollView name="tree-grid-scroll" style="flex: 1; margin-top: 8px;">
+                    <ui:VisualElement name="tree-grid" style="align-items: center; padding-bottom: 8px;" />
+                </ui:ScrollView>
+            </ui:VisualElement>
+
+            <ui:VisualElement name="branch-inventory-panel" class="panel" style="width: 30%;">
+                <ui:Label text="Branch Inventory" class="panel-header" style="margin-bottom: 6px;" />
+                <ui:ScrollView name="branch-inventory-scroll" style="flex: 1;">
+                    <ui:VisualElement name="branch-inventory-list" />
+                </ui:ScrollView>
+            </ui:VisualElement>
+        </ui:VisualElement>
+
+        <ui:VisualElement class="panel" style="margin: 8px 10px 10px 10px; padding: 8px; flex-direction: row; align-items: center; justify-content: space-between;">
+            <ui:VisualElement style="flex-direction: row; align-items: center;">
+                <ui:Label text="Seeds:" class="stat-label" style="margin-right: 8px;" />
+                <ui:Button name="seed-slot-a" text="Fire" class="btn" style="width: 90px; margin-right: 4px;" />
+                <ui:Button name="seed-slot-b" text="Speed" class="btn" style="width: 90px; margin-right: 4px;" />
+                <ui:Button name="seed-slot-c" text="Defense" class="btn" style="width: 90px;" />
+            </ui:VisualElement>
+            <ui:Button name="btn-grow-branch" text="Grow Branch" class="btn" style="width: 140px;" />
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

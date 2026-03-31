@@ -6,15 +6,18 @@ using Game.Application.Ports;
 using Game.Application.Combat;
 using Game.Application.Inventory;
 using Game.Application.Loot;
+using Game.Application.Progression.TreeTalents;
 using Game.Application.Skills;
 using Game.Application.Stats;
 using Game.Domain.DTOs.Combat;
 using Game.Domain.DTOs.Inventory;
+using Game.Domain.DTOs.Progression;
 using Game.Domain.DTOs.Skills;
 using Game.Domain.DTOs.Stats;
 using Game.Domain.Skills.Crafting;
 using Game.Infrastructure.Configs;
 using Game.Infrastructure.Configs.Combat;
+using Game.Infrastructure.Configs.Progression;
 using Game.Infrastructure.Configs.Skills;
 using Game.Infrastructure.Repositories;
 using Game.Infrastructure.Services;
@@ -38,6 +41,8 @@ namespace Game.Presentation.Core.Bootstrap
         [SerializeField] private SkillDatabaseSO _skillDatabase;
         [SerializeField] private SkillGemDatabaseSO _skillGemDatabase;
         [SerializeField] private StartingPresetSO _startingPreset;
+        [SerializeField] private TreeTalentsDatabaseSO _treeTalentsDatabase;
+        [SerializeField] private TreeUnlockProfileSO _treeUnlockProfile;
 
         protected override void Configure(IContainerBuilder builder)
         {
@@ -63,6 +68,13 @@ namespace Game.Presentation.Core.Bootstrap
             builder.RegisterMessageBroker<SkillAffixAddedDTO>(options);
             builder.RegisterMessageBroker<SkillAffixRemovedDTO>(options);
             builder.RegisterMessageBroker<SkillGemUsedDTO>(options);
+            builder.RegisterMessageBroker<BranchGrowthCompletedDTO>(options);
+            builder.RegisterMessageBroker<BranchPlacedDTO>(options);
+            builder.RegisterMessageBroker<BranchRemovedDTO>(options);
+            builder.RegisterMessageBroker<TreeAlliancesChangedDTO>(options);
+            builder.RegisterMessageBroker<TreeLevelChangedDTO>(options);
+            builder.RegisterMessageBroker<TreeXpChangedDTO>(options);
+            builder.RegisterMessageBroker<TreeTalentsChangedDTO>(options);
 
             // --- Infrastructure (Singletons) ---
             builder.Register<IRandomService>(c => new UnityRandomService(), Lifetime.Singleton);
@@ -77,6 +89,9 @@ namespace Game.Presentation.Core.Bootstrap
             builder.Register<IPlayerProgressRepository, PlayerPrefsProgressRepository>(Lifetime.Singleton);
             builder.Register<IInventoryRepository>(c =>
                 new PlayerPrefsInventoryRepository(c.Resolve<IConfigProvider>()), Lifetime.Singleton);
+            builder.Register<ITreeTalentsConfigProvider>(c =>
+                new ScriptableObjectTreeTalentsConfigProvider(_treeTalentsDatabase, _treeUnlockProfile), Lifetime.Singleton);
+            builder.Register<ITreeTalentsRepository, PlayerPrefsTreeTalentsRepository>(Lifetime.Singleton);
             builder.Register<IIconProvider, AddressableIconProvider>(Lifetime.Singleton);
             builder.RegisterInstance(_startingPreset);
 
@@ -94,6 +109,11 @@ namespace Game.Presentation.Core.Bootstrap
             builder.Register<SkillAffixRollingService>(Lifetime.Singleton);
             builder.Register<SkillGemInventory>(Lifetime.Singleton);
             builder.Register<InventoryCommandService>(Lifetime.Singleton);
+            builder.Register<BranchGenerationService>(Lifetime.Singleton);
+            builder.Register<TreeUnlockProfileService>(Lifetime.Singleton);
+            builder.Register<RunBranchGrowthCycleUseCase>(Lifetime.Transient);
+            builder.Register<ApplyTreeBranchOperationUseCase>(Lifetime.Transient);
+            builder.Register<AdvanceTreeProgressionUseCase>(Lifetime.Transient);
             builder.Register<UtilitySkillRunner>(Lifetime.Singleton);
             builder.Register<WaveSpawner>(Lifetime.Singleton);
             builder.Register<DamageEventProcessor>(Lifetime.Singleton);
@@ -103,6 +123,7 @@ namespace Game.Presentation.Core.Bootstrap
             builder.RegisterComponentInHierarchy<CharacterTabView>();
             builder.RegisterComponentInHierarchy<EquipmentTabView>();
             builder.RegisterComponentInHierarchy<SkillsTabView>();
+            builder.RegisterComponentInHierarchy<TreeTalentsTabView>();
             builder.RegisterComponentInHierarchy<SkillSlotsView>();
             builder.RegisterComponentInHierarchy<CheatsView>();
             builder.RegisterComponentInHierarchy<GameMenuView>();
@@ -118,6 +139,7 @@ namespace Game.Presentation.Core.Bootstrap
             builder.RegisterEntryPoint<CharacterPresenter>();
             builder.RegisterEntryPoint<EquipmentPresenter>();
             builder.RegisterEntryPoint<SkillsPresenter>();
+            builder.RegisterEntryPoint<TreeTalentsPresenter>();
             builder.RegisterEntryPoint<SkillSlotsPresenter>();
             builder.RegisterEntryPoint<CheatsPresenter>();
             builder.RegisterEntryPoint<SettingsPresenter>();

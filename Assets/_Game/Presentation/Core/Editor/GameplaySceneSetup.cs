@@ -26,6 +26,7 @@ namespace Game.Presentation.Core.Editor
             new("CharacterTab", "Assets/_Game/Presentation/UI/MainScreen/CharacterTabView.uxml", typeof(CharacterTabView), 5, true),
             new("EquipmentTab", "Assets/_Game/Presentation/UI/MainScreen/EquipmentTabView.uxml", typeof(EquipmentTabView), 5, false),
             new("SkillsTab", "Assets/_Game/Presentation/UI/MainScreen/SkillsTabView.uxml", typeof(SkillsTabView), 5, false),
+            new("TreeTalentsTab", "Assets/_Game/Presentation/UI/MainScreen/TreeTalentsTabView.uxml", typeof(TreeTalentsTabView), 5, false),
             new("SkillSlots", "Assets/_Game/Presentation/UI/Combat/SkillSlotsView.uxml", typeof(SkillSlotsView), 10, true),
             new("GameMenu", "Assets/_Game/Presentation/UI/GameMenu/GameMenuView.uxml", typeof(GameMenuView), 90, true),
             new("Settings", "Assets/_Game/Presentation/UI/Settings/SettingsView.uxml", typeof(SettingsView), 95, true),

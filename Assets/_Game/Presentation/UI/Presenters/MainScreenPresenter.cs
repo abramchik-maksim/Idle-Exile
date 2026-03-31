@@ -10,6 +10,7 @@ namespace Game.Presentation.UI.Presenters
         private readonly CharacterTabView _characterTabView;
         private readonly EquipmentTabView _equipmentTabView;
         private readonly SkillsTabView _skillsTabView;
+        private readonly TreeTalentsTabView _treeTabView;
 
         private int _activeTab;
 
@@ -17,12 +18,14 @@ namespace Game.Presentation.UI.Presenters
             MainScreenView mainScreenView,
             CharacterTabView characterTabView,
             EquipmentTabView equipmentTabView,
-            SkillsTabView skillsTabView)
+            SkillsTabView skillsTabView,
+            TreeTalentsTabView treeTabView = null)
         {
             _mainScreenView = mainScreenView;
             _characterTabView = characterTabView;
             _equipmentTabView = equipmentTabView;
             _skillsTabView = skillsTabView;
+            _treeTabView = treeTabView;
         }
 
         public void Start()
@@ -46,6 +49,10 @@ namespace Game.Presentation.UI.Presenters
             if (tabIndex == 0) _characterTabView.Show(); else _characterTabView.Hide();
             if (tabIndex == 1) _equipmentTabView.Show(); else _equipmentTabView.Hide();
             if (tabIndex == 2) _skillsTabView.Show(); else _skillsTabView.Hide();
+            if (_treeTabView != null)
+            {
+                if (tabIndex == 3) _treeTabView.Show(); else _treeTabView.Hide();
+            }
         }
 
         public void Dispose()

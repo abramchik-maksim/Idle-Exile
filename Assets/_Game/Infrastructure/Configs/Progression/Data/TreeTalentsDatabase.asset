@@ -1,0 +1,117 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 682f18a6922ed074dacc4c01034e1c0d, type: 3}
+  m_Name: TreeTalentsDatabase
+  m_EditorClassIdentifier: Game.Infrastructure::Game.Infrastructure.Configs.Progression.TreeTalentsDatabaseSO
+  growthDurationSeconds: 20
+  seedWeightMultiplier: 5
+  shapes:
+  - id: line_3
+    weight: 4
+    offsets:
+    - {x: 0, y: 0}
+    - {x: 1, y: 0}
+    - {x: 2, y: 0}
+  - id: line_4
+    weight: 2.2
+    offsets:
+    - {x: 0, y: 0}
+    - {x: 1, y: 0}
+    - {x: 2, y: 0}
+    - {x: 3, y: 0}
+  - id: l_4
+    weight: 1.8
+    offsets:
+    - {x: 0, y: 0}
+    - {x: 1, y: 0}
+    - {x: 2, y: 0}
+    - {x: 2, y: 1}
+  - id: z_4
+    weight: 1
+    offsets:
+    - {x: 0, y: 0}
+    - {x: 1, y: 0}
+    - {x: 1, y: 1}
+    - {x: 2, y: 1}
+  nodes:
+  - id: fire_small
+    weight: 3.2
+    seedAffinity: 0
+    nodeType: 0
+    allianceType: 1
+    value: 5
+  - id: speed_small
+    weight: 3.2
+    seedAffinity: 1
+    nodeType: 0
+    allianceType: 2
+    value: 5
+  - id: defense_small
+    weight: 3.2
+    seedAffinity: 2
+    nodeType: 0
+    allianceType: 3
+    value: 5
+  - id: crit_small
+    weight: 2.7
+    seedAffinity: 3
+    nodeType: 0
+    allianceType: 4
+    value: 4
+  - id: bleed_small
+    weight: 2.4
+    seedAffinity: 4
+    nodeType: 0
+    allianceType: 5
+    value: 4
+  - id: utility_small
+    weight: 2
+    seedAffinity: 5
+    nodeType: 0
+    allianceType: 6
+    value: 3
+  - id: growth_small
+    weight: 1.8
+    seedAffinity: 6
+    nodeType: 0
+    allianceType: 7
+    value: 3
+  - id: universal_small
+    weight: 1.2
+    seedAffinity: 7
+    nodeType: 0
+    allianceType: 8
+    value: 2
+  - id: socket_node
+    weight: 0.35
+    seedAffinity: 6
+    nodeType: 1
+    allianceType: 0
+    value: 0
+  - id: hybrid_node
+    weight: 0.2
+    seedAffinity: 7
+    nodeType: 2
+    allianceType: 8
+    value: 2
+  - id: growth_modifier_node
+    weight: 0.15
+    seedAffinity: 6
+    nodeType: 3
+    allianceType: 7
+    value: 1.5
+  - id: alliance_amplifier_node
+    weight: 0.1
+    seedAffinity: 7
+    nodeType: 4
+    allianceType: 8
+    value: 1

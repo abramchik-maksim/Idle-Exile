@@ -6,7 +6,9 @@ using Game.Application.Ports;
 using Game.Application.Stats;
 using Game.Domain.Characters;
 using Game.Domain.DTOs.Inventory;
+using Game.Domain.DTOs.Progression;
 using Game.Domain.Items;
+using Game.Domain.Progression.TreeTalents;
 using Game.Domain.Skills;
 using Game.Infrastructure.Configs;
 using UnityEngine;
@@ -18,29 +20,37 @@ namespace Game.Presentation.Core.Bootstrap
     {
         private readonly IPlayerProgressRepository _progressRepo;
         private readonly IInventoryRepository _inventoryRepo;
+        private readonly ITreeTalentsRepository _treeTalentsRepo;
         private readonly CalculateHeroStatsUseCase _calcStats;
         private readonly ISubscriber<InventoryChangedDTO> _inventoryChangedSub;
+        private readonly ISubscriber<TreeTalentsChangedDTO> _treeChangedSub;
         private readonly StartingPresetSO _startingPreset;
 
         private IDisposable _autoSaveSub;
+        private IDisposable _treeAutoSaveSub;
 
         public HeroState Hero { get; private set; }
         public InventoryModel Inventory { get; private set; }
         public PlayerProgressData Progress { get; private set; }
         public SkillCollection Skills { get; private set; }
         public SkillLoadout Loadout { get; private set; }
+        public TreeTalentsState TreeTalents { get; private set; }
 
         public GameInitializer(
             IPlayerProgressRepository progressRepo,
             IInventoryRepository inventoryRepo,
+            ITreeTalentsRepository treeTalentsRepo,
             CalculateHeroStatsUseCase calcStats,
             ISubscriber<InventoryChangedDTO> inventoryChangedSub,
+            ISubscriber<TreeTalentsChangedDTO> treeChangedSub,
             StartingPresetSO startingPreset)
         {
             _progressRepo = progressRepo;
             _inventoryRepo = inventoryRepo;
+            _treeTalentsRepo = treeTalentsRepo;
             _calcStats = calcStats;
             _inventoryChangedSub = inventoryChangedSub;
+            _treeChangedSub = treeChangedSub;
             _startingPreset = startingPreset;
         }
 
@@ -57,6 +67,7 @@ namespace Game.Presentation.Core.Bootstrap
             Inventory = _inventoryRepo.Load();
             Skills = new SkillCollection();
             Loadout = new SkillLoadout();
+            TreeTalents = _treeTalentsRepo.Load();
 
             bool isNewGame = !_progressRepo.HasSave();
 
@@ -73,7 +84,10 @@ namespace Game.Presentation.Core.Bootstrap
             {
                 _inventoryRepo.Save(Inventory);
                 _progressRepo.Save(Progress);
+                _treeTalentsRepo.Save(TreeTalents);
             });
+
+            _treeAutoSaveSub = _treeChangedSub.Subscribe(_ => _treeTalentsRepo.Save(TreeTalents));
 
             Debug.Log($"[GameInitializer] Hero '{Hero.Id}' ready. Tier: {Progress.CurrentTier}, Map: {Progress.CurrentMap}, Battle: {Progress.CurrentBattle}. " +
                       $"Inventory: {Inventory.Items.Count}/{Inventory.Capacity}, Equipped: {Inventory.Equipped.Count}. " +
@@ -121,11 +135,14 @@ namespace Game.Presentation.Core.Bootstrap
         public void Dispose()
         {
             _autoSaveSub?.Dispose();
+            _treeAutoSaveSub?.Dispose();
 
             if (Progress != null)
                 _progressRepo.Save(Progress);
             if (Inventory != null)
                 _inventoryRepo.Save(Inventory);
+            if (TreeTalents != null)
+                _treeTalentsRepo.Save(TreeTalents);
 
             Debug.Log("[GameInitializer] Progress saved on dispose.");
         }

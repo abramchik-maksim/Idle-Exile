@@ -6,6 +6,7 @@ using Game.Application.Inventory;
 using Game.Application.Loot;
 using Game.Application.Ports;
 using Game.Domain.DTOs.Inventory;
+using Game.Domain.DTOs.Progression;
 using Game.Domain.Items;
 using Game.Domain.Skills.Crafting;
 using Game.Presentation.UI.Cheats;
@@ -24,6 +25,9 @@ namespace Game.Presentation.UI.Presenters
         private readonly IRandomService _random;
         private readonly IPublisher<InventoryChangedDTO> _inventoryChangedPub;
         private readonly IPublisher<ItemAddedDTO> _itemAddedPub;
+        private readonly IPublisher<TreeXpChangedDTO> _treeXpChangedPub;
+        private readonly IPublisher<TreeLevelChangedDTO> _treeLevelChangedPub;
+        private readonly IPublisher<TreeTalentsChangedDTO> _treeTalentsChangedPub;
 
         public CheatsPresenter(
             CheatsView cheatsView,
@@ -34,7 +38,10 @@ namespace Game.Presentation.UI.Presenters
             SkillGemInventory gemInventory,
             IRandomService random,
             IPublisher<InventoryChangedDTO> inventoryChangedPub,
-            IPublisher<ItemAddedDTO> itemAddedPub)
+            IPublisher<ItemAddedDTO> itemAddedPub,
+            IPublisher<TreeXpChangedDTO> treeXpChangedPub,
+            IPublisher<TreeLevelChangedDTO> treeLevelChangedPub,
+            IPublisher<TreeTalentsChangedDTO> treeTalentsChangedPub)
         {
             _cheatsView = cheatsView;
             _inventoryCommands = inventoryCommands;
@@ -45,6 +52,9 @@ namespace Game.Presentation.UI.Presenters
             _random = random;
             _inventoryChangedPub = inventoryChangedPub;
             _itemAddedPub = itemAddedPub;
+            _treeXpChangedPub = treeXpChangedPub;
+            _treeLevelChangedPub = treeLevelChangedPub;
+            _treeTalentsChangedPub = treeTalentsChangedPub;
         }
 
         public void Start()
@@ -52,6 +62,7 @@ namespace Game.Presentation.UI.Presenters
             _cheatsView.OnGenerateItemClicked += HandleGenerateItem;
             _cheatsView.OnAddSkillGemClicked += HandleAddSkillGem;
             _cheatsView.OnAddRemovalOrbClicked += HandleAddRemovalOrb;
+            _cheatsView.OnAddTreeXpClicked += HandleAddTreeXp;
             _cheatsView.OnResetSaveClicked += HandleResetSave;
 
             Debug.Log("[CheatsPresenter] Initialized.");
@@ -106,6 +117,27 @@ namespace Game.Presentation.UI.Presenters
             Debug.Log($"[CheatsPresenter] Added 5 Removal Orbs. Total: {_gemInventory.RemovalCurrencyCount}");
         }
 
+        private void HandleAddTreeXp()
+        {
+            const int amount = 25;
+            var tree = _gameState.TreeTalents;
+            if (tree == null)
+            {
+                _cheatsView.SetFeedback("Tree talents state is not initialized.");
+                return;
+            }
+
+            var beforeLevel = tree.Level;
+            tree.GainXp(amount);
+
+            _treeXpChangedPub.Publish(new TreeXpChangedDTO(tree.CurrentXp, tree.XpToNextLevel));
+            if (tree.Level != beforeLevel)
+                _treeLevelChangedPub.Publish(new TreeLevelChangedDTO(tree.Level));
+            _treeTalentsChangedPub.Publish(new TreeTalentsChangedDTO());
+
+            _cheatsView.SetFeedback($"Added {amount} Tree XP\nLevel: {tree.Level} | XP: {tree.CurrentXp}/{tree.XpToNextLevel}");
+        }
+
         private void HandleResetSave()
         {
             _gameState.Inventory.ClearAll();
@@ -128,6 +160,7 @@ namespace Game.Presentation.UI.Presenters
             _cheatsView.OnGenerateItemClicked -= HandleGenerateItem;
             _cheatsView.OnAddSkillGemClicked -= HandleAddSkillGem;
             _cheatsView.OnAddRemovalOrbClicked -= HandleAddRemovalOrb;
+            _cheatsView.OnAddTreeXpClicked -= HandleAddTreeXp;
             _cheatsView.OnResetSaveClicked -= HandleResetSave;
         }
     }

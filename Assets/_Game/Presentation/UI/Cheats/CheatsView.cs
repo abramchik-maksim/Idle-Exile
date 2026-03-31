@@ -10,6 +10,7 @@ namespace Game.Presentation.UI.Cheats
         private Button _btnGenerateItem;
         private Button _btnAddSkillGem;
         private Button _btnAddRemovalOrb;
+        private Button _btnAddTreeXp;
         private Button _btnResetSave;
         private Label _feedbackLabel;
         private VisualElement _panel;
@@ -22,6 +23,7 @@ namespace Game.Presentation.UI.Cheats
         public event Action OnGenerateItemClicked;
         public event Action OnAddSkillGemClicked;
         public event Action OnAddRemovalOrbClicked;
+        public event Action OnAddTreeXpClicked;
         public event Action OnResetSaveClicked;
 
         protected override void OnBind()
@@ -29,6 +31,7 @@ namespace Game.Presentation.UI.Cheats
             _btnGenerateItem = Q<Button>("btn-generate-item");
             _btnAddSkillGem = Q<Button>("btn-add-skill-gem");
             _btnAddRemovalOrb = Q<Button>("btn-add-removal-orb");
+            _btnAddTreeXp = Q<Button>("btn-add-tree-xp");
             _btnResetSave = Q<Button>("btn-reset-save");
             _feedbackLabel = Q<Label>("feedback-label");
             _panel = Q("cheats-panel");
@@ -37,6 +40,7 @@ namespace Game.Presentation.UI.Cheats
             _btnGenerateItem.clicked += RaiseGenerateItemClicked;
             _btnAddSkillGem.clicked += RaiseAddSkillGemClicked;
             _btnAddRemovalOrb.clicked += RaiseAddRemovalOrbClicked;
+            _btnAddTreeXp.clicked += RaiseAddTreeXpClicked;
             _btnResetSave.clicked += RaiseResetSaveClicked;
 
             _header.RegisterCallback<PointerDownEvent>(OnHeaderPointerDown);
@@ -105,6 +109,7 @@ namespace Game.Presentation.UI.Cheats
             if (_btnGenerateItem != null) _btnGenerateItem.clicked -= RaiseGenerateItemClicked;
             if (_btnAddSkillGem != null) _btnAddSkillGem.clicked -= RaiseAddSkillGemClicked;
             if (_btnAddRemovalOrb != null) _btnAddRemovalOrb.clicked -= RaiseAddRemovalOrbClicked;
+            if (_btnAddTreeXp != null) _btnAddTreeXp.clicked -= RaiseAddTreeXpClicked;
             if (_btnResetSave != null) _btnResetSave.clicked -= RaiseResetSaveClicked;
             if (_header != null)
             {
@@ -117,6 +122,7 @@ namespace Game.Presentation.UI.Cheats
         private void RaiseGenerateItemClicked() => OnGenerateItemClicked?.Invoke();
         private void RaiseAddSkillGemClicked() => OnAddSkillGemClicked?.Invoke();
         private void RaiseAddRemovalOrbClicked() => OnAddRemovalOrbClicked?.Invoke();
+        private void RaiseAddTreeXpClicked() => OnAddTreeXpClicked?.Invoke();
         private void RaiseResetSaveClicked() => OnResetSaveClicked?.Invoke();
     }
 }

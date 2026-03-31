@@ -18,6 +18,7 @@ namespace Game.Presentation.UI.MainScreen
         private Button _btnCharacterTab;
         private Button _btnEquipmentTab;
         private Button _btnSkillsTab;
+        private Button _btnTreeTab;
         private VisualElement _lootNotification;
         private Label _lootText;
         private IVisualElementScheduledItem _lootHideHandle;
@@ -33,12 +34,14 @@ namespace Game.Presentation.UI.MainScreen
             _btnCharacterTab = Q<Button>("btn-tab-character");
             _btnEquipmentTab = Q<Button>("btn-tab-equipment");
             _btnSkillsTab = Q<Button>("btn-tab-skills");
+            _btnTreeTab = Q<Button>("btn-tab-tree");
             _lootNotification = Q("loot-notification");
             _lootText = Q<Label>("loot-text");
 
             _btnCharacterTab.clicked += () => SelectTab(0);
             _btnEquipmentTab.clicked += () => SelectTab(1);
             _btnSkillsTab.clicked += () => SelectTab(2);
+            _btnTreeTab.clicked += () => SelectTab(3);
         }
 
         public void SetBattleInfo(string tierName, int battleIndex, int totalBattles)
@@ -81,6 +84,7 @@ namespace Game.Presentation.UI.MainScreen
             _btnCharacterTab.EnableInClassList("tab-btn--active", index == 0);
             _btnEquipmentTab.EnableInClassList("tab-btn--active", index == 1);
             _btnSkillsTab.EnableInClassList("tab-btn--active", index == 2);
+            _btnTreeTab.EnableInClassList("tab-btn--active", index == 3);
             OnTabSelected?.Invoke(index);
         }
 

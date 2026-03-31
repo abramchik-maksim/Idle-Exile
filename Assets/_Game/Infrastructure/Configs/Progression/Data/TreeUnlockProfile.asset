@@ -1,0 +1,23 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a0d1d586c268a1e4692f5119ad239c89, type: 3}
+  m_Name: TreeUnlockProfile
+  m_EditorClassIdentifier: Game.Infrastructure::Game.Infrastructure.Configs.Progression.TreeUnlockProfileSO
+  levels:
+  - level: 1
+    halfWidthsByRow: 030000000300000004000000040000000300000002000000
+  - level: 2
+    halfWidthsByRow: 05000000050000000600000006000000040000000300000002000000
+  - level: 3
+    halfWidthsByRow: 060000000600000007000000070000000600000005000000040000000300000002000000
+  - level: 4
+    halfWidthsByRow: 07000000070000000800000008000000070000000600000005000000040000000300000002000000

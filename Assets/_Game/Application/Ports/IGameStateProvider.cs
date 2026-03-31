@@ -1,4 +1,5 @@
 using Game.Domain.Characters;
+using Game.Domain.Progression.TreeTalents;
 using Game.Domain.Skills;
 using InventoryModel = Game.Domain.Inventory.Inventory;
 
@@ -11,5 +12,6 @@ namespace Game.Application.Ports
         PlayerProgressData Progress { get; }
         SkillCollection Skills { get; }
         SkillLoadout Loadout { get; }
+        TreeTalentsState TreeTalents { get; }
     }
 }

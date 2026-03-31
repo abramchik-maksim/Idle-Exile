@@ -8,6 +8,7 @@
             <ui:Button name="btn-generate-item" text="Generate Random Item" class="btn" style="margin-bottom: 4px; margin-top: 6px;"/>
             <ui:Button name="btn-add-skill-gem" text="Add Random Skill Gem" class="btn" style="margin-bottom: 4px;"/>
             <ui:Button name="btn-add-removal-orb" text="Add 5 Removal Orbs" class="btn" style="margin-bottom: 4px;"/>
+            <ui:Button name="btn-add-tree-xp" text="Add 25 Tree XP" class="btn" style="margin-bottom: 4px;"/>
             <ui:Button name="btn-reset-save" text="Reset Save Data" class="btn" style="margin-bottom: 8px; color: rgb(255, 100, 100);"/>
             <ui:Label name="feedback-label" text="---" style="font-size: 14px; color: rgb(180, 255, 180); -unity-text-align: upper-center; white-space: normal;"/>
         </ui:VisualElement>
