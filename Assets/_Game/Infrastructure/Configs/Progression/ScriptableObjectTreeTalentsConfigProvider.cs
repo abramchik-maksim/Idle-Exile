@@ -27,6 +27,12 @@ namespace Game.Infrastructure.Configs.Progression
 
         public IReadOnlyList<WeightedShapeDefinition> GetShapePool() => _shapes;
         public IReadOnlyList<WeightedNodeDefinition> GetNodePool() => _nodes;
+        public IReadOnlyList<int> GetAllianceThresholds()
+        {
+            if (_database?.allianceThresholds != null && _database.allianceThresholds.Count > 0)
+                return _database.allianceThresholds.Where(x => x > 0).Distinct().OrderBy(x => x).ToList();
+            return new List<int> { 5, 10, 20, 30, 40 };
+        }
 
         public IReadOnlyList<int> GetUnlockHalfWidthsForLevel(int level)
         {

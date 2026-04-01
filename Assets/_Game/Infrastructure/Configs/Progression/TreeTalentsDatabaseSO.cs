@@ -10,6 +10,7 @@ namespace Game.Infrastructure.Configs.Progression
     {
         [Min(1)] public int growthDurationSeconds = 20;
         [Min(1)] public int seedWeightMultiplier = 5;
+        public List<int> allianceThresholds = new() { 5, 10, 20, 30, 40 };
         public List<ShapeEntry> shapes = new();
         public List<NodeEntry> nodes = new();
 

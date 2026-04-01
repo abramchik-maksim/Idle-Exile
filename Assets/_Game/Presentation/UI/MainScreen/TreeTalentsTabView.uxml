@@ -9,6 +9,7 @@
                     <ui:VisualElement name="tree-xp-fill" class="health-bar__fill" style="width: 0%;" />
                 </ui:VisualElement>
                 <ui:Label name="tree-xp-label" text="0 / 100" class="stat-label" style="font-size: 11px; margin-top: 2px;" />
+                <ui:VisualElement name="tree-alliance-summary" class="tree-alliance-summary" />
                 <ui:ScrollView name="tree-grid-scroll" style="flex: 1; margin-top: 8px;">
                     <ui:VisualElement name="tree-grid" style="align-items: center; padding-bottom: 8px;" />
                 </ui:ScrollView>
@@ -22,14 +23,26 @@
             </ui:VisualElement>
         </ui:VisualElement>
 
-        <ui:VisualElement class="panel" style="margin: 8px 10px 10px 10px; padding: 8px; flex-direction: row; align-items: center; justify-content: space-between;">
-            <ui:VisualElement style="flex-direction: row; align-items: center;">
-                <ui:Label text="Seeds:" class="stat-label" style="margin-right: 8px;" />
-                <ui:Button name="seed-slot-a" text="Fire" class="btn" style="width: 90px; margin-right: 4px;" />
-                <ui:Button name="seed-slot-b" text="Speed" class="btn" style="width: 90px; margin-right: 4px;" />
-                <ui:Button name="seed-slot-c" text="Defense" class="btn" style="width: 90px;" />
+        <ui:VisualElement class="panel tree-seed-grow-panel" style="margin: 8px 10px 10px 10px; padding: 8px;">
+            <ui:VisualElement class="tree-seed-pool-panel">
+                <ui:Label text="Seeds Pool" class="panel-header" style="margin-bottom: 6px;" />
+                <ui:VisualElement name="seed-pool-list" class="seed-pool-list" />
             </ui:VisualElement>
-            <ui:Button name="btn-grow-branch" text="Grow Branch" class="btn" style="width: 140px;" />
+
+            <ui:VisualElement class="tree-grow-zone-panel">
+                <ui:Label text="Growth Zone" class="panel-header" style="margin-bottom: 6px;" />
+                <ui:VisualElement name="selected-seeds-list" class="selected-seeds-list" />
+                <ui:VisualElement name="grow-drop-zone" class="grow-drop-zone">
+                    <ui:Label name="grow-drop-zone-hint" text="Drag 3 seeds here" class="grow-drop-zone__hint" />
+                </ui:VisualElement>
+                <ui:VisualElement name="grow-progress-root" class="grow-progress-root" style="display: none;">
+                    <ui:VisualElement class="health-bar" style="height: 12px;">
+                        <ui:VisualElement name="grow-progress-fill" class="health-bar__fill" style="width: 0%;" />
+                    </ui:VisualElement>
+                    <ui:Label name="grow-progress-label" text="20.0s" class="stat-label" style="font-size: 11px; margin-top: 2px;" />
+                </ui:VisualElement>
+                <ui:Button name="btn-grow-branch" text="Grow Branch" class="btn" style="width: 140px; margin-top: 6px;" />
+            </ui:VisualElement>
         </ui:VisualElement>
     </ui:VisualElement>
 </ui:UXML>

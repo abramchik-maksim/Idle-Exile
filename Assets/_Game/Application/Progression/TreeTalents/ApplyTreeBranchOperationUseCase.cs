@@ -23,7 +23,8 @@ namespace Game.Application.Progression.TreeTalents
                 success = state.TryPlaceBranch(
                     operation.BranchId,
                     new GridCoord(operation.AnchorX, operation.AnchorY),
-                    halfWidths);
+                    halfWidths,
+                    operation.RotationQuarterTurns);
             }
             else
             {
@@ -46,13 +47,20 @@ namespace Game.Application.Progression.TreeTalents
         public string BranchId { get; }
         public int AnchorX { get; }
         public int AnchorY { get; }
+        public int RotationQuarterTurns { get; }
 
-        public TreeBranchOperation(TreeBranchOperationType operationType, string branchId, int anchorX = 0, int anchorY = 0)
+        public TreeBranchOperation(
+            TreeBranchOperationType operationType,
+            string branchId,
+            int anchorX = 0,
+            int anchorY = 0,
+            int rotationQuarterTurns = 0)
         {
             OperationType = operationType;
             BranchId = branchId;
             AnchorX = anchorX;
             AnchorY = anchorY;
+            RotationQuarterTurns = rotationQuarterTurns;
         }
     }
 

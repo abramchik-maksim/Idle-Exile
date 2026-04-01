@@ -46,13 +46,17 @@ namespace Game.Domain.Progression.TreeTalents
         public BranchInstance FindInventoryBranch(string branchId) =>
             _branchInventory.FirstOrDefault(b => b.Id == branchId);
 
-        public bool TryPlaceBranch(string branchId, GridCoord anchor, IReadOnlyList<int> halfWidthsByRow)
+        public bool TryPlaceBranch(
+            string branchId,
+            GridCoord anchor,
+            IReadOnlyList<int> halfWidthsByRow,
+            int rotationQuarterTurns = 0)
         {
             var branch = FindInventoryBranch(branchId);
             if (branch == null || branch.IsPlaced) return false;
-            if (!CanPlace(branch, anchor, halfWidthsByRow)) return false;
+            if (!CanPlace(branch, anchor, halfWidthsByRow, rotationQuarterTurns)) return false;
 
-            branch.PlaceAt(anchor);
+            branch.PlaceAt(anchor, rotationQuarterTurns);
             _branchInventory.Remove(branch);
             _placedBranches.Add(branch);
             RecalculateAlliances();
@@ -63,6 +67,7 @@ namespace Game.Domain.Progression.TreeTalents
         {
             var branch = _placedBranches.FirstOrDefault(b => b.Id == branchId);
             if (branch == null) return false;
+            if (HasDependentBranches(branch)) return false;
 
             _placedBranches.Remove(branch);
             RecalculateAlliances();
@@ -106,18 +111,23 @@ namespace Game.Domain.Progression.TreeTalents
         public IReadOnlyCollection<GridCoord> GetAvailableSockets()
         {
             var occupied = GetOccupiedCoords();
+            var trunk = GetTrunkCoords();
             var sockets = new List<GridCoord>();
 
             foreach (var s in GetAllPotentialSockets())
             {
-                if (!occupied.Contains(s))
+                if (!occupied.Contains(s) && !trunk.Contains(s))
                     sockets.Add(s);
             }
 
             return sockets;
         }
 
-        private bool CanPlace(BranchInstance branch, GridCoord anchor, IReadOnlyList<int> halfWidthsByRow)
+        private bool CanPlace(
+            BranchInstance branch,
+            GridCoord anchor,
+            IReadOnlyList<int> halfWidthsByRow,
+            int rotationQuarterTurns)
         {
             var occupied = GetOccupiedCoords();
             var trunkCoords = GetTrunkCoords();
@@ -128,7 +138,8 @@ namespace Game.Domain.Progression.TreeTalents
 
             foreach (var tile in branch.Tiles)
             {
-                var coord = anchor.Add(tile.Offset);
+                var rotatedOffset = BranchInstance.GetRotatedOffset(tile.Offset, rotationQuarterTurns);
+                var coord = anchor.Add(rotatedOffset);
                 if (!IsInsideUnlockedArea(coord, halfWidthsByRow))
                     return false;
                 if (occupied.Contains(coord) || trunkCoords.Contains(coord))
@@ -172,11 +183,51 @@ namespace Game.Domain.Progression.TreeTalents
                 foreach (var tile in branch.Tiles)
                 {
                     if (tile.Node != null && tile.Node.IsSocket)
-                        sockets.Add(branch.Anchor.Add(tile.Offset));
+                    {
+                        var rotated = BranchInstance.GetRotatedOffset(tile.Offset, branch.PlacedRotationQuarterTurns);
+                        var center = branch.Anchor.Add(rotated);
+
+                        // Socket on a branch exposes adjacent free attachment cells.
+                        sockets.Add(center.Add(new GridCoord(1, 0)));
+                        sockets.Add(center.Add(new GridCoord(-1, 0)));
+                        sockets.Add(center.Add(new GridCoord(0, 1)));
+                        sockets.Add(center.Add(new GridCoord(0, -1)));
+                    }
                 }
             }
 
             return sockets;
+        }
+
+        private bool HasDependentBranches(BranchInstance parent)
+        {
+            var providedSockets = GetProvidedSocketsForBranch(parent);
+            foreach (var candidate in _placedBranches)
+            {
+                if (candidate.Id == parent.Id) continue;
+                if (providedSockets.Contains(candidate.Anchor))
+                    return true;
+            }
+
+            return false;
+        }
+
+        private static HashSet<GridCoord> GetProvidedSocketsForBranch(BranchInstance branch)
+        {
+            var result = new HashSet<GridCoord>();
+            foreach (var tile in branch.Tiles)
+            {
+                if (tile.Node == null || !tile.Node.IsSocket) continue;
+
+                var rotated = BranchInstance.GetRotatedOffset(tile.Offset, branch.PlacedRotationQuarterTurns);
+                var center = branch.Anchor.Add(rotated);
+                result.Add(center.Add(new GridCoord(1, 0)));
+                result.Add(center.Add(new GridCoord(-1, 0)));
+                result.Add(center.Add(new GridCoord(0, 1)));
+                result.Add(center.Add(new GridCoord(0, -1)));
+            }
+
+            return result;
         }
 
         private static bool IsInsideUnlockedArea(GridCoord coord, IReadOnlyList<int> halfWidthsByRow)

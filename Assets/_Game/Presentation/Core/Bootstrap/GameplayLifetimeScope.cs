@@ -93,6 +93,7 @@ namespace Game.Presentation.Core.Bootstrap
                 new ScriptableObjectTreeTalentsConfigProvider(_treeTalentsDatabase, _treeUnlockProfile), Lifetime.Singleton);
             builder.Register<ITreeTalentsRepository, PlayerPrefsTreeTalentsRepository>(Lifetime.Singleton);
             builder.Register<IIconProvider, AddressableIconProvider>(Lifetime.Singleton);
+            builder.Register<ITreeTalentsInputReader, TreeTalentsInputReader>(Lifetime.Singleton);
             builder.RegisterInstance(_startingPreset);
 
             // --- Services & Use Cases ---

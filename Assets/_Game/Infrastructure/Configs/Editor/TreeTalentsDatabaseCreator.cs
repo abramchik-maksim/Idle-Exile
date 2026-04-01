@@ -40,6 +40,7 @@ namespace Game.Infrastructure.Configs.Editor
 
             db.growthDurationSeconds = 20;
             db.seedWeightMultiplier = 5;
+            db.allianceThresholds = new List<int> { 5, 10, 20, 30, 40 };
             db.shapes = BuildShapeEntries();
             db.nodes = BuildNodeEntries();
 

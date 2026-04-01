@@ -10,6 +10,7 @@ namespace Game.Application.Ports
         IReadOnlyList<WeightedShapeDefinition> GetShapePool();
         IReadOnlyList<WeightedNodeDefinition> GetNodePool();
         IReadOnlyList<int> GetUnlockHalfWidthsForLevel(int level);
+        IReadOnlyList<int> GetAllianceThresholds();
     }
 
     public sealed class WeightedShapeDefinition

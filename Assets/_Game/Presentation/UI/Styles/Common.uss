@@ -826,10 +826,176 @@
     -unity-font-style: bold;
 }
 
-.branch-inventory-cell__desc {
+.branch-inventory-cell__body {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 4px;
+}
+
+.branch-node-icons {
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    max-width: 120px;
+}
+
+.branch-node-icon {
+    width: 10px;
+    height: 10px;
+    border-radius: 6px;
+    border-width: 1px;
+    border-color: rgba(0, 0, 0, 0.4);
+    margin-right: 3px;
+    margin-bottom: 3px;
+}
+
+.branch-shape-preview {
+    position: relative;
+    min-width: 26px;
+    min-height: 17px;
+    margin-left: 8px;
+}
+
+.branch-shape-preview__cell {
+    position: absolute;
+    width: 8px;
+    height: 8px;
+    border-width: 1px;
+    border-color: rgba(170, 145, 90, 0.95);
+    background-color: rgba(100, 84, 55, 0.65);
+    border-radius: 1px;
+}
+
+.tree-seed-grow-panel {
+    flex-direction: row;
+    align-items: stretch;
+}
+
+.tree-seed-pool-panel {
+    flex: 1;
+    margin-right: 8px;
+}
+
+.seed-pool-list {
+    flex-direction: row;
+    flex-wrap: wrap;
+}
+
+.seed-pool-item {
+    flex-direction: row;
+    align-items: center;
+    padding: 4px 6px;
+    margin-right: 4px;
+    margin-bottom: 4px;
+    border-width: 1px;
+    border-color: rgba(80, 80, 100, 0.8);
+    border-radius: 10px;
+    background-color: rgba(34, 34, 50, 0.55);
+}
+
+.seed-pool-item__icon {
+    width: 12px;
+    height: 12px;
+    border-radius: 6px;
+    margin-right: 4px;
+}
+
+.seed-pool-item__label {
     font-size: 10px;
+    color: var(--color-text);
+}
+
+.tree-grow-zone-panel {
+    width: 260px;
+}
+
+.selected-seeds-list {
+    flex-direction: row;
+    align-items: center;
+    min-height: 18px;
+    margin-bottom: 4px;
+}
+
+.selected-seed-icon {
+    width: 12px;
+    height: 12px;
+    border-radius: 6px;
+    margin-right: 4px;
+    border-width: 1px;
+    border-color: rgba(0, 0, 0, 0.45);
+}
+
+.grow-drop-zone {
+    min-height: 56px;
+    border-width: 1px;
+    border-color: rgba(110, 95, 75, 0.95);
+    border-radius: 4px;
+    background-color: rgba(56, 48, 34, 0.35);
+    align-items: center;
+    justify-content: center;
+}
+
+.grow-drop-zone--hover {
+    border-color: rgba(140, 180, 95, 0.95);
+    background-color: rgba(65, 92, 48, 0.45);
+}
+
+.grow-drop-zone__hint {
+    font-size: 11px;
     color: var(--color-text-dim);
-    margin-top: 2px;
+}
+
+.grow-progress-root {
+    margin-top: 6px;
+}
+
+.tree-alliance-summary {
+    margin-top: 4px;
+    margin-bottom: 4px;
+}
+
+.tree-alliance-summary__line {
+    font-size: 11px;
+    color: rgb(150, 214, 150);
+    margin-bottom: 2px;
+}
+
+.tree-alliance-summary__empty {
+    font-size: 11px;
+    color: var(--color-text-dim);
+}
+
+.tree-confirm-dialog {
+    position: absolute;
+    width: 220px;
+    max-width: 220px;
+    padding: 8px;
+    border-width: 1px;
+    border-color: var(--color-border);
+    border-radius: 4px;
+    background-color: rgb(20, 22, 30);
+}
+
+.tree-confirm-dialog__text {
+    font-size: 12px;
+    color: var(--color-text);
+    white-space: normal;
+    min-height: 30px;
+}
+
+.tree-confirm-dialog__actions {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 8px;
+    width: 100%;
+}
+
+.tree-confirm-dialog__btn {
+    width: 92px;
+    height: 24px;
+    font-size: 11px;
 }
 
 .branch-drag-ghost {

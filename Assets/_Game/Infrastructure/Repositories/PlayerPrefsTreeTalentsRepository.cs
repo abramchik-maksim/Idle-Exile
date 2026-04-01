@@ -62,6 +62,7 @@ namespace Game.Infrastructure.Repositories
                     seedTypes = new List<int>(),
                     anchorX = branch.Anchor.X,
                     anchorY = branch.Anchor.Y,
+                    rotationQuarterTurns = branch.PlacedRotationQuarterTurns,
                     isPlaced = forcePlaced || branch.IsPlaced,
                     tiles = new List<TileData>()
                 };
@@ -118,7 +119,9 @@ namespace Game.Infrastructure.Repositories
 
                 var branch = new BranchInstance(branchData.id, branchData.generationLevel, seeds, tiles);
                 if (branchData.isPlaced)
-                    branch.PlaceAt(new GridCoord(branchData.anchorX, branchData.anchorY));
+                    branch.PlaceAt(
+                        new GridCoord(branchData.anchorX, branchData.anchorY),
+                        branchData.rotationQuarterTurns);
 
                 result.Add(branch);
             }
@@ -145,6 +148,7 @@ namespace Game.Infrastructure.Repositories
             public bool isPlaced;
             public int anchorX;
             public int anchorY;
+            public int rotationQuarterTurns;
             public List<TileData> tiles;
         }
 
