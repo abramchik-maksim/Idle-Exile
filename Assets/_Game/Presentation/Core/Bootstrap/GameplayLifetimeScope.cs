@@ -6,6 +6,7 @@ using Game.Application.Ports;
 using Game.Application.Combat;
 using Game.Application.Inventory;
 using Game.Application.Loot;
+using Game.Infrastructure.ItemAffixes;
 using Game.Application.Progression.TreeTalents;
 using Game.Application.Skills;
 using Game.Application.Stats;
@@ -43,6 +44,7 @@ namespace Game.Presentation.Core.Bootstrap
         [SerializeField] private StartingPresetSO _startingPreset;
         [SerializeField] private TreeTalentsDatabaseSO _treeTalentsDatabase;
         [SerializeField] private TreeUnlockProfileSO _treeUnlockProfile;
+        [SerializeField] private ItemAffixDatabaseSO _itemAffixDatabase;
 
         protected override void Configure(IContainerBuilder builder)
         {
@@ -80,6 +82,14 @@ namespace Game.Presentation.Core.Bootstrap
             builder.Register<IRandomService>(c => new UnityRandomService(), Lifetime.Singleton);
             builder.Register<IConfigProvider>(
                 _ => new ScriptableObjectConfigProvider(_itemDatabase), Lifetime.Singleton);
+            builder.Register<IAffixConfigProvider>(
+                _ => new ScriptableObjectAffixConfigProvider(_itemAffixDatabase), Lifetime.Singleton);
+            builder.Register<IHeroItemClassProvider>(
+                _ => new HeroItemClassFromPresetProvider(_startingPreset), Lifetime.Singleton);
+            builder.Register<IItemAffixModifierResolver, ItemAffixModifierResolver>(Lifetime.Singleton);
+            builder.Register<IModCatalogProvider>(
+                _ => new ScriptableObjectModCatalogProvider(_itemAffixDatabase), Lifetime.Singleton);
+            builder.Register<IItemAffixDisplayTextFormatter, ItemAffixDisplayTextFormatter>(Lifetime.Singleton);
             builder.Register<ICombatConfigProvider>(
                 _ => new ScriptableObjectCombatConfigProvider(_combatDatabase, _lootTable), Lifetime.Singleton);
             builder.Register<ISkillConfigProvider>(
@@ -88,7 +98,9 @@ namespace Game.Presentation.Core.Bootstrap
                 _ => new ScriptableObjectSkillGemConfigProvider(_skillGemDatabase), Lifetime.Singleton);
             builder.Register<IPlayerProgressRepository, PlayerPrefsProgressRepository>(Lifetime.Singleton);
             builder.Register<IInventoryRepository>(c =>
-                new PlayerPrefsInventoryRepository(c.Resolve<IConfigProvider>()), Lifetime.Singleton);
+                new PlayerPrefsInventoryRepository(
+                    c.Resolve<IConfigProvider>(),
+                    c.Resolve<IItemAffixModifierResolver>()), Lifetime.Singleton);
             builder.Register<ITreeTalentsConfigProvider>(c =>
                 new ScriptableObjectTreeTalentsConfigProvider(_treeTalentsDatabase, _treeUnlockProfile), Lifetime.Singleton);
             builder.Register<ITreeTalentsRepository, PlayerPrefsTreeTalentsRepository>(Lifetime.Singleton);

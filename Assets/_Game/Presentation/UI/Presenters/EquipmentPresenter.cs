@@ -27,6 +27,7 @@ namespace Game.Presentation.UI.Presenters
         private readonly ISubscriber<InventoryChangedDTO> _inventoryChangedSub;
         private readonly ISubscriber<ItemEquippedDTO> _itemEquippedSub;
         private readonly ISubscriber<ItemUnequippedDTO> _itemUnequippedSub;
+        private readonly IItemAffixDisplayTextFormatter _affixDisplay;
 
         private readonly List<IDisposable> _subscriptions = new();
 
@@ -34,6 +35,7 @@ namespace Game.Presentation.UI.Presenters
             EquipmentTabView view,
             IGameStateProvider gameState,
             IIconProvider iconProvider,
+            IItemAffixDisplayTextFormatter affixDisplay,
             EquipItemUseCase equipItemUseCase,
             UnequipItemUseCase unequipItemUseCase,
             InventoryCommandService inventoryCommands,
@@ -48,6 +50,7 @@ namespace Game.Presentation.UI.Presenters
             _view = view;
             _gameState = gameState;
             _iconProvider = iconProvider;
+            _affixDisplay = affixDisplay;
             _equipItemUseCase = equipItemUseCase;
             _unequipItemUseCase = unequipItemUseCase;
             _inventoryCommands = inventoryCommands;
@@ -63,6 +66,7 @@ namespace Game.Presentation.UI.Presenters
         public void Start()
         {
             _view.SetIconProvider(_iconProvider);
+            _view.SetRolledAffixFormatter(_affixDisplay.FormatRolledLine);
             _view.OnItemDroppedOnSlot += HandleEquipItem;
             _view.OnItemRightClicked += HandleEquipItemByUid;
             _view.OnSlotRightClicked += HandleUnequipSlot;

@@ -5,6 +5,7 @@ namespace Game.Domain.Items
         Normal,
         Magic,
         Rare,
+        Mythic,
         Unique
     }
 }

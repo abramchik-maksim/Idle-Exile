@@ -1,0 +1,5 @@
+curveId,valueFormula,weightFormula,clampPolicy,description
+core_soft,"value(t)=cap*(base/cap)^((n-t)/(n-1))","w(t)=baseWeight*(1.00-0.08*(t-1))",ClampToTemplateCaps,Soft weight drop across all available tiers
+broad_soft,"value(t)=cap*(base/cap)^((n-t)/(n-1))","w(t)=baseWeight*(1.00-0.06*(t-1))",ClampToTemplateCaps,Very gentle drop for broad mods
+premium_soft,"value(t)=cap*(base/cap)^((n-t)/(n-1))","w(t)=baseWeight*(1.00-0.10*(t-1))",ClampToTemplateCaps,Slightly steeper than core but still casual-friendly
+special_soft,"value(t)=cap*(base/cap)^((n-t)/(n-1))","w(t)=baseWeight*(1.00-0.12*(t-1))",ClampToTemplateCaps,Special procs keep fewer tiers and tighter windows

@@ -89,8 +89,9 @@ namespace Game.Presentation.UI.Presenters
 
             var def = item.Definition;
             string rarityTag = def.Rarity != Rarity.Normal ? $" [{def.Rarity}]" : "";
-            _cheatsView.SetFeedback($"Added: {def.Name}{rarityTag}\n+{item.RolledModifiers.Count} modifiers");
-            Debug.Log($"[CheatsPresenter] Generated item: {def.Name} ({def.Slot}) with {item.RolledModifiers.Count} mods");
+            int rolledCount = item.RolledAffixes.Count > 0 ? item.RolledAffixes.Count : item.RolledModifiers.Count;
+            _cheatsView.SetFeedback($"Added: {def.Name}{rarityTag}\n+{rolledCount} rolled lines");
+            Debug.Log($"[CheatsPresenter] Generated item: {def.Name} ({def.Slot}) rolledLines={rolledCount}");
         }
 
         private void HandleAddSkillGem()

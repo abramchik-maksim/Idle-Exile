@@ -1,3 +1,4 @@
+using System;
 using UnityEngine.UIElements;
 using Game.Domain.Items;
 using Game.Domain.Stats;
@@ -11,13 +12,17 @@ namespace Game.Presentation.UI.Tooltip
         private static EventCallback<PointerLeaveEvent> _dismissOnLeave;
         private static VisualElement _dismissOwner;
 
-        public static void Show(VisualElement owner, ItemInstance item, VisualElement root)
+        public static void Show(
+            VisualElement owner,
+            ItemInstance item,
+            VisualElement root,
+            Func<RolledItemAffix, string> formatRolledAffix = null)
         {
             Hide();
             if (item == null) return;
 
             _currentOwner = owner;
-            _tooltip = BuildTooltipPanel(item);
+            _tooltip = BuildTooltipPanel(item, formatRolledAffix);
 
             var ownerRect = owner.worldBound;
             _tooltip.style.left = ownerRect.xMax + 8;
@@ -29,7 +34,11 @@ namespace Game.Presentation.UI.Tooltip
         }
 
         public static void ShowComparison(
-            VisualElement owner, ItemInstance item, ItemInstance equipped, VisualElement root)
+            VisualElement owner,
+            ItemInstance item,
+            ItemInstance equipped,
+            VisualElement root,
+            Func<RolledItemAffix, string> formatRolledAffix = null)
         {
             Hide();
             if (item == null) return;
@@ -41,7 +50,7 @@ namespace Game.Presentation.UI.Tooltip
             container.pickingMode = PickingMode.Ignore;
             container.style.position = Position.Absolute;
 
-            var newPanel = BuildTooltipPanel(item);
+            var newPanel = BuildTooltipPanel(item, formatRolledAffix);
             var headerNew = new Label("Selected");
             headerNew.AddToClassList("item-comparison__label");
             headerNew.pickingMode = PickingMode.Ignore;
@@ -55,7 +64,7 @@ namespace Game.Presentation.UI.Tooltip
                 spacer.pickingMode = PickingMode.Ignore;
                 container.Add(spacer);
 
-                var eqPanel = BuildTooltipPanel(equipped);
+                var eqPanel = BuildTooltipPanel(equipped, formatRolledAffix);
                 var headerEq = new Label("Equipped");
                 headerEq.AddToClassList("item-comparison__label");
                 headerEq.pickingMode = PickingMode.Ignore;
@@ -94,7 +103,9 @@ namespace Game.Presentation.UI.Tooltip
 
         public static bool IsShownFor(VisualElement owner) => _currentOwner == owner;
 
-        private static VisualElement BuildTooltipPanel(ItemInstance item)
+        private static VisualElement BuildTooltipPanel(
+            ItemInstance item,
+            Func<RolledItemAffix, string> formatRolledAffix = null)
         {
             var panel = new VisualElement();
             panel.AddToClassList("item-tooltip");
@@ -131,29 +142,71 @@ namespace Game.Presentation.UI.Tooltip
                 panel.Add(slotLabel);
             }
 
-            var allMods = item.GetAllModifiers();
-            bool hasMods = false;
-            foreach (var mod in allMods)
-            {
-                if (!hasMods)
-                {
-                    var separator = new VisualElement();
-                    separator.AddToClassList("item-tooltip__separator");
-                    separator.pickingMode = PickingMode.Ignore;
-                    panel.Add(separator);
-                    hasMods = true;
-                }
+            bool hasStatLines = item.Definition.ImplicitModifiers.Count > 0
+                || item.RolledAffixes.Count > 0
+                || item.RolledModifiers.Count > 0;
 
-                string prefix = mod.Source == "implicit" ? "" : "+";
-                var modLabel = new Label($"{prefix}{FormatModValue(mod)} {FormatStatName(mod.Stat)}");
+            if (hasStatLines)
+            {
+                var sep = new VisualElement();
+                sep.AddToClassList("item-tooltip__separator");
+                sep.pickingMode = PickingMode.Ignore;
+                panel.Add(sep);
+            }
+
+            foreach (var mod in item.Definition.ImplicitModifiers)
+            {
+                var modLabel = new Label($"{FormatModValue(mod)} {FormatStatName(mod.Stat)}");
                 modLabel.AddToClassList("item-tooltip__mod");
-                if (mod.Source == "implicit")
-                    modLabel.AddToClassList("item-tooltip__mod--implicit");
+                modLabel.AddToClassList("item-tooltip__mod--implicit");
                 modLabel.pickingMode = PickingMode.Ignore;
                 panel.Add(modLabel);
             }
 
+            if (item.RolledAffixes.Count > 0)
+            {
+                foreach (var a in item.RolledAffixes)
+                {
+                    string line = formatRolledAffix != null
+                        ? formatRolledAffix(a)
+                        : FormatRolledAffixFallback(a);
+                    panel.Add(CreateRolledAffixRow(line, a.Tier));
+                }
+            }
+            else
+            {
+                foreach (var mod in item.RolledModifiers)
+                {
+                    var modLabel = new Label($"+{FormatModValue(mod)} {FormatStatName(mod.Stat)}");
+                    modLabel.AddToClassList("item-tooltip__mod");
+                    modLabel.pickingMode = PickingMode.Ignore;
+                    panel.Add(modLabel);
+                }
+            }
+
             return panel;
+        }
+
+        private static string FormatRolledAffixFallback(in RolledItemAffix a) =>
+            $"{a.ModId}: {a.RolledValue:0.##}";
+
+        private static VisualElement CreateRolledAffixRow(string modText, int tier)
+        {
+            var row = new VisualElement();
+            row.AddToClassList("item-tooltip__mod-row");
+            row.pickingMode = PickingMode.Ignore;
+
+            var text = new Label($"+{modText}");
+            text.AddToClassList("item-tooltip__mod-text");
+            text.pickingMode = PickingMode.Ignore;
+
+            var tierLabel = new Label($"T{tier}");
+            tierLabel.AddToClassList("item-tooltip__mod-tier");
+            tierLabel.pickingMode = PickingMode.Ignore;
+
+            row.Add(text);
+            row.Add(tierLabel);
+            return row;
         }
 
         private static void ClampToScreen(VisualElement tooltip, VisualElement root)
@@ -210,6 +263,7 @@ namespace Game.Presentation.UI.Tooltip
         {
             Rarity.Magic => "rarity-magic",
             Rarity.Rare => "rarity-rare",
+            Rarity.Mythic => "rarity-mythic",
             Rarity.Unique => "rarity-unique",
             _ => "rarity-normal"
         };

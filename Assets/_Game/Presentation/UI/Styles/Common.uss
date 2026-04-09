@@ -12,6 +12,7 @@
     --color-rarity-magic: rgb(90, 130, 255);
     --color-rarity-rare: rgb(255, 255, 90);
     --color-rarity-unique: rgb(175, 96, 37);
+    --color-rarity-mythic: rgb(200, 55, 75);
     --font-size-sm: 12px;
     --font-size-md: 16px;
     --font-size-lg: 22px;
@@ -96,6 +97,7 @@
 .rarity-magic { color: var(--color-rarity-magic); }
 .rarity-rare { color: var(--color-rarity-rare); }
 .rarity-unique { color: var(--color-rarity-unique); }
+.rarity-mythic { color: var(--color-rarity-mythic); }
 
 .btn {
     background-color: var(--color-bg-slot);
@@ -240,6 +242,7 @@
 .item-icon--placeholder-magic   { background-color: rgba(70, 100, 220, 0.55); border-width: 1px; border-color: rgba(90, 130, 255, 0.4); }
 .item-icon--placeholder-rare    { background-color: rgba(200, 200, 60, 0.50); border-width: 1px; border-color: rgba(255, 255, 90, 0.4); }
 .item-icon--placeholder-unique  { background-color: rgba(175, 96, 37, 0.55); border-width: 1px; border-color: rgba(175, 96, 37, 0.5); }
+.item-icon--placeholder-mythic  { background-color: rgba(120, 35, 55, 0.55); border-width: 1px; border-color: rgba(200, 55, 75, 0.55); }
 
 /* --- Rarity slot backgrounds (applied to slot container) --- */
 
@@ -257,6 +260,10 @@
 
 .slot-bg--unique {
     background-color: rgba(175, 96, 37, 0.14);
+}
+
+.slot-bg--mythic {
+    background-color: rgba(120, 35, 55, 0.16);
 }
 
 /* --- Rarity slot borders --- */
@@ -281,6 +288,11 @@
     border-width: 2px;
 }
 
+.slot-border--mythic {
+    border-color: rgba(200, 55, 75, 0.95);
+    border-width: 2px;
+}
+
 /* Glow effect for rare/unique via double-border inset trick */
 .slot-glow--rare {
     border-color: rgba(255, 255, 90, 0.35);
@@ -292,6 +304,14 @@
 
 .slot-glow--unique {
     border-color: rgba(175, 96, 37, 0.40);
+    border-width: 1px;
+    border-radius: 2px;
+    position: absolute;
+    left: -3px; right: -3px; top: -3px; bottom: -3px;
+}
+
+.slot-glow--mythic {
+    border-color: rgba(200, 55, 75, 0.42);
     border-width: 1px;
     border-radius: 2px;
     position: absolute;
@@ -381,6 +401,31 @@
     font-size: var(--font-size-sm);
     color: rgb(130, 200, 255);
     margin-bottom: 1px;
+}
+
+.item-tooltip__mod-row {
+    flex-direction: row;
+    width: 100%;
+    align-items: flex-start;
+    margin-bottom: 1px;
+}
+
+.item-tooltip__mod-text {
+    flex-grow: 1;
+    flex-shrink: 1;
+    font-size: var(--font-size-sm);
+    color: rgb(130, 200, 255);
+    padding-right: 8px;
+    white-space: normal;
+}
+
+.item-tooltip__mod-tier {
+    flex-shrink: 0;
+    width: 36px;
+    font-size: var(--font-size-sm);
+    color: rgba(130, 125, 115, 0.9);
+    -unity-text-align: upper-right;
+    margin-right: 2px;
 }
 
 .item-tooltip__mod--implicit {

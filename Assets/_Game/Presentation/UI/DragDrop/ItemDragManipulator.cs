@@ -227,6 +227,11 @@ namespace Game.Presentation.UI.DragDrop
                     ghostBorder = new Color(0.69f, 0.38f, 0.15f, 0.9f);
                     placeholderBg = new Color(0.69f, 0.38f, 0.15f, 0.55f);
                     break;
+                case Rarity.Mythic:
+                    ghostBg = new Color(0.18f, 0.08f, 0.10f, 0.95f);
+                    ghostBorder = new Color(0.78f, 0.22f, 0.30f, 0.92f);
+                    placeholderBg = new Color(0.47f, 0.14f, 0.22f, 0.55f);
+                    break;
                 default:
                     ghostBg = new Color(0.16f, 0.16f, 0.22f, 0.95f);
                     ghostBorder = new Color(0.78f, 0.78f, 0.78f, 0.5f);

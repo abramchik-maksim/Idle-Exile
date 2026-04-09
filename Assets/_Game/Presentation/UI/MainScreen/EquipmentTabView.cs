@@ -30,6 +30,7 @@ namespace Game.Presentation.UI.MainScreen
         public event Action<EquipmentSlotType> OnEquipmentSellDropped;
 
         private VisualElement _compareAnchor;
+        private Func<RolledItemAffix, string> _formatRolledAffix;
 
         private static readonly EquipmentSlotType[] LeftColumnSlots =
         {
@@ -62,6 +63,9 @@ namespace Game.Presentation.UI.MainScreen
         }
 
         public void SetIconProvider(IIconProvider provider) => _iconProvider = provider;
+
+        public void SetRolledAffixFormatter(Func<RolledItemAffix, string> formatter) =>
+            _formatRolledAffix = formatter;
 
         public VisualElement EquipmentSlotsContainer => _columnLeft?.parent;
         public VisualElement InventoryGridContainer => _inventoryGrid;
@@ -107,7 +111,7 @@ namespace Game.Presentation.UI.MainScreen
         public void ShowItemComparison(ItemInstance item, ItemInstance equipped)
         {
             if (_compareAnchor == null) return;
-            ItemTooltip.ShowComparison(_compareAnchor, item, equipped, Root);
+            ItemTooltip.ShowComparison(_compareAnchor, item, equipped, Root, _formatRolledAffix);
         }
 
         private VisualElement CreateEquipmentSlot(EquipmentSlotType slotType, ItemInstance item,
@@ -151,7 +155,7 @@ namespace Game.Presentation.UI.MainScreen
             slot.RegisterCallback<PointerEnterEvent>(_ =>
             {
                 if (capturedItem != null)
-                    ItemTooltip.Show(slot, capturedItem, Root);
+                    ItemTooltip.Show(slot, capturedItem, Root, _formatRolledAffix);
             });
             slot.RegisterCallback<PointerLeaveEvent>(_ => ItemTooltip.Hide());
 
@@ -190,7 +194,7 @@ namespace Game.Presentation.UI.MainScreen
             });
 
             slot.RegisterCallback<PointerEnterEvent>(_ =>
-                ItemTooltip.Show(slot, item, Root));
+                ItemTooltip.Show(slot, item, Root, _formatRolledAffix));
             slot.RegisterCallback<PointerLeaveEvent>(_ => ItemTooltip.Hide());
 
             if (item.Definition.Slot != EquipmentSlotType.None)
@@ -254,7 +258,7 @@ namespace Game.Presentation.UI.MainScreen
             slot.AddToClassList($"slot-bg--{key}");
             slot.AddToClassList($"slot-border--{key}");
 
-            if (rarity is Rarity.Rare or Rarity.Unique)
+            if (rarity is Rarity.Rare or Rarity.Mythic or Rarity.Unique)
             {
                 var glow = new VisualElement();
                 glow.AddToClassList($"slot-glow--{key}");
@@ -282,6 +286,7 @@ namespace Game.Presentation.UI.MainScreen
         {
             Rarity.Magic => "magic",
             Rarity.Rare => "rare",
+            Rarity.Mythic => "mythic",
             Rarity.Unique => "unique",
             _ => "normal"
         };

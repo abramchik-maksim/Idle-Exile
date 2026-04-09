@@ -13,6 +13,10 @@ namespace Game.Infrastructure.Configs
         [Header("Hero Base Stats")]
         public List<HeroBaseStat> heroBaseStats = new();
 
+        [Header("Loot")]
+        [Tooltip("Filters class-specific affix rolls (Melee / Rogue / Caster mods).")]
+        public HeroItemClass heroItemClass = HeroItemClass.Warrior;
+
         [Header("Starting Items")]
         public List<StartingItem> startingItems = new();
 

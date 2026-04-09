@@ -1,0 +1,16 @@
+keyType,key,valueCoefPerUnit,synergyTag,riskPenalty,premiumTax,notes
+Template,flat_core,1.00,Core,0.00,0.00,Default valuation for flat stats
+Template,inc_core,0.85,Core,0.00,0.00,Default valuation for increased stats
+Template,broad_core,0.75,Broad,0.00,0.00,Generic broad mods have lower per-point value
+Template,premium_offense,1.30,Offense,0.05,0.08,Offensive premium mods
+Template,premium_defense,1.20,Defense,0.03,0.06,Defensive premium mods
+Template,special_proc,1.45,Proc,0.08,0.10,Proc mods are volatile and capped
+Mod,Damage_DoubleHit_All,1.60,Crit,0.10,0.12,High volatility top-end modifier
+Mod,Damage_DoubleHit_Lightning,1.55,Crit,0.10,0.12,Elemental double-hit premium
+Mod,Damage_DoubleHit_Fire,1.55,Crit,0.10,0.12,Elemental double-hit premium
+Mod,Damage_DoubleHit_Cold,1.55,Crit,0.10,0.12,Elemental double-hit premium
+Mod,Damage_DoubleHit_Physical,1.55,Crit,0.10,0.12,Elemental double-hit premium
+Mod,Damage_DoubleHit_Corrosion,1.55,Crit,0.10,0.12,Elemental double-hit premium
+Mod,Damage_IgnoreArmor,1.45,Penetration,0.06,0.10,Very high effective DPS gain
+Mod,Defense_ArmorToNonPhysical,1.40,Fortitude,0.05,0.10,Cross-damage mitigation premium
+Mod,Block_Chance,1.35,Fortitude,0.05,0.08,Strong EHP scaler with cap

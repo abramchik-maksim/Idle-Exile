@@ -1,0 +1,26 @@
+templateId,tierCount,minBase,maxBase,minCap,maxCap,growthCurve,weightCurveId,roundMode,valueCoefPerUnit,description
+flat_damage_2_300,8,2,8,90,300,geom,core_soft,int,1.05,Flat damage (T8->T1: 2..300)
+damage_increase_12_120,8,12,24,60,120,geom,core_soft,int,0.90,Damage/defense increase family (12..120)
+gain_3_30,8,3,6,15,30,geom,premium_soft,int,1.20,Gain as extra damage (3..30)
+pen_double_2_20,8,2,4,10,20,geom,premium_soft,int,1.35,Penetration and double-hit family (2..20)
+crit_chance_0_5_5,8,0.5,1.0,2.5,5.0,geom,broad_soft,1dp,1.30,Flat crit chance (0.5..5)
+inc_crit_25_160,8,25,40,100,160,geom,premium_soft,int,1.10,Increased crit chance / increased block chance
+crit_multi_12_60,8,12,20,40,60,geom,premium_soft,int,1.25,Critical multiplier (12..60)
+ail_chance_6_24,8,6,10,16,24,geom,broad_soft,int,1.00,Ailment chance family
+ail_speed_12_48,8,12,18,32,48,geom,premium_soft,int,1.15,Faster DoT / extra shock-chill chance
+ail_effect_8_36,8,8,12,24,36,geom,core_soft,int,1.00,Ailment effect/damage
+ail_spread_hit_3_18,8,3,6,12,18,geom,special_soft,int,1.10,Ailment spread on hit (future if enabled for items)
+ail_spread_kill_9_52,8,9,15,34,52,geom,special_soft,int,1.20,Ailment spread on kill (future if enabled for items)
+ail_spread_area_20_72,8,20,28,52,72,geom,special_soft,int,1.05,Ailment spread area / AoE-like utility
+flat_defense_30_360,8,30,60,180,360,geom,core_soft,int,0.95,Flat evasion/armor/barrier
+flat_health_25_300,8,25,50,150,300,geom,core_soft,int,0.95,Flat health
+life_leech_1_8,8,1,2,5,8,geom,premium_defense,int,1.20,Life leech percent
+inc_health_10_100,8,10,18,60,100,geom,core_soft,int,0.95,Increased health
+resist_3_30,8,3,6,18,30,geom,core_soft,int,1.00,Elemental/corrosion resistance
+attack_cast_speed_12_60,8,12,18,36,60,geom,core_soft,int,1.05,Melee/ranged attack speed and cast speed
+block_chance_3_30,8,3,6,18,30,geom,premium_defense,int,1.25,Flat block chance
+proj_special_25_160,8,25,40,100,160,geom,special_soft,int,1.30,Chain/fork/pierce chance family
+aoe_20_72,8,20,28,52,72,geom,broad_soft,int,0.90,Melee/Spell area of effect
+cdr_or_buffeffect_12_48,8,12,18,32,48,geom,broad_soft,int,0.95,Cooldown recovery / buff effect
+buff_duration_20_72,8,20,28,52,72,geom,broad_soft,int,0.90,Buff duration
+movement_speed_1_8,8,1,2,5,8,geom,broad_soft,int,1.00,Movement speed

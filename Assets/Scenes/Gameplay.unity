@@ -729,6 +729,7 @@ MonoBehaviour:
   _startingPreset: {fileID: 11400000, guid: e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6, type: 2}
   _treeTalentsDatabase: {fileID: 11400000, guid: 7962c1cded8407549ab0b661fc413cb2, type: 2}
   _treeUnlockProfile: {fileID: 11400000, guid: 2cdfefcf07a901b4b8f093d42c2a32ee, type: 2}
+  _itemAffixDatabase: {fileID: 11400000, guid: e7a1c3d9f2b84e5a9c0d6e8f1a2b3c4d, type: 2}
 --- !u!4 &1184002394
 Transform:
   m_ObjectHideFlags: 0

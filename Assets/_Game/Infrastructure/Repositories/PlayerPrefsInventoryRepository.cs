@@ -12,10 +12,14 @@ namespace Game.Infrastructure.Repositories
     {
         private const string Key = "player_inventory";
         private readonly IConfigProvider _configProvider;
+        private readonly IItemAffixModifierResolver _affixResolver;
 
-        public PlayerPrefsInventoryRepository(IConfigProvider configProvider)
+        public PlayerPrefsInventoryRepository(
+            IConfigProvider configProvider,
+            IItemAffixModifierResolver affixResolver)
         {
             _configProvider = configProvider;
+            _affixResolver = affixResolver;
         }
 
         public void Save(InventoryModel inventory)
@@ -93,14 +97,29 @@ namespace Game.Infrastructure.Repositories
                 return null;
             }
 
+            var affixes = new List<RolledItemAffix>();
+            if (si.affixes != null && si.affixes.Length > 0)
+            {
+                foreach (var a in si.affixes)
+                    affixes.Add(new RolledItemAffix(a.affixId, a.modId, a.tier, a.value, a.valueFormat));
+            }
+
             var mods = new List<Modifier>();
-            if (si.mods != null)
+            if (affixes.Count > 0)
+            {
+                foreach (var ax in affixes)
+                {
+                    foreach (var m in _affixResolver.ResolveModifiers(ax))
+                        mods.Add(m);
+                }
+            }
+            else if (si.mods != null)
             {
                 foreach (var sm in si.mods)
                     mods.Add(new Modifier((StatType)sm.stat, (ModifierType)sm.type, sm.value, sm.source));
             }
 
-            return new ItemInstance(si.uid, def, mods);
+            return new ItemInstance(si.uid, def, affixes, mods);
         }
 
         private static ItemSaveData[] SerializeItems(IReadOnlyList<ItemInstance> items)
@@ -128,16 +147,17 @@ namespace Game.Infrastructure.Repositories
 
         private static ItemSaveData SerializeItem(ItemInstance item)
         {
-            var mods = new ModSaveData[item.RolledModifiers.Count];
-            for (int i = 0; i < item.RolledModifiers.Count; i++)
+            var affixes = new RolledAffixSaveData[item.RolledAffixes.Count];
+            for (int i = 0; i < item.RolledAffixes.Count; i++)
             {
-                var m = item.RolledModifiers[i];
-                mods[i] = new ModSaveData
+                var a = item.RolledAffixes[i];
+                affixes[i] = new RolledAffixSaveData
                 {
-                    stat = (int)m.Stat,
-                    type = (int)m.Type,
-                    value = m.Value,
-                    source = m.Source
+                    affixId = a.AffixId,
+                    modId = a.ModId,
+                    tier = a.Tier,
+                    value = a.RolledValue,
+                    valueFormat = a.ValueFormat
                 };
             }
 
@@ -145,7 +165,8 @@ namespace Game.Infrastructure.Repositories
             {
                 uid = item.Uid,
                 defId = item.Definition.Id,
-                mods = mods
+                affixes = affixes,
+                mods = null
             };
         }
 
@@ -158,10 +179,11 @@ namespace Game.Infrastructure.Repositories
         }
 
         [Serializable]
-        private struct ItemSaveData
+        private class ItemSaveData
         {
             public string uid;
             public string defId;
+            public RolledAffixSaveData[] affixes;
             public ModSaveData[] mods;
         }
 
@@ -170,6 +192,16 @@ namespace Game.Infrastructure.Repositories
         {
             public int slot;
             public ItemSaveData item;
+        }
+
+        [Serializable]
+        private struct RolledAffixSaveData
+        {
+            public string affixId;
+            public string modId;
+            public int tier;
+            public float value;
+            public string valueFormat;
         }
 
         [Serializable]
