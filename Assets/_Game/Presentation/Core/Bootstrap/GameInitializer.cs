@@ -11,6 +11,7 @@ using Game.Domain.Items;
 using Game.Domain.Progression.TreeTalents;
 using Game.Domain.Skills;
 using Game.Infrastructure.Configs;
+using Game.Infrastructure.Repositories;
 using UnityEngine;
 using InventoryModel = Game.Domain.Inventory.Inventory;
 
@@ -25,6 +26,9 @@ namespace Game.Presentation.Core.Bootstrap
         private readonly ISubscriber<InventoryChangedDTO> _inventoryChangedSub;
         private readonly ISubscriber<TreeTalentsChangedDTO> _treeChangedSub;
         private readonly StartingPresetSO _startingPreset;
+        private readonly GameSessionContext _session;
+        private readonly ISaveSlotManager _slotManager;
+        private readonly LegacyPlayerPrefsMigrationService _migrationService;
 
         private IDisposable _autoSaveSub;
         private IDisposable _treeAutoSaveSub;
@@ -43,7 +47,10 @@ namespace Game.Presentation.Core.Bootstrap
             CalculateHeroStatsUseCase calcStats,
             ISubscriber<InventoryChangedDTO> inventoryChangedSub,
             ISubscriber<TreeTalentsChangedDTO> treeChangedSub,
-            StartingPresetSO startingPreset)
+            StartingPresetSO startingPreset,
+            GameSessionContext session,
+            ISaveSlotManager slotManager,
+            LegacyPlayerPrefsMigrationService migrationService)
         {
             _progressRepo = progressRepo;
             _inventoryRepo = inventoryRepo;
@@ -52,11 +59,15 @@ namespace Game.Presentation.Core.Bootstrap
             _inventoryChangedSub = inventoryChangedSub;
             _treeChangedSub = treeChangedSub;
             _startingPreset = startingPreset;
+            _session = session;
+            _slotManager = slotManager;
+            _migrationService = migrationService;
         }
 
         public void Initialize()
         {
             Debug.Log("[GameInitializer] Starting game...");
+            _migrationService.TryMigrate();
 
             Progress = _progressRepo.Load();
 
@@ -69,7 +80,9 @@ namespace Game.Presentation.Core.Bootstrap
             Loadout = new SkillLoadout();
             TreeTalents = _treeTalentsRepo.Load();
 
-            bool isNewGame = !_progressRepo.HasSave();
+            bool isNewGame = _session.IsNewGame;
+            if (isNewGame)
+                Progress.HeroId = $"{_session.SelectedClass.ToString().ToLowerInvariant()}_hero";
 
             if (_startingPreset != null)
                 ApplyStartingPreset(isNewGame);
@@ -85,9 +98,14 @@ namespace Game.Presentation.Core.Bootstrap
                 _inventoryRepo.Save(Inventory);
                 _progressRepo.Save(Progress);
                 _treeTalentsRepo.Save(TreeTalents);
+                UpdateSlotMetadata();
             });
 
-            _treeAutoSaveSub = _treeChangedSub.Subscribe(_ => _treeTalentsRepo.Save(TreeTalents));
+            _treeAutoSaveSub = _treeChangedSub.Subscribe(_ =>
+            {
+                _treeTalentsRepo.Save(TreeTalents);
+                UpdateSlotMetadata();
+            });
 
             Debug.Log($"[GameInitializer] Hero '{Hero.Id}' ready. Tier: {Progress.CurrentTier}, Map: {Progress.CurrentMap}, Battle: {Progress.CurrentBattle}. " +
                       $"Inventory: {Inventory.Items.Count}/{Inventory.Capacity}, Equipped: {Inventory.Equipped.Count}. " +
@@ -144,7 +162,25 @@ namespace Game.Presentation.Core.Bootstrap
             if (TreeTalents != null)
                 _treeTalentsRepo.Save(TreeTalents);
 
+            UpdateSlotMetadata();
+
             Debug.Log("[GameInitializer] Progress saved on dispose.");
+        }
+
+        private void UpdateSlotMetadata()
+        {
+            if (Progress == null)
+                return;
+
+            _slotManager.UpdateMetadata(new Domain.SaveSystem.SaveSlotMetadata(
+                _slotManager.ActiveSlotIndex,
+                false,
+                Progress.HeroId ?? "default_hero",
+                _session.SelectedClass,
+                TreeTalents != null && TreeTalents.Level > 0 ? TreeTalents.Level : 1,
+                Progress.CurrentTier,
+                Progress.CurrentMap,
+                DateTime.UtcNow.Ticks));
         }
     }
 }

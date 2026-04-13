@@ -10,6 +10,9 @@ namespace Game.Infrastructure.Configs
     [CreateAssetMenu(menuName = "Idle Exile/Starting Preset", fileName = "StartingPreset")]
     public sealed class StartingPresetSO : ScriptableObject
     {
+        [Header("Identity")]
+        public string presetId = "default";
+
         [Header("Hero Base Stats")]
         public List<HeroBaseStat> heroBaseStats = new();
 

@@ -10,15 +10,17 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9, type: 3}
-  m_Name: StartingPreset
+  m_Name: RogueStartingPreset
   m_EditorClassIdentifier: 
+  presetId: default
   heroBaseStats: []
+  heroItemClass: 1
   startingItems:
-  - item: {fileID: 11400000, guid: e8c58850f7c1cb14093b790623847a5e, type: 2}
+  - item: {fileID: 11400000, guid: bb07028a05b8c5546910fcdd2120439b, type: 2}
     autoEquip: 1
     equipSlot: 10
   startingSkills:
-  - skill: {fileID: 11400000, guid: 970d669a6b9de7e4583e6a0fc56d5d25, type: 2}
+  - skill: {fileID: 11400000, guid: e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0, type: 2}
     autoEquip: 1
     slotIndex: 0
   - skill: {fileID: 11400000, guid: f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1, type: 2}

@@ -1,0 +1,43 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements">
+    <Style src="../Styles/Common.uss" />
+    <ui:VisualElement name="save-slots-screen" class="full-screen" style="display: none; align-items: center; justify-content: center;">
+        <ui:VisualElement class="panel" style="width: 680px; align-items: stretch;">
+            <ui:Label text="Select Save Slot" class="panel-header" style="-unity-text-align: middle-center;" />
+            <ui:VisualElement style="flex-direction: row; justify-content: space-between;">
+                <ui:VisualElement class="panel" style="flex: 1; margin-right: 8px;">
+                    <ui:VisualElement style="flex-direction: row; align-items: center; margin-bottom: 8px;">
+                        <ui:VisualElement name="slot-icon-0" style="width: 52px; height: 52px; border-top-width: 1px; border-right-width: 1px; border-bottom-width: 1px; border-left-width: 1px; border-top-color: rgba(255,255,255,0.2); border-right-color: rgba(255,255,255,0.2); border-bottom-color: rgba(255,255,255,0.2); border-left-color: rgba(255,255,255,0.2); margin-right: 8px; align-items: center; justify-content: center;" />
+                        <ui:Label name="label-slot-0" text="Slot 1" style="white-space: normal; flex-grow: 1; color: rgb(235,235,240);" />
+                    </ui:VisualElement>
+                    <ui:Button name="btn-slot-0" text="Select" class="btn menu-btn" />
+                    <ui:Button name="btn-slot-delete-0" text="Delete" class="btn btn--danger menu-btn" />
+                </ui:VisualElement>
+                <ui:VisualElement class="panel" style="flex: 1; margin-left: 4px; margin-right: 4px;">
+                    <ui:VisualElement style="flex-direction: row; align-items: center; margin-bottom: 8px;">
+                        <ui:VisualElement name="slot-icon-1" style="width: 52px; height: 52px; border-top-width: 1px; border-right-width: 1px; border-bottom-width: 1px; border-left-width: 1px; border-top-color: rgba(255,255,255,0.2); border-right-color: rgba(255,255,255,0.2); border-bottom-color: rgba(255,255,255,0.2); border-left-color: rgba(255,255,255,0.2); margin-right: 8px; align-items: center; justify-content: center;" />
+                        <ui:Label name="label-slot-1" text="Slot 2" style="white-space: normal; flex-grow: 1; color: rgb(235,235,240);" />
+                    </ui:VisualElement>
+                    <ui:Button name="btn-slot-1" text="Select" class="btn menu-btn" />
+                    <ui:Button name="btn-slot-delete-1" text="Delete" class="btn btn--danger menu-btn" />
+                </ui:VisualElement>
+                <ui:VisualElement class="panel" style="flex: 1; margin-left: 8px;">
+                    <ui:VisualElement style="flex-direction: row; align-items: center; margin-bottom: 8px;">
+                        <ui:VisualElement name="slot-icon-2" style="width: 52px; height: 52px; border-top-width: 1px; border-right-width: 1px; border-bottom-width: 1px; border-left-width: 1px; border-top-color: rgba(255,255,255,0.2); border-right-color: rgba(255,255,255,0.2); border-bottom-color: rgba(255,255,255,0.2); border-left-color: rgba(255,255,255,0.2); margin-right: 8px; align-items: center; justify-content: center;" />
+                        <ui:Label name="label-slot-2" text="Slot 3" style="white-space: normal; flex-grow: 1; color: rgb(235,235,240);" />
+                    </ui:VisualElement>
+                    <ui:Button name="btn-slot-2" text="Select" class="btn menu-btn" />
+                    <ui:Button name="btn-slot-delete-2" text="Delete" class="btn btn--danger menu-btn" />
+                </ui:VisualElement>
+            </ui:VisualElement>
+            <ui:Button name="btn-save-slots-back" text="Back" class="btn menu-btn" />
+
+            <ui:VisualElement name="overwrite-dialog" class="menu-overlay" style="display: none;">
+                <ui:VisualElement class="panel menu-panel">
+                    <ui:Label name="overwrite-dialog-label" text="Overwrite?" class="panel-header" />
+                    <ui:Button name="btn-overwrite-confirm" text="Overwrite" class="btn btn--danger menu-btn" />
+                    <ui:Button name="btn-overwrite-cancel" text="Cancel" class="btn menu-btn" />
+                </ui:VisualElement>
+            </ui:VisualElement>
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

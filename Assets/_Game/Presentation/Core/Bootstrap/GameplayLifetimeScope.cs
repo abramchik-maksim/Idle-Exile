@@ -41,13 +41,31 @@ namespace Game.Presentation.Core.Bootstrap
         [SerializeField] private LootTableSO _lootTable;
         [SerializeField] private SkillDatabaseSO _skillDatabase;
         [SerializeField] private SkillGemDatabaseSO _skillGemDatabase;
-        [SerializeField] private StartingPresetSO _startingPreset;
         [SerializeField] private TreeTalentsDatabaseSO _treeTalentsDatabase;
         [SerializeField] private TreeUnlockProfileSO _treeUnlockProfile;
         [SerializeField] private ItemAffixDatabaseSO _itemAffixDatabase;
 
         protected override void Configure(IContainerBuilder builder)
         {
+            // --- StartingPresetSO (resolved from parent CharacterDatabaseSO) ---
+            builder.Register<StartingPresetSO>(c =>
+            {
+                var ctx = c.Resolve<GameSessionContext>();
+                var db = c.Resolve<CharacterDatabaseSO>();
+                if (db != null && db.characters != null)
+                {
+                    foreach (var entry in db.characters)
+                    {
+                        if (entry.heroClass == ctx.SelectedClass && entry.preset != null)
+                            return entry.preset;
+                    }
+                    if (db.characters.Count > 0 && db.characters[0].preset != null)
+                        return db.characters[0].preset;
+                }
+                Debug.LogWarning("[GameplayLifetimeScope] No StartingPresetSO found for selected class, returning null.");
+                return null;
+            }, Lifetime.Singleton);
+
             // --- MessagePipe ---
             var options = builder.RegisterMessagePipe();
             builder.RegisterBuildCallback(c => GlobalMessagePipe.SetProvider(c.AsServiceProvider()));
@@ -85,7 +103,7 @@ namespace Game.Presentation.Core.Bootstrap
             builder.Register<IAffixConfigProvider>(
                 _ => new ScriptableObjectAffixConfigProvider(_itemAffixDatabase), Lifetime.Singleton);
             builder.Register<IHeroItemClassProvider>(
-                _ => new HeroItemClassFromPresetProvider(_startingPreset), Lifetime.Singleton);
+                c => new HeroItemClassFromPresetProvider(c.Resolve<StartingPresetSO>()), Lifetime.Singleton);
             builder.Register<IItemAffixModifierResolver, ItemAffixModifierResolver>(Lifetime.Singleton);
             builder.Register<IModCatalogProvider>(
                 _ => new ScriptableObjectModCatalogProvider(_itemAffixDatabase), Lifetime.Singleton);
@@ -96,17 +114,18 @@ namespace Game.Presentation.Core.Bootstrap
                 _ => new ScriptableObjectSkillConfigProvider(_skillDatabase), Lifetime.Singleton);
             builder.Register<ISkillGemConfigProvider>(
                 _ => new ScriptableObjectSkillGemConfigProvider(_skillGemDatabase), Lifetime.Singleton);
-            builder.Register<IPlayerProgressRepository, PlayerPrefsProgressRepository>(Lifetime.Singleton);
+            builder.Register<IPlayerProgressRepository, FileProgressRepository>(Lifetime.Singleton);
             builder.Register<IInventoryRepository>(c =>
-                new PlayerPrefsInventoryRepository(
+                new FileInventoryRepository(
                     c.Resolve<IConfigProvider>(),
-                    c.Resolve<IItemAffixModifierResolver>()), Lifetime.Singleton);
+                    c.Resolve<IItemAffixModifierResolver>(),
+                    c.Resolve<ISaveSlotManager>()), Lifetime.Singleton);
             builder.Register<ITreeTalentsConfigProvider>(c =>
                 new ScriptableObjectTreeTalentsConfigProvider(_treeTalentsDatabase, _treeUnlockProfile), Lifetime.Singleton);
-            builder.Register<ITreeTalentsRepository, PlayerPrefsTreeTalentsRepository>(Lifetime.Singleton);
+            builder.Register<ITreeTalentsRepository, FileTreeTalentsRepository>(Lifetime.Singleton);
             builder.Register<IIconProvider, AddressableIconProvider>(Lifetime.Singleton);
             builder.Register<ITreeTalentsInputReader, TreeTalentsInputReader>(Lifetime.Singleton);
-            builder.RegisterInstance(_startingPreset);
+            builder.Register<LegacyPlayerPrefsMigrationService>(Lifetime.Singleton);
 
             // --- Services & Use Cases ---
             builder.Register<ItemRollingService>(Lifetime.Transient);

@@ -18,6 +18,7 @@
             <ui:VisualElement name="menu-panel" class="panel menu-panel">
                 <ui:Label text="Menu" class="panel-header" style="-unity-text-align: middle-center;" />
                 <ui:Button name="btn-settings" text="Settings" class="btn menu-btn" />
+                <ui:Button name="btn-main-menu" text="Return to Main Menu" class="btn menu-btn" />
                 <ui:Button name="btn-quit" text="Quit Game" class="btn btn--danger menu-btn" />
                 <ui:Button name="btn-close" text="Close" class="btn menu-btn" />
             </ui:VisualElement>
