@@ -23,6 +23,9 @@ namespace Game.Presentation.Combat.Systems
             public float2 HeroPos;
             public float Distance;
             public float AttackRange;
+            public float IgnoreArmorChance;
+            public float DoubleHitChance;
+            public float LifeLeech;
         }
 
         private struct PendingProjectile
@@ -32,6 +35,8 @@ namespace Game.Presentation.Combat.Systems
             public float TotalDamage;
             public bool IsCritical;
             public int VisualId;
+            public float IgnoreArmorChance;
+            public float LifeLeech;
         }
 
         protected override void OnCreate()
@@ -81,13 +86,16 @@ namespace Game.Presentation.Combat.Systems
                 break;
             }
 
+            Entity heroEntity = Entity.Null;
             var meleeHits = new NativeList<PendingMeleeHit>(4, Allocator.Temp);
             var projectiles = new NativeList<PendingProjectile>(4, Allocator.Temp);
 
-            foreach (var (cooldown, heroPos, stats)
+            foreach (var (cooldown, heroPos, stats, entity)
                 in SystemAPI.Query<RefRW<AttackCooldown>, RefRO<Position2D>, RefRO<CombatStats>>()
-                    .WithAll<HeroTag, AttackEnabled>())
+                    .WithAll<HeroTag, AttackEnabled>()
+                    .WithEntityAccess())
             {
+                heroEntity = entity;
                 cooldown.ValueRW.Timer -= dt;
                 if (cooldown.ValueRW.Timer > 0f) continue;
 
@@ -130,7 +138,10 @@ namespace Game.Presentation.Combat.Systems
                         TargetPos = enemyPositions[nearestIdx].Value,
                         HeroPos = heroPos.ValueRO.Value,
                         Distance = dist,
-                        AttackRange = attackRange
+                        AttackRange = attackRange,
+                        IgnoreArmorChance = stats.ValueRO.IgnoreArmorChance,
+                        DoubleHitChance = stats.ValueRO.DoubleHitChance,
+                        LifeLeech = stats.ValueRO.LifeLeech,
                     });
                 }
                 else
@@ -143,7 +154,9 @@ namespace Game.Presentation.Combat.Systems
                         Target = nearest,
                         TotalDamage = totalDamage,
                         IsCritical = isCritical,
-                        VisualId = heroProjectileVisualId
+                        VisualId = heroProjectileVisualId,
+                        IgnoreArmorChance = stats.ValueRO.IgnoreArmorChance,
+                        LifeLeech = stats.ValueRO.LifeLeech,
                     });
                 }
             }
@@ -152,13 +165,16 @@ namespace Game.Presentation.Combat.Systems
             enemyPositions.Dispose();
 
             var ecb = new EntityCommandBuffer(Allocator.Temp);
+            float totalLeech = 0f;
 
             for (int i = 0; i < meleeHits.Length; i++)
             {
                 var hit = meleeHits[i];
 
                 var targetStats = EntityManager.GetComponentData<CombatStats>(hit.Target);
-                float finalDmg = DamageCalculator.ApplyArmorReduction(hit.TotalDamage, targetStats.Armor);
+                bool ignoreArmor = hit.IgnoreArmorChance > 0f && NextRandom() < hit.IgnoreArmorChance;
+                float effectiveArmor = ignoreArmor ? 0f : targetStats.Armor;
+                float finalDmg = DamageCalculator.ApplyArmorReduction(hit.TotalDamage, effectiveArmor);
 
                 targetStats.CurrentHealth -= finalDmg;
                 EntityManager.SetComponentData(hit.Target, targetStats);
@@ -168,6 +184,9 @@ namespace Game.Presentation.Combat.Systems
 
                 if (hasAffixData)
                     ApplyAilmentsOnHit(hit.Target, hit.TotalDamage, affixData);
+
+                if (hit.LifeLeech > 0f)
+                    totalLeech += finalDmg * hit.LifeLeech;
 
                 int actorId = EntityManager.HasComponent<ActorId>(hit.Target)
                     ? EntityManager.GetComponentData<ActorId>(hit.Target).Value
@@ -195,6 +214,31 @@ namespace Game.Presentation.Combat.Systems
                     Timer = 0f,
                     Duration = 0.15f
                 });
+
+                if (hit.DoubleHitChance > 0f && NextRandom() < hit.DoubleHitChance)
+                {
+                    float dh = DamageCalculator.ApplyArmorReduction(hit.TotalDamage, effectiveArmor);
+                    var ts2 = EntityManager.GetComponentData<CombatStats>(hit.Target);
+                    ts2.CurrentHealth -= dh;
+                    EntityManager.SetComponentData(hit.Target, ts2);
+
+                    if (ts2.CurrentHealth <= 0f && !EntityManager.HasComponent<DeadTag>(hit.Target))
+                        ecb.AddComponent<DeadTag>(hit.Target);
+
+                    if (hit.LifeLeech > 0f)
+                        totalLeech += dh * hit.LifeLeech;
+
+                    _damageBuffer.EventQueue.Enqueue(new DamageEvent
+                    {
+                        Amount = dh,
+                        WorldX = hit.TargetPos.x,
+                        WorldY = hit.TargetPos.y,
+                        IsCritical = false,
+                        TargetActorId = actorId,
+                        IsFromHero = true,
+                        DamageCategory = 0
+                    });
+                }
             }
 
             for (int i = 0; i < projectiles.Length; i++)
@@ -210,8 +254,17 @@ namespace Game.Presentation.Combat.Systems
                     Speed = 12f,
                     Damage = p.TotalDamage,
                     IsCritical = p.IsCritical,
-                    VisualId = p.VisualId
+                    VisualId = p.VisualId,
+                    IgnoreArmorChance = p.IgnoreArmorChance,
+                    LifeLeech = p.LifeLeech,
                 });
+            }
+
+            if (totalLeech > 0f && heroEntity != Entity.Null && EntityManager.Exists(heroEntity))
+            {
+                var hs = EntityManager.GetComponentData<CombatStats>(heroEntity);
+                hs.CurrentHealth = math.min(hs.CurrentHealth + totalLeech, hs.MaxHealth);
+                EntityManager.SetComponentData(heroEntity, hs);
             }
 
             ecb.Playback(EntityManager);

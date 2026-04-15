@@ -1,0 +1,33 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6ee9bd02130221d48aa142315abc1a0d, type: 3}
+  m_Name: Map_map_1_1
+  m_EditorClassIdentifier: Game.Infrastructure::Game.Infrastructure.Configs.Combat.MapDefinitionSO
+  id: map_1_1
+  displayName: Twilight Shore
+  description: 
+  locationId: 1
+  battles:
+  - {fileID: 11400000, guid: d0d8b5514363a624a9c11430e6822460, type: 2}
+  - {fileID: 11400000, guid: c390e918a34f27b409ea7d7f82e37a27, type: 2}
+  - {fileID: 11400000, guid: 8d246da9e6f0d774895f172dfab319b0, type: 2}
+  - {fileID: 11400000, guid: 9075a40b4bfe84949af13b08f79ad2be, type: 2}
+  - {fileID: 11400000, guid: f7e4bfc0eae34984cb7a23f07aef8106, type: 2}
+  - {fileID: 11400000, guid: 1427d2f5a960633429a4d6d5fc90df6c, type: 2}
+  - {fileID: 11400000, guid: 8a5fd5002309e8d469fd5d38e6dfa642, type: 2}
+  - {fileID: 11400000, guid: ad151a8c42de20a48a8d93eab1fdae3c, type: 2}
+  - {fileID: 11400000, guid: 9fb6dc21ead00994ab3363a746f7700f, type: 2}
+  - {fileID: 11400000, guid: 2eeefa38ee0e701458bc647690e02f12, type: 2}
+  itemWeightMultiplier: 1
+  currencyWeightMultiplier: 1
+  modifiers: []
+  isBossMap: 0

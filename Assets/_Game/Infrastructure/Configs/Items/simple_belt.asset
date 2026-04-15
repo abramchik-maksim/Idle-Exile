@@ -14,11 +14,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: Game.Infrastructure::Game.Infrastructure.Configs.ItemDefinitionSO
   id: simple_belt
   itemName: Simple belt
-  slot: 7
+  slot: 6
   handedness: 0
   weaponType: 0
   iconAddress: Assets/_Game/Content/UI/Jewelery/fc2068.png
   implicitModifiers:
-  - stat: 4
-    type: 1
+  - stat: 0
+    type: 0
     value: 20

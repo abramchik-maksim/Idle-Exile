@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using Game.Domain.Items;
+using Game.Domain.Skills;
 using Game.Domain.Stats;
 using Game.Infrastructure.Configs.Skills;
 using UnityEngine;
@@ -19,6 +20,10 @@ namespace Game.Infrastructure.Configs
         [Header("Loot")]
         [Tooltip("Filters class-specific affix rolls (Melee / Rogue / Caster mods).")]
         public HeroItemClass heroItemClass = HeroItemClass.Warrior;
+
+        [Header("Allowed Weapons")]
+        [Tooltip("Weapon types this class can find as drops. Empty = all weapon types allowed.")]
+        public List<WeaponType> allowedWeaponTypes = new();
 
         [Header("Starting Items")]
         public List<StartingItem> startingItems = new();

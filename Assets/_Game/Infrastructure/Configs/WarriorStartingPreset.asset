@@ -12,7 +12,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9, type: 3}
   m_Name: WarriorStartingPreset
   m_EditorClassIdentifier: 
+  presetId: default
   heroBaseStats: []
+  heroItemClass: 0
+  allowedWeaponTypes: 02000000
   startingItems:
   - item: {fileID: 11400000, guid: e8c58850f7c1cb14093b790623847a5e, type: 2}
     autoEquip: 1

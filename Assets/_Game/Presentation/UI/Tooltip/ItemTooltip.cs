@@ -2,6 +2,7 @@ using System;
 using UnityEngine.UIElements;
 using Game.Domain.Items;
 using Game.Domain.Stats;
+using Game.Presentation.UI.MainScreen;
 
 namespace Game.Presentation.UI.Tooltip
 {
@@ -229,19 +230,8 @@ namespace Game.Presentation.UI.Tooltip
             _ => $"{mod.Value:F1}"
         };
 
-        private static string FormatStatName(StatType stat) => stat switch
-        {
-            StatType.MaxHealth => "Max Health",
-            StatType.PhysicalDamage => "Physical Damage",
-            StatType.AttackSpeed => "Attack Speed",
-            StatType.CriticalChance => "Critical Chance",
-            StatType.CriticalMultiplier => "Critical Multiplier",
-            StatType.Armor => "Armor",
-            StatType.Evasion => "Evasion",
-            StatType.MovementSpeed => "Movement Speed",
-            StatType.HealthRegen => "Health Regen",
-            _ => stat.ToString()
-        };
+        private static string FormatStatName(StatType stat) =>
+            CharacterTabView.FormatStatName(stat);
 
         private static string FormatSlotName(EquipmentSlotType slot) => slot switch
         {

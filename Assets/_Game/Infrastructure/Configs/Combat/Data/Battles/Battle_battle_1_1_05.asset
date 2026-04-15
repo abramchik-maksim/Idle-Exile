@@ -1,0 +1,28 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ed980d2055b23e74686202f64e0c5052, type: 3}
+  m_Name: Battle_battle_1_1_05
+  m_EditorClassIdentifier: Game.Infrastructure::Game.Infrastructure.Configs.Combat.BattleDefinitionSO
+  id: battle_1_1_05
+  waves:
+  - delayBeforeWave: 1
+    spawns:
+    - enemy: {fileID: 11400000, guid: d66b086addd654c428efe2e1fa26dd4e, type: 2}
+      count: 3
+  - delayBeforeWave: 2
+    spawns:
+    - enemy: {fileID: 11400000, guid: d66b086addd654c428efe2e1fa26dd4e, type: 2}
+      count: 4
+  - delayBeforeWave: 2
+    spawns:
+    - enemy: {fileID: 11400000, guid: 011158767095ea347a3de04b901d0ca5, type: 2}
+      count: 5

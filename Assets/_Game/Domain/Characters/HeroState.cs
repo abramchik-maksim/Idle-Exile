@@ -8,6 +8,16 @@ namespace Game.Domain.Characters
         public string Id { get; }
         public StatCollection Stats { get; }
 
+        private static readonly StatType[] AlwaysVisibleStats =
+        {
+            StatType.FireResistance,
+            StatType.ColdResistance,
+            StatType.LightningResistance,
+            StatType.CorrosionResistance,
+            StatType.Evasion,
+            StatType.BlockChance,
+        };
+
         public HeroState(string id, IReadOnlyDictionary<StatType, float> baseStats = null)
         {
             Id = id;
@@ -24,6 +34,17 @@ namespace Game.Domain.Characters
             else
             {
                 SetDefaults();
+            }
+
+            EnsureAlwaysVisible();
+        }
+
+        private void EnsureAlwaysVisible()
+        {
+            foreach (var stat in AlwaysVisibleStats)
+            {
+                if (Stats.GetBase(stat) == 0f)
+                    Stats.SetBase(stat, 0f);
             }
         }
 

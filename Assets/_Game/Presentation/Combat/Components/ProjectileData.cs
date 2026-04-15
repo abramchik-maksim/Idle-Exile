@@ -9,5 +9,7 @@ namespace Game.Presentation.Combat.Components
         public float Damage;
         public bool IsCritical;
         public int VisualId;
+        public float IgnoreArmorChance;
+        public float LifeLeech;
     }
 }

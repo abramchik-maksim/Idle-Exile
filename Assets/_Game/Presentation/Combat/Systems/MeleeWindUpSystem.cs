@@ -12,6 +12,7 @@ namespace Game.Presentation.Combat.Systems
     {
         private EntityQuery _targetableQuery;
         private DamageEventBufferSystem _damageBuffer;
+        private uint _rngState;
 
         protected override void OnCreate()
         {
@@ -21,6 +22,7 @@ namespace Game.Presentation.Combat.Systems
                 ComponentType.ReadOnly<CombatStats>()
             );
             _damageBuffer = World.GetExistingSystemManaged<DamageEventBufferSystem>();
+            _rngState = (uint)System.Environment.TickCount + 41u;
             RequireForUpdate<MeleeWindUp>();
         }
 
@@ -67,11 +69,14 @@ namespace Game.Presentation.Combat.Systems
                     }
 
                     var targetStats = tStats[i];
+                    bool isHero = EntityManager.HasComponent<HeroTag>(tEntities[i]);
+
+                    if (isHero && targetStats.BlockChance > 0f && NextRandom() < targetStats.BlockChance)
+                        continue;
+
                     float finalDmg = DamageCalculator.ApplyArmorReduction(damage, targetStats.Armor);
 
                     targetStats.CurrentHealth -= finalDmg;
-
-                    bool isHero = EntityManager.HasComponent<HeroTag>(tEntities[i]);
                     EntityManager.SetComponentData(tEntities[i], targetStats);
 
                     if (targetStats.CurrentHealth <= 0f && !isHero
@@ -121,6 +126,14 @@ namespace Game.Presentation.Combat.Systems
 
             ecb.Playback(EntityManager);
             ecb.Dispose();
+        }
+
+        private float NextRandom()
+        {
+            _rngState = _rngState * 747796405u + 2891336453u;
+            uint result = ((_rngState >> (int)((_rngState >> 28) + 4u)) ^ _rngState) * 277803737u;
+            result = (result >> 22) ^ result;
+            return result / (float)uint.MaxValue;
         }
     }
 }

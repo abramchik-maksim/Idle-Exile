@@ -31,7 +31,15 @@ namespace Game.Presentation.Combat.Systems
                 break;
             }
 
+            Entity heroEntity = Entity.Null;
+            foreach (var (_, e) in SystemAPI.Query<RefRO<CombatStats>>().WithAll<HeroTag>().WithEntityAccess())
+            {
+                heroEntity = e;
+                break;
+            }
+
             var ecb = new EntityCommandBuffer(Unity.Collections.Allocator.Temp);
+            float totalLeech = 0f;
 
             foreach (var (pos, proj, entity)
                 in SystemAPI.Query<RefRO<Position2D>, RefRO<ProjectileData>>()
@@ -54,7 +62,9 @@ namespace Game.Presentation.Combat.Systems
                 var targetStats = EntityManager.GetComponentData<CombatStats>(target);
 
                 float rawDmg = proj.ValueRO.Damage;
-                float finalDmg = DamageCalculator.ApplyArmorReduction(rawDmg, targetStats.Armor);
+                bool ignoreArmor = proj.ValueRO.IgnoreArmorChance > 0f && NextRandom() < proj.ValueRO.IgnoreArmorChance;
+                float effectiveArmor = ignoreArmor ? 0f : targetStats.Armor;
+                float finalDmg = DamageCalculator.ApplyArmorReduction(rawDmg, effectiveArmor);
 
                 targetStats.CurrentHealth -= finalDmg;
                 EntityManager.SetComponentData(target, targetStats);
@@ -64,6 +74,9 @@ namespace Game.Presentation.Combat.Systems
 
                 if (hasAffixData)
                     ApplyAilmentsOnHit(target, rawDmg, affixData);
+
+                if (proj.ValueRO.LifeLeech > 0f)
+                    totalLeech += finalDmg * proj.ValueRO.LifeLeech;
 
                 int actorId = EntityManager.HasComponent<ActorId>(target)
                     ? EntityManager.GetComponentData<ActorId>(target).Value
@@ -81,6 +94,13 @@ namespace Game.Presentation.Combat.Systems
                 });
 
                 ecb.DestroyEntity(entity);
+            }
+
+            if (totalLeech > 0f && heroEntity != Entity.Null && EntityManager.Exists(heroEntity))
+            {
+                var hs = EntityManager.GetComponentData<CombatStats>(heroEntity);
+                hs.CurrentHealth = math.min(hs.CurrentHealth + totalLeech, hs.MaxHealth);
+                EntityManager.SetComponentData(heroEntity, hs);
             }
 
             ecb.Playback(EntityManager);

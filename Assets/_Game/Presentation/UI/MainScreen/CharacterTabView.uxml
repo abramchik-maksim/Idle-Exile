@@ -4,8 +4,14 @@
         <ui:ScrollView name="stats-scroll" style="flex-grow: 1; padding: 12px 16px; padding-left: 24px;">
             <ui:Label text="Combat" class="stat-group-header"/>
             <ui:VisualElement name="stats-combat" class="stat-group"/>
+            <ui:Label text="Elemental" class="stat-group-header"/>
+            <ui:VisualElement name="stats-elemental" class="stat-group"/>
             <ui:Label text="Defense" class="stat-group-header"/>
             <ui:VisualElement name="stats-defense" class="stat-group"/>
+            <ui:Label text="Resistances" class="stat-group-header"/>
+            <ui:VisualElement name="stats-resistances" class="stat-group"/>
+            <ui:Label text="Ailments" class="stat-group-header"/>
+            <ui:VisualElement name="stats-ailments" class="stat-group"/>
             <ui:Label text="Utility" class="stat-group-header"/>
             <ui:VisualElement name="stats-utility" class="stat-group"/>
         </ui:ScrollView>

@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using Game.Application.Ports;
 using Game.Domain.Items;
+using Game.Domain.Skills;
 using Game.Domain.Stats;
 
 namespace Game.Application.Loot
@@ -36,7 +37,11 @@ namespace Game.Application.Loot
             var allItems = _config.GetAllItems();
             if (allItems.Count == 0) return null;
 
-            var def = allItems[_random.Next(0, allItems.Count)];
+            var allowed = _heroClass.GetAllowedWeaponTypes();
+            var pool = FilterByAllowedWeapons(allItems, allowed);
+            if (pool.Count == 0) return null;
+
+            var def = pool[_random.Next(0, pool.Count)];
             return RollItem(def, globalStage);
         }
 
@@ -162,5 +167,33 @@ namespace Game.Application.Loot
                 Rarity.Unique => 0,
                 _ => 0
             };
+
+        private static List<ItemDefinition> FilterByAllowedWeapons(
+            IReadOnlyList<ItemDefinition> items, IReadOnlyList<WeaponType> allowed)
+        {
+            if (allowed.Count == 0)
+                return new List<ItemDefinition>(items);
+
+            var result = new List<ItemDefinition>(items.Count);
+            foreach (var item in items)
+            {
+                bool isWeapon = item.Slot == EquipmentSlotType.MainHand
+                             || item.Slot == EquipmentSlotType.OffHand;
+
+                if (isWeapon && item.WeaponType != WeaponType.None)
+                {
+                    bool found = false;
+                    for (int i = 0; i < allowed.Count; i++)
+                    {
+                        if (allowed[i] == item.WeaponType) { found = true; break; }
+                    }
+                    if (!found) continue;
+                }
+
+                result.Add(item);
+            }
+
+            return result;
+        }
     }
 }

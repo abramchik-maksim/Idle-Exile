@@ -11,11 +11,13 @@ namespace Game.Presentation.Combat.Systems
     {
         private const float HitRadius = 0.3f;
         private DamageEventBufferSystem _damageBuffer;
+        private uint _rngState;
 
         protected override void OnCreate()
         {
             RequireForUpdate<EnemyProjectileTag>();
             _damageBuffer = World.GetExistingSystemManaged<DamageEventBufferSystem>();
+            _rngState = (uint)System.Environment.TickCount + 31u;
         }
 
         protected override void OnUpdate()
@@ -41,6 +43,13 @@ namespace Game.Presentation.Combat.Systems
                 if (dist > HitRadius) continue;
 
                 var targetStats = EntityManager.GetComponentData<CombatStats>(target);
+
+                bool blocked = targetStats.BlockChance > 0f && NextRandom() < targetStats.BlockChance;
+                if (blocked)
+                {
+                    ecb.DestroyEntity(entity);
+                    continue;
+                }
 
                 float rawDmg = proj.ValueRO.Damage;
                 float finalDmg = DamageCalculator.ApplyArmorReduction(rawDmg, targetStats.Armor);
@@ -73,6 +82,14 @@ namespace Game.Presentation.Combat.Systems
 
             ecb.Playback(EntityManager);
             ecb.Dispose();
+        }
+
+        private float NextRandom()
+        {
+            _rngState = _rngState * 747796405u + 2891336453u;
+            uint result = ((_rngState >> (int)((_rngState >> 28) + 4u)) ^ _rngState) * 277803737u;
+            result = (result >> 22) ^ result;
+            return result / (float)uint.MaxValue;
         }
     }
 }

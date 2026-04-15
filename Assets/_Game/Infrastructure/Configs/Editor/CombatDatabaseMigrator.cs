@@ -7,100 +7,64 @@ using UnityEngine;
 
 namespace Game.Infrastructure.Configs.Editor
 {
-    public static class CombatDatabaseCreator
+    /// <summary>
+    /// One-shot migration: deletes the old monolithic CombatDatabase.asset
+    /// and rebuilds everything as a pyramid of individual ScriptableObject assets.
+    /// Re-uses the same wave composition logic from the original CombatDatabaseCreator.
+    /// </summary>
+    public static class CombatDatabaseMigrator
     {
         private const string CombatFolder = "Assets/_Game/Infrastructure/Configs/Combat/Data";
         private const string BattlesFolder = "Assets/_Game/Infrastructure/Configs/Combat/Data/Battles";
         private const string MapsFolder = "Assets/_Game/Infrastructure/Configs/Combat/Data/Maps";
         private const string TiersFolder = "Assets/_Game/Infrastructure/Configs/Combat/Data/Tiers";
         private const string DatabasePath = "Assets/_Game/Infrastructure/Configs/Combat/Data/CombatDatabase.asset";
-        private const string LootTablePath = "Assets/_Game/Infrastructure/Configs/Combat/Data/LootTable.asset";
 
-        [MenuItem("Idle Exile/Create Combat Database", priority = 200)]
-        public static void CreateAll()
+        [MenuItem("Tools/Idle Exile/Migrate CombatDatabase to SO Pyramid", priority = 201)]
+        public static void Migrate()
         {
             EnsureFolders();
 
-            var enemies = CreateEnemies();
-            var database = CreateDatabase(enemies);
-            CreateLootTable();
-
-            AssetDatabase.SaveAssets();
-            AssetDatabase.Refresh();
-
-            Debug.Log($"[CombatDatabaseCreator] Created combat database with {enemies.Count} enemies, " +
-                      $"{database.tiers.Count} tiers at {DatabasePath}");
-        }
-
-        private static void EnsureFolders()
-        {
-            foreach (var folder in new[] { CombatFolder, BattlesFolder, MapsFolder, TiersFolder })
+            var oldDb = AssetDatabase.LoadAssetAtPath<CombatDatabaseSO>(DatabasePath);
+            if (oldDb == null)
             {
-                if (!Directory.Exists(folder))
-                    Directory.CreateDirectory(folder);
-            }
-        }
-
-        private static List<EnemyDefinitionSO> CreateEnemies()
-        {
-            var blueprints = new[]
-            {
-                ("skeleton", "Skeleton", 30f, 5f, 2f, 2f),
-                ("zombie", "Zombie", 50f, 8f, 4f, 1.2f),
-                ("ghost", "Ghost", 20f, 10f, 0f, 3f),
-            };
-
-            var result = new List<EnemyDefinitionSO>();
-
-            foreach (var (id, name, hp, dmg, armor, speed) in blueprints)
-            {
-                var path = $"{CombatFolder}/Enemy_{id}.asset";
-                var existing = AssetDatabase.LoadAssetAtPath<EnemyDefinitionSO>(path);
-
-                if (existing != null)
-                {
-                    result.Add(existing);
-                    continue;
-                }
-
-                var so = ScriptableObject.CreateInstance<EnemyDefinitionSO>();
-                so.id = id;
-                so.displayName = name;
-                so.baseHealth = hp;
-                so.baseDamage = dmg;
-                so.baseArmor = armor;
-                so.baseSpeed = speed;
-
-                AssetDatabase.CreateAsset(so, path);
-                result.Add(so);
+                Debug.LogWarning("[CombatMigrator] No CombatDatabase.asset found. Running fresh creator instead.");
+                CombatDatabaseCreator.CreateAll();
+                return;
             }
 
-            return result;
-        }
-
-        private static CombatDatabaseSO CreateDatabase(List<EnemyDefinitionSO> enemies)
-        {
-            var existing = AssetDatabase.LoadAssetAtPath<CombatDatabaseSO>(DatabasePath);
-            if (existing != null)
+            var enemies = oldDb.enemies;
+            if (enemies == null || enemies.Count == 0)
             {
-                Debug.Log("[CombatDatabaseCreator] CombatDatabase already exists, skipping.");
-                return existing;
+                Debug.LogError("[CombatMigrator] CombatDatabase has no enemies. Aborting.");
+                return;
             }
 
-            var skeleton = enemies.Find(e => e.id == "skeleton");
-            var zombie = enemies.Find(e => e.id == "zombie");
-            var ghost = enemies.Find(e => e.id == "ghost");
+            var skeleton = enemies.Find(e => e != null && e.id == "skeleton");
+            var zombie = enemies.Find(e => e != null && e.id == "zombie");
+            var ghost = enemies.Find(e => e != null && e.id == "ghost");
 
             var battles = CreateBattleAssets(skeleton, zombie, ghost);
             var map = CreateMapAsset("map_1_1", "Twilight Shore", "1", battles);
             var tier = CreateTierAsset("tier_1", "Act I", 1f, true, new List<MapDefinitionSO> { map });
 
-            var db = ScriptableObject.CreateInstance<CombatDatabaseSO>();
-            db.enemies = new List<EnemyDefinitionSO>(enemies);
-            db.tiers = new List<TierDefinitionSO> { tier };
+            oldDb.tiers = new List<TierDefinitionSO> { tier };
+            EditorUtility.SetDirty(oldDb);
 
-            AssetDatabase.CreateAsset(db, DatabasePath);
-            return db;
+            AssetDatabase.SaveAssets();
+            AssetDatabase.Refresh();
+
+            Debug.Log($"[CombatMigrator] Migration complete. " +
+                      $"Created {battles.Count} battles, 1 map, 1 tier as separate SO assets.");
+        }
+
+        private static void EnsureFolders()
+        {
+            foreach (var folder in new[] { BattlesFolder, MapsFolder, TiersFolder })
+            {
+                if (!Directory.Exists(folder))
+                    Directory.CreateDirectory(folder);
+            }
         }
 
         private static List<BattleDefinitionSO> CreateBattleAssets(
@@ -137,7 +101,12 @@ namespace Game.Infrastructure.Configs.Editor
         {
             string path = $"{MapsFolder}/Map_{id}.asset";
             var existing = AssetDatabase.LoadAssetAtPath<MapDefinitionSO>(path);
-            if (existing != null) return existing;
+            if (existing != null)
+            {
+                existing.battles = battles;
+                EditorUtility.SetDirty(existing);
+                return existing;
+            }
 
             var so = ScriptableObject.CreateInstance<MapDefinitionSO>();
             so.id = id;
@@ -157,7 +126,13 @@ namespace Game.Infrastructure.Configs.Editor
         {
             string path = $"{TiersFolder}/Tier_{id}.asset";
             var existing = AssetDatabase.LoadAssetAtPath<TierDefinitionSO>(path);
-            if (existing != null) return existing;
+            if (existing != null)
+            {
+                existing.maps = maps;
+                existing.hasForcedStartMap = hasForcedStartMap;
+                EditorUtility.SetDirty(existing);
+                return existing;
+            }
 
             var so = ScriptableObject.CreateInstance<TierDefinitionSO>();
             so.id = id;
@@ -201,26 +176,6 @@ namespace Game.Infrastructure.Configs.Editor
             }
 
             return waves;
-        }
-
-        private static void CreateLootTable()
-        {
-            var existing = AssetDatabase.LoadAssetAtPath<LootTableSO>(LootTablePath);
-            if (existing != null)
-            {
-                Debug.Log("[CombatDatabaseCreator] LootTable already exists, skipping.");
-                return;
-            }
-
-            var lt = ScriptableObject.CreateInstance<LootTableSO>();
-            lt.baseDropChance = 0.3f;
-            lt.dropChancePerBattle = 0.025f;
-            lt.maxDropChance = 0.65f;
-            lt.bonusDropChancePerTier = 0.1f;
-            lt.minModValue = 1f;
-            lt.maxModValue = 10f;
-
-            AssetDatabase.CreateAsset(lt, LootTablePath);
         }
     }
 }

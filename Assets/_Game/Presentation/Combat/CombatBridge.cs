@@ -153,20 +153,7 @@ namespace Game.Presentation.Combat
             float cooldown = attackSpeed > 0 ? 1f / attackSpeed : 1f;
 
             _entityManager.SetComponentData(_heroEntity, new Position2D { Value = HeroStartPosition });
-            _entityManager.SetComponentData(_heroEntity, new CombatStats
-            {
-                MaxHealth = hero.Stats.GetFinal(StatType.MaxHealth),
-                CurrentHealth = hero.Stats.GetFinal(StatType.CurrentHealth),
-                PhysicalDamage = hero.Stats.GetFinal(StatType.PhysicalDamage),
-                FireDamage = hero.Stats.GetFinal(StatType.FireDamage),
-                ColdDamage = hero.Stats.GetFinal(StatType.ColdDamage),
-                LightningDamage = hero.Stats.GetFinal(StatType.LightningDamage),
-                CriticalChance = hero.Stats.GetFinal(StatType.CriticalChance),
-                CriticalMultiplier = hero.Stats.GetFinal(StatType.CriticalMultiplier),
-                AttackSpeed = attackSpeed,
-                Armor = hero.Stats.GetFinal(StatType.Armor),
-                MoveSpeed = hero.Stats.GetFinal(StatType.MovementSpeed)
-            });
+            _entityManager.SetComponentData(_heroEntity, BuildCombatStats(hero, attackSpeed));
             _entityManager.SetComponentData(_heroEntity, new AttackCooldown { Cooldown = cooldown, Timer = cooldown });
             _entityManager.SetComponentData(_heroEntity, new ActorId { Value = 0 });
             _entityManager.SetComponentData(_heroEntity, new Targetable { AggroWeight = 10f });
@@ -181,6 +168,33 @@ namespace Game.Presentation.Combat
             RefreshSkillAffixData();
 
             Debug.Log($"[CombatBridge] Hero entity created. Damage: {hero.Stats.GetFinal(StatType.PhysicalDamage)}, AS: {attackSpeed}");
+        }
+
+        private CombatStats BuildCombatStats(Domain.Characters.HeroState hero, float attackSpeed)
+        {
+            return new CombatStats
+            {
+                MaxHealth = hero.Stats.GetFinal(StatType.MaxHealth),
+                CurrentHealth = hero.Stats.GetFinal(StatType.CurrentHealth),
+                PhysicalDamage = hero.Stats.GetFinal(StatType.PhysicalDamage),
+                FireDamage = hero.Stats.GetFinal(StatType.FireDamage),
+                ColdDamage = hero.Stats.GetFinal(StatType.ColdDamage),
+                LightningDamage = hero.Stats.GetFinal(StatType.LightningDamage),
+                CriticalChance = hero.Stats.GetFinal(StatType.CriticalChance),
+                CriticalMultiplier = hero.Stats.GetFinal(StatType.CriticalMultiplier),
+                AttackSpeed = attackSpeed,
+                Armor = hero.Stats.GetFinal(StatType.Armor),
+                MoveSpeed = hero.Stats.GetFinal(StatType.MovementSpeed),
+                Evasion = hero.Stats.GetFinal(StatType.Evasion),
+                BlockChance = hero.Stats.GetFinal(StatType.BlockChance),
+                LifeLeech = hero.Stats.GetFinal(StatType.LifeLeech),
+                FireResistance = hero.Stats.GetFinal(StatType.FireResistance),
+                ColdResistance = hero.Stats.GetFinal(StatType.ColdResistance),
+                LightningResistance = hero.Stats.GetFinal(StatType.LightningResistance),
+                CorrosionResistance = hero.Stats.GetFinal(StatType.CorrosionResistance),
+                DoubleHitChance = hero.Stats.GetFinal(StatType.DoubleHitChance),
+                IgnoreArmorChance = hero.Stats.GetFinal(StatType.IgnoreArmorChance),
+            };
         }
 
         private void UpdateHeroAttackRange()
@@ -372,8 +386,32 @@ namespace Game.Presentation.Combat
                 }
             }
 
+            MergeGearAilmentChances(ref data);
+            MergeGearGainAs(ref data);
+
             _entityManager.SetComponentData(_heroEntity, data);
             ApplyBuffBonuses();
+        }
+
+        private void MergeGearAilmentChances(ref HeroSkillAffixData data)
+        {
+            var hero = _gameState.Hero;
+            data.IgniteChance += hero.Stats.GetFinal(StatType.IgniteChance)
+                                 + hero.Stats.GetFinal(StatType.AilmentChanceAll);
+            data.ChillChance  += hero.Stats.GetFinal(StatType.ChillChance)
+                                 + hero.Stats.GetFinal(StatType.AilmentChanceAll);
+            data.ShockChance  += hero.Stats.GetFinal(StatType.ShockChance)
+                                 + hero.Stats.GetFinal(StatType.AilmentChanceAll);
+            data.BleedChance  += hero.Stats.GetFinal(StatType.BleedChance)
+                                 + hero.Stats.GetFinal(StatType.AilmentChanceAll);
+        }
+
+        private void MergeGearGainAs(ref HeroSkillAffixData data)
+        {
+            var hero = _gameState.Hero;
+            data.GainAsFirePercent      += hero.Stats.GetFinal(StatType.GainAsFirePercent);
+            data.GainAsColdPercent      += hero.Stats.GetFinal(StatType.GainAsColdPercent);
+            data.GainAsLightningPercent += hero.Stats.GetFinal(StatType.GainAsLightningPercent);
         }
 
         private void ApplyFlatDamageAffix(SkillAffix affix)
@@ -454,32 +492,36 @@ namespace Game.Presentation.Combat
             return weapon.Definition.WeaponType == requiredWeapon;
         }
 
+        private static float Stat(IReadOnlyDictionary<StatType, float> s, StatType t, float fallback = 0f) =>
+            s.TryGetValue(t, out var v) ? v : fallback;
+
         private void OnHeroStatsChanged(HeroStatsChangedDTO dto)
         {
             if (!IsReady || !_entityManager.Exists(_heroEntity)) return;
 
-            float physDmg = dto.FinalStats.TryGetValue(StatType.PhysicalDamage, out var d) ? d : 10f;
-            float fireDmg = dto.FinalStats.TryGetValue(StatType.FireDamage, out var fd) ? fd : 0f;
-            float coldDmg = dto.FinalStats.TryGetValue(StatType.ColdDamage, out var cd2) ? cd2 : 0f;
-            float ltngDmg = dto.FinalStats.TryGetValue(StatType.LightningDamage, out var ld) ? ld : 0f;
-            float maxHp = dto.FinalStats.TryGetValue(StatType.MaxHealth, out var h) ? h : 100f;
-            float armor = dto.FinalStats.TryGetValue(StatType.Armor, out var a) ? a : 5f;
-            float atkSpd = dto.FinalStats.TryGetValue(StatType.AttackSpeed, out var s) ? s : 1f;
-            float critChance = dto.FinalStats.TryGetValue(StatType.CriticalChance, out var cc) ? cc : 0.05f;
-            float critMulti = dto.FinalStats.TryGetValue(StatType.CriticalMultiplier, out var cm) ? cm : 1.5f;
-            float moveSpd = dto.FinalStats.TryGetValue(StatType.MovementSpeed, out var m) ? m : 3f;
+            var f = dto.FinalStats;
+            float atkSpd = Stat(f, StatType.AttackSpeed, 1f);
 
             var stats = _entityManager.GetComponentData<CombatStats>(_heroEntity);
-            stats.MaxHealth = maxHp;
-            stats.PhysicalDamage = physDmg;
-            stats.FireDamage = fireDmg;
-            stats.ColdDamage = coldDmg;
-            stats.LightningDamage = ltngDmg;
-            stats.CriticalChance = critChance;
-            stats.CriticalMultiplier = critMulti;
-            stats.Armor = armor;
-            stats.AttackSpeed = atkSpd;
-            stats.MoveSpeed = moveSpd;
+            stats.MaxHealth          = Stat(f, StatType.MaxHealth, 100f);
+            stats.PhysicalDamage     = Stat(f, StatType.PhysicalDamage, 10f);
+            stats.FireDamage         = Stat(f, StatType.FireDamage);
+            stats.ColdDamage         = Stat(f, StatType.ColdDamage);
+            stats.LightningDamage    = Stat(f, StatType.LightningDamage);
+            stats.CriticalChance     = Stat(f, StatType.CriticalChance, 0.05f);
+            stats.CriticalMultiplier = Stat(f, StatType.CriticalMultiplier, 1.5f);
+            stats.Armor              = Stat(f, StatType.Armor, 5f);
+            stats.AttackSpeed        = atkSpd;
+            stats.MoveSpeed          = Stat(f, StatType.MovementSpeed, 3f);
+            stats.Evasion            = Stat(f, StatType.Evasion);
+            stats.BlockChance        = Stat(f, StatType.BlockChance);
+            stats.LifeLeech          = Stat(f, StatType.LifeLeech);
+            stats.FireResistance     = Stat(f, StatType.FireResistance);
+            stats.ColdResistance     = Stat(f, StatType.ColdResistance);
+            stats.LightningResistance = Stat(f, StatType.LightningResistance);
+            stats.CorrosionResistance = Stat(f, StatType.CorrosionResistance);
+            stats.DoubleHitChance    = Stat(f, StatType.DoubleHitChance);
+            stats.IgnoreArmorChance  = Stat(f, StatType.IgnoreArmorChance);
             _entityManager.SetComponentData(_heroEntity, stats);
 
             float cooldown = atkSpd > 0 ? 1f / atkSpd : 1f;
@@ -487,9 +529,10 @@ namespace Game.Presentation.Combat
             cd.Cooldown = cooldown;
             _entityManager.SetComponentData(_heroEntity, cd);
 
+            RefreshSkillAffixData();
             RefreshAttackState();
 
-            Debug.Log($"[CombatBridge] Hero stats updated. Damage: {physDmg}, AS: {atkSpd}");
+            Debug.Log($"[CombatBridge] Hero stats updated. Damage: {stats.PhysicalDamage}, AS: {atkSpd}");
         }
 
         private void OnDestroy()
