@@ -15,6 +15,7 @@ namespace Game.Presentation.Combat.Systems
             public float2 Origin;
             public Entity Target;
             public float Damage;
+            public int VisualId;
         }
 
         protected override void OnCreate()
@@ -27,9 +28,9 @@ namespace Game.Presentation.Combat.Systems
             float dt = SystemAPI.Time.DeltaTime;
             var pending = new NativeList<PendingProjectile>(4, Allocator.Temp);
 
-            foreach (var (pos, behavior, target, cooldown, stats, status)
+            foreach (var (pos, behavior, target, cooldown, stats, status, projVisId)
                 in SystemAPI.Query<RefRO<Position2D>, RefRO<EnemyBehavior>, RefRO<TargetEntity>,
-                    RefRW<AttackCooldown>, RefRO<CombatStats>, RefRO<StatusEffects>>()
+                    RefRW<AttackCooldown>, RefRO<CombatStats>, RefRO<StatusEffects>, RefRO<ProjectileVisualId>>()
                     .WithAll<EnemyTag>()
                     .WithNone<DeadTag>())
             {
@@ -59,7 +60,8 @@ namespace Game.Presentation.Combat.Systems
                 {
                     Origin = pos.ValueRO.Value,
                     Target = targetEntity,
-                    Damage = stats.ValueRO.PhysicalDamage
+                    Damage = stats.ValueRO.PhysicalDamage,
+                    VisualId = projVisId.ValueRO.Value
                 });
             }
 
@@ -78,7 +80,8 @@ namespace Game.Presentation.Combat.Systems
                         Target = p.Target,
                         Speed = 8f,
                         Damage = p.Damage,
-                        IsCritical = false
+                        IsCritical = false,
+                        VisualId = p.VisualId
                     });
                 }
 

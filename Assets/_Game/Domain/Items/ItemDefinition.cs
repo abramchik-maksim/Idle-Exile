@@ -8,7 +8,6 @@ namespace Game.Domain.Items
     {
         public string Id { get; }
         public string Name { get; }
-        public Rarity Rarity { get; }
         public EquipmentSlotType Slot { get; }
         public Handedness Handedness { get; }
         public WeaponType WeaponType { get; }
@@ -16,7 +15,7 @@ namespace Game.Domain.Items
         public IReadOnlyList<Modifier> ImplicitModifiers { get; }
 
         public ItemDefinition(
-            string id, string name, Rarity rarity,
+            string id, string name,
             EquipmentSlotType slot, IReadOnlyList<Modifier> implicitModifiers,
             string iconAddress = null,
             Handedness handedness = Handedness.None,
@@ -24,7 +23,6 @@ namespace Game.Domain.Items
         {
             Id = id;
             Name = name;
-            Rarity = rarity;
             Slot = slot;
             Handedness = handedness;
             WeaponType = weaponType;

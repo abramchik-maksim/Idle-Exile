@@ -31,6 +31,7 @@ namespace Game.Presentation.Combat.Systems
             public Entity Target;
             public float TotalDamage;
             public bool IsCritical;
+            public int VisualId;
         }
 
         protected override void OnCreate()
@@ -70,6 +71,13 @@ namespace Game.Presentation.Combat.Systems
             {
                 affixData = affix.ValueRO;
                 hasAffixData = true;
+                break;
+            }
+
+            int heroProjectileVisualId = 0;
+            foreach (var projVis in SystemAPI.Query<RefRO<ProjectileVisualId>>().WithAll<HeroTag>())
+            {
+                heroProjectileVisualId = projVis.ValueRO.Value;
                 break;
             }
 
@@ -134,7 +142,8 @@ namespace Game.Presentation.Combat.Systems
                         HeroPos = heroPos.ValueRO.Value,
                         Target = nearest,
                         TotalDamage = totalDamage,
-                        IsCritical = isCritical
+                        IsCritical = isCritical,
+                        VisualId = heroProjectileVisualId
                     });
                 }
             }
@@ -200,7 +209,8 @@ namespace Game.Presentation.Combat.Systems
                     Target = p.Target,
                     Speed = 12f,
                     Damage = p.TotalDamage,
-                    IsCritical = p.IsCritical
+                    IsCritical = p.IsCritical,
+                    VisualId = p.VisualId
                 });
             }
 

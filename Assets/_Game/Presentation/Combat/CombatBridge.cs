@@ -17,6 +17,7 @@ using Game.Domain.Skills;
 using Game.Domain.Skills.Crafting;
 using Game.Domain.Stats;
 using Game.Presentation.Combat.Components;
+using Game.Presentation.Combat.Rendering;
 
 namespace Game.Presentation.Combat
 {
@@ -26,6 +27,9 @@ namespace Game.Presentation.Combat
         private WaveSpawner _waveSpawner;
         private DamageEventProcessor _damageProcessor;
         private UtilitySkillRunner _utilityRunner;
+        private CombatVisualManager _visualManager;
+        private ICharacterConfigProvider _characterConfig;
+        private GameSessionContext _session;
 
         private ISubscriber<HeroStatsChangedDTO> _heroStatsChangedSub;
         private ISubscriber<SkillEquippedDTO> _skillEquippedSub;
@@ -48,6 +52,9 @@ namespace Game.Presentation.Combat
             WaveSpawner waveSpawner,
             DamageEventProcessor damageProcessor,
             UtilitySkillRunner utilityRunner,
+            CombatVisualManager visualManager,
+            ICharacterConfigProvider characterConfig,
+            GameSessionContext session,
             ISubscriber<HeroStatsChangedDTO> heroStatsChangedSub,
             ISubscriber<SkillEquippedDTO> skillEquippedSub,
             ISubscriber<SkillUnequippedDTO> skillUnequippedSub,
@@ -61,6 +68,9 @@ namespace Game.Presentation.Combat
             _waveSpawner = waveSpawner;
             _damageProcessor = damageProcessor;
             _utilityRunner = utilityRunner;
+            _visualManager = visualManager;
+            _characterConfig = characterConfig;
+            _session = session;
             _heroStatsChangedSub = heroStatsChangedSub;
             _skillEquippedSub = skillEquippedSub;
             _skillUnequippedSub = skillUnequippedSub;
@@ -105,7 +115,7 @@ namespace Game.Presentation.Combat
 
             SpawnHeroEntity();
 
-            _waveSpawner.Initialize(_entityManager, 1);
+            _waveSpawner.Initialize(_entityManager, _visualManager, 1);
             _damageProcessor.Initialize(world.GetExistingSystemManaged<Systems.DamageEventBufferSystem>());
 
             _utilityRunner.OnBuffsChanged += ApplyBuffBonuses;
@@ -133,7 +143,9 @@ namespace Game.Presentation.Combat
                 typeof(StatusEffects),
                 typeof(AilmentState),
                 typeof(HeroAttackRange),
-                typeof(HeroSkillAffixData)
+                typeof(HeroSkillAffixData),
+                typeof(VisualId),
+                typeof(ProjectileVisualId)
             );
             _entityManager.AddBuffer<BleedStack>(_heroEntity);
 
@@ -158,6 +170,12 @@ namespace Game.Presentation.Combat
             _entityManager.SetComponentData(_heroEntity, new AttackCooldown { Cooldown = cooldown, Timer = cooldown });
             _entityManager.SetComponentData(_heroEntity, new ActorId { Value = 0 });
             _entityManager.SetComponentData(_heroEntity, new Targetable { AggroWeight = 10f });
+
+            var charDef = _characterConfig.GetByClass(_session.SelectedClass);
+            int heroVisualId = charDef.VisualId;
+            _entityManager.SetComponentData(_heroEntity, new VisualId { Value = heroVisualId });
+            _entityManager.SetComponentData(_heroEntity, new ProjectileVisualId { Value = charDef.ProjectileVisualId });
+            _visualManager.OnEntitySpawned(0, heroVisualId);
 
             UpdateHeroAttackRange();
             RefreshSkillAffixData();

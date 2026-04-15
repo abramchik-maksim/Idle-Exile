@@ -15,5 +15,11 @@ namespace Game.Application.Ports
 
         float GetDropChance(int battleIndex, int tierIndex);
         float GetBonusDropChance(int tierIndex);
+
+        /// <summary>
+        /// Returns the two map options for a given choice point within a tier.
+        /// choiceIndex: 0-based index of the choice (e.g. 0 = first choice after forced/previous map).
+        /// </summary>
+        (MapDefinition Option1, MapDefinition Option2) GetMapChoice(int tierIndex, int choiceIndex);
     }
 }

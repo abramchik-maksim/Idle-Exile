@@ -21,5 +21,6 @@ MonoBehaviour:
   archetype: 1
   attackRange: 5
   attackSpeed: 0.8
-  castDuration: 0
-  spellId: 0
+  spell: {fileID: 0}
+  visualId: 3
+  projectileVisualId: 100

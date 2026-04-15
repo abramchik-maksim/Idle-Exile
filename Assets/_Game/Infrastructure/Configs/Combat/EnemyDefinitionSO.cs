@@ -23,8 +23,15 @@ namespace Game.Infrastructure.Configs.Combat
         [Tooltip("Assign a Spell Definition SO. Only used when Archetype = Caster.")]
         public SpellDefinitionSO spell;
 
+        [Header("Visuals")]
+        [Tooltip("Index into CombatVisualDatabaseSO entries")]
+        public int visualId;
+        [Tooltip("Index into CombatVisualDatabaseSO entries for ranged projectile sprite")]
+        public int projectileVisualId;
+
         public EnemyDefinition ToDomain() =>
             new(id, displayName, baseHealth, baseDamage, baseArmor, baseSpeed,
-                archetype, attackRange, attackSpeed, spell != null ? spell.ToDomain() : null);
+                archetype, attackRange, attackSpeed, spell != null ? spell.ToDomain() : null,
+                visualId, projectileVisualId);
     }
 }

@@ -66,6 +66,8 @@ namespace Game.Presentation.Combat
             _cam.rect = new Rect(0f, 0f, _viewportWidth, 1f);
             _cam.nearClipPlane = _nearClip;
             _cam.farClipPlane = _farClip;
+            _cam.transparencySortMode = TransparencySortMode.CustomAxis;
+            _cam.transparencySortAxis = new Vector3(0f, 1f, 0f);
 
             _targetOrthoSize = _cam.orthographicSize;
 

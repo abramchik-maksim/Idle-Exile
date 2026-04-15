@@ -61,6 +61,11 @@ namespace Game.Infrastructure.Configs.Combat
 
         public float GetBonusDropChance(int tierIndex) => tierIndex * 0.1f;
 
+        public (MapDefinition Option1, MapDefinition Option2) GetMapChoice(int tierIndex, int choiceIndex)
+        {
+            return (null, null);
+        }
+
         private void BuildEnemies()
         {
             _enemies["skeleton"] = new EnemyDefinition("skeleton", "Skeleton", 30f, 5f, 2f, 2f);

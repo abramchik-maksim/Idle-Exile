@@ -70,7 +70,7 @@ namespace Game.Presentation.UI.Presenters
 
         private void HandleGenerateItem()
         {
-            var item = _itemRolling.RollRandomItem();
+            var item = _itemRolling.RollRandomItem(1);
             if (item == null)
             {
                 _cheatsView.SetFeedback("No item definitions available.");
@@ -88,7 +88,7 @@ namespace Game.Presentation.UI.Presenters
             _inventoryChangedPub.Publish(new InventoryChangedDTO());
 
             var def = item.Definition;
-            string rarityTag = def.Rarity != Rarity.Normal ? $" [{def.Rarity}]" : "";
+            string rarityTag = item.Rarity != Rarity.Normal ? $" [{item.Rarity}]" : "";
             int rolledCount = item.RolledAffixes.Count > 0 ? item.RolledAffixes.Count : item.RolledModifiers.Count;
             _cheatsView.SetFeedback($"Added: {def.Name}{rarityTag}\n+{rolledCount} rolled lines");
             Debug.Log($"[CheatsPresenter] Generated item: {def.Name} ({def.Slot}) rolledLines={rolledCount}");

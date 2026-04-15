@@ -120,7 +120,7 @@ namespace Game.Presentation.Core.Bootstrap
                 {
                     if (entry.item == null) continue;
                     var def = entry.item.ToDomain();
-                    var instance = new ItemInstance(def, new List<Domain.Stats.Modifier>());
+                    var instance = new ItemInstance(def, Domain.Items.Rarity.Normal, new List<Domain.Stats.Modifier>());
                     Inventory.TryAdd(instance);
 
                     if (entry.autoEquip)

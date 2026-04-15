@@ -1,0 +1,125 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 713dfc7d780338e479a3ffaea4beaf81, type: 3}
+  m_Name: DropQualityDatabase
+  m_EditorClassIdentifier: Game.Infrastructure::Game.Infrastructure.ItemAffixes.DropQualityDatabaseSO
+  bands:
+  - progressBand: 1
+    idleStageMin: 1
+    idleStageMax: 9
+    allowedTierMin: 6
+    allowedTierMax: 8
+    tierBias: 0
+    qualityMultiplier: 1
+    weightNormal: 35
+    weightMagic: 45
+    weightRare: 15
+    weightMythic: 5
+  - progressBand: 2
+    idleStageMin: 10
+    idleStageMax: 19
+    allowedTierMin: 5
+    allowedTierMax: 8
+    tierBias: 0.05
+    qualityMultiplier: 1.03
+    weightNormal: 30
+    weightMagic: 45
+    weightRare: 18
+    weightMythic: 7
+  - progressBand: 3
+    idleStageMin: 20
+    idleStageMax: 34
+    allowedTierMin: 4
+    allowedTierMax: 7
+    tierBias: 0.1
+    qualityMultiplier: 1.06
+    weightNormal: 25
+    weightMagic: 42
+    weightRare: 23
+    weightMythic: 10
+  - progressBand: 4
+    idleStageMin: 35
+    idleStageMax: 49
+    allowedTierMin: 3
+    allowedTierMax: 7
+    tierBias: 0.15
+    qualityMultiplier: 1.1
+    weightNormal: 20
+    weightMagic: 40
+    weightRare: 27
+    weightMythic: 13
+  - progressBand: 5
+    idleStageMin: 50
+    idleStageMax: 69
+    allowedTierMin: 3
+    allowedTierMax: 6
+    tierBias: 0.2
+    qualityMultiplier: 1.14
+    weightNormal: 15
+    weightMagic: 37
+    weightRare: 32
+    weightMythic: 16
+  - progressBand: 6
+    idleStageMin: 70
+    idleStageMax: 89
+    allowedTierMin: 2
+    allowedTierMax: 6
+    tierBias: 0.25
+    qualityMultiplier: 1.18
+    weightNormal: 10
+    weightMagic: 33
+    weightRare: 37
+    weightMythic: 20
+  - progressBand: 7
+    idleStageMin: 90
+    idleStageMax: 114
+    allowedTierMin: 2
+    allowedTierMax: 5
+    tierBias: 0.3
+    qualityMultiplier: 1.23
+    weightNormal: 5
+    weightMagic: 28
+    weightRare: 42
+    weightMythic: 25
+  - progressBand: 8
+    idleStageMin: 115
+    idleStageMax: 139
+    allowedTierMin: 1
+    allowedTierMax: 5
+    tierBias: 0.35
+    qualityMultiplier: 1.28
+    weightNormal: 2
+    weightMagic: 22
+    weightRare: 48
+    weightMythic: 28
+  - progressBand: 9
+    idleStageMin: 140
+    idleStageMax: 169
+    allowedTierMin: 1
+    allowedTierMax: 4
+    tierBias: 0.4
+    qualityMultiplier: 1.34
+    weightNormal: 0
+    weightMagic: 12
+    weightRare: 58
+    weightMythic: 30
+  - progressBand: 10
+    idleStageMin: 170
+    idleStageMax: 999
+    allowedTierMin: 1
+    allowedTierMax: 3
+    tierBias: 0.45
+    qualityMultiplier: 1.4
+    weightNormal: 0
+    weightMagic: 0
+    weightRare: 70
+    weightMythic: 30

@@ -119,7 +119,8 @@ namespace Game.Infrastructure.Repositories
                     mods.Add(new Modifier((StatType)sm.stat, (ModifierType)sm.type, sm.value, sm.source));
             }
 
-            return new ItemInstance(si.uid, def, affixes, mods);
+            var rarity = (Rarity)si.rarity;
+            return new ItemInstance(si.uid, def, rarity, affixes, mods);
         }
 
         private static ItemSaveData[] SerializeItems(IReadOnlyList<ItemInstance> items)
@@ -165,6 +166,7 @@ namespace Game.Infrastructure.Repositories
             {
                 uid = item.Uid,
                 defId = item.Definition.Id,
+                rarity = (int)item.Rarity,
                 affixes = affixes,
                 mods = null
             };
@@ -183,6 +185,7 @@ namespace Game.Infrastructure.Repositories
         {
             public string uid;
             public string defId;
+            public int rarity;
             public RolledAffixSaveData[] affixes;
             public ModSaveData[] mods;
         }

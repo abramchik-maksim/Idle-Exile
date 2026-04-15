@@ -1,0 +1,30 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bf4493e2bbe70284e850326a4744538c, type: 3}
+  m_Name: CombatVisualDatabase
+  m_EditorClassIdentifier: Game.Infrastructure::Game.Infrastructure.Configs.Combat.CombatVisualDatabaseSO
+  entries:
+  - id: 1
+    spriteViewPrefab: {fileID: 4775136470125758144, guid: 4507c1e49a0679c40b23b2be0098d27d, type: 3}
+    scale: 0.4
+  - id: 2
+    spriteViewPrefab: {fileID: 4775136470125758144, guid: 9abf18f42734e464fb0323cd422d0fae, type: 3}
+    scale: 0.4
+  - id: 3
+    spriteViewPrefab: {fileID: 4775136470125758144, guid: 7bae4dfd41dff1c4a9499327788880a2, type: 3}
+    scale: 0.4
+  - id: 0
+    spriteViewPrefab: {fileID: 4775136470125758144, guid: 8a79e3e74c1692848ba746cad17f3883, type: 3}
+    scale: 0.4
+  - id: 100
+    spriteViewPrefab: {fileID: 592616631442060151, guid: 362cefae3c9659249b482f43f9286464, type: 3}
+    scale: 0.4

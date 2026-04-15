@@ -15,8 +15,53 @@ MonoBehaviour:
   m_GroupName: Default Local Group
   m_GUID: 03eacd8e500b22c448eac5a86e7dceeb
   m_SerializeEntries:
+  - m_GUID: 1197444afd6e6de488ba6b165a078a99
+    m_Address: Assets/_Game/Content/UI/Jewelery/fc1848.png
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 1e25f472c6d62a04a852860fb8d9d61d
+    m_Address: Assets/_Game/Content/UI/Jewelery/fc2068.png
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 1eb89262a71a6bf4db40478d99ed1799
+    m_Address: Assets/_Game/Content/UI/Jewelery/fc1843.png
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 2fa0cb00c4fd42c469a3dfc115913ddf
+    m_Address: Assets/_Game/Content/UI/Jewelery/fc1845.png
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 3a5df0b3b7d8cc544b0cf67cb3198a4e
     m_Address: Assets/_Game/Content/UI/Armor/fc2019.png
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 3f45a8566595507458d39ce158c7bfeb
+    m_Address: Assets/_Game/Content/UI/Jewelery/fc1844.png
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 4b79a5c880189d44f8cc5fc0c6bbed1a
+    m_Address: Assets/_Game/Content/UI/Jewelery/fc1850.png
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 5441fdf2de3997e4c81ffc7e4e144c39
+    m_Address: Assets/_Game/Content/UI/Jewelery/fc1847.png
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 59ce52cd0409f1f43b4b69ccb7ecadc0
+    m_Address: Assets/_Game/Content/UI/Jewelery/fc1852.png
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 5f01e423a24de04478f3c7ed1750cde2
+    m_Address: Assets/_Game/Content/UI/Jewelery/fc1849.png
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -25,13 +70,33 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 650e8b80341b9814fad56a6c75328f3f
+    m_Address: Assets/_Game/Content/UI/Jewelery/fc2065.png
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 6eda709dd94636441a3776059adb4d00
+    m_Address: Assets/_Game/Content/UI/Jewelery/fc1846.png
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 709b59a687203a44c899ddebd5e758dc
     m_Address: Assets/_Game/Content/UI/Weapon/fc1441.png
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 77ae0f3c66aaca34fb94dae354da5901
+    m_Address: Assets/_Game/Content/UI/Jewelery/fc2069.png
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 77e52c95006b0fb4c8b7ebd7a0909922
     m_Address: Assets/_Game/Content/UI/Weapon/fc1451.png
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 82d80029089d3fa479e74618730970ff
+    m_Address: Assets/_Game/Content/UI/Jewelery/fc2066.png
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -47,6 +112,41 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 9ee4c46839e91464fa527afd73f134f2
     m_Address: Assets/_Game/Content/UI/Armor/fc2060.png
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: a8cde0e0bf290a84981cca448c83265b
+    m_Address: Assets/_Game/Content/UI/Jewelery/fc2061.png
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: b9d668abab72d3a42830a221f676b4a2
+    m_Address: Assets/_Game/Content/Prefabs/Arenas/FirstArena.prefab
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: c1f481651007e224e94dbb8dbed30491
+    m_Address: Assets/_Game/Content/UI/Jewelery/fc2063.png
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: d634abb0ed8499644ab00eec290def9c
+    m_Address: Assets/_Game/Content/UI/Jewelery/fc1851.png
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: e347a50d59f8cfb4b894ec64a008200a
+    m_Address: Assets/_Game/Content/UI/Jewelery/fc2062.png
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: ed35c3a0d8105af4481dd99ab08bd1ee
+    m_Address: Assets/_Game/Content/UI/Jewelery/fc2067.png
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: f01d622113bfa9c40b066be463be7ee4
+    m_Address: Assets/_Game/Content/UI/Jewelery/fc2064.png
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0

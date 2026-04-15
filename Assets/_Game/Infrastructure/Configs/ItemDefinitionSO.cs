@@ -13,7 +13,6 @@ namespace Game.Infrastructure.Configs
         [Header("Identity")]
         public string id;
         public string itemName;
-        public Rarity rarity;
         public EquipmentSlotType slot;
         public Handedness handedness;
         public WeaponType weaponType;
@@ -33,7 +32,7 @@ namespace Game.Infrastructure.Configs
                 mods[i] = new Modifier(e.stat, e.type, e.value, "implicit");
             }
 
-            return new ItemDefinition(id, itemName, rarity, slot, mods, iconAddress, handedness, weaponType);
+            return new ItemDefinition(id, itemName, slot, mods, iconAddress, handedness, weaponType);
         }
     }
 

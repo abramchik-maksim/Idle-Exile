@@ -131,7 +131,7 @@ namespace Game.Presentation.UI.MainScreen
 
             if (item != null)
             {
-                ApplyRarityStyle(slot, item.Definition.Rarity);
+                ApplyRarityStyle(slot, item.Rarity);
 
                 var icon = CreateIconElement(item, false);
                 slot.Add(icon);
@@ -177,7 +177,7 @@ namespace Game.Presentation.UI.MainScreen
             slot.AddToClassList("inventory-slot");
             slot.userData = item;
 
-            ApplyRarityStyle(slot, item.Definition.Rarity);
+            ApplyRarityStyle(slot, item.Rarity);
 
             var icon = CreateIconElement(item, true);
             slot.Add(icon);
@@ -235,7 +235,7 @@ namespace Game.Presentation.UI.MainScreen
             if (small)
                 icon.AddToClassList("item-icon--small");
 
-            var rarityKey = RarityKey(item.Definition.Rarity);
+            var rarityKey = RarityKey(item.Rarity);
             icon.AddToClassList($"item-icon--placeholder-{rarityKey}");
             return icon;
         }
@@ -249,7 +249,7 @@ namespace Game.Presentation.UI.MainScreen
             if (sprite == null) return;
 
             iconElement.style.backgroundImage = new StyleBackground(sprite);
-            iconElement.RemoveFromClassList($"item-icon--placeholder-{RarityKey(item.Definition.Rarity)}");
+            iconElement.RemoveFromClassList($"item-icon--placeholder-{RarityKey(item.Rarity)}");
         }
 
         private static void ApplyRarityStyle(VisualElement slot, Rarity rarity)

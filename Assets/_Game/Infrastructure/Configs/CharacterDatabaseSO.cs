@@ -19,5 +19,9 @@ namespace Game.Infrastructure.Configs
         [TextArea] public string description;
         public Sprite icon;
         public StartingPresetSO preset;
+        [Tooltip("Index into CombatVisualDatabaseSO entries")]
+        public int visualId;
+        [Tooltip("Index into CombatVisualDatabaseSO entries for projectile sprite")]
+        public int projectileVisualId;
     }
 }

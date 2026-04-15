@@ -24,6 +24,7 @@ using Game.Infrastructure.Repositories;
 using Game.Infrastructure.Services;
 using Game.Presentation.Combat;
 using Game.Presentation.Combat.Rendering;
+using Game.Presentation.Core.Services;
 using Game.Presentation.UI.Combat;
 using Game.Presentation.UI.MainScreen;
 using Game.Presentation.UI.Cheats;
@@ -44,6 +45,9 @@ namespace Game.Presentation.Core.Bootstrap
         [SerializeField] private TreeTalentsDatabaseSO _treeTalentsDatabase;
         [SerializeField] private TreeUnlockProfileSO _treeUnlockProfile;
         [SerializeField] private ItemAffixDatabaseSO _itemAffixDatabase;
+        [SerializeField] private DropQualityDatabaseSO _dropQualityDatabase;
+        [SerializeField] private CombatVisualDatabaseSO _combatVisualDatabase;
+        [SerializeField] private LocationDatabaseSO _locationDatabase;
 
         protected override void Configure(IContainerBuilder builder)
         {
@@ -95,6 +99,9 @@ namespace Game.Presentation.Core.Bootstrap
             builder.RegisterMessageBroker<TreeLevelChangedDTO>(options);
             builder.RegisterMessageBroker<TreeXpChangedDTO>(options);
             builder.RegisterMessageBroker<TreeTalentsChangedDTO>(options);
+            builder.RegisterMessageBroker<MapChangedDTO>(options);
+            builder.RegisterMessageBroker<MapChoiceOfferedDTO>(options);
+            builder.RegisterMessageBroker<MapChosenDTO>(options);
 
             // --- Infrastructure (Singletons) ---
             builder.Register<IRandomService>(c => new UnityRandomService(), Lifetime.Singleton);
@@ -108,6 +115,8 @@ namespace Game.Presentation.Core.Bootstrap
             builder.Register<IModCatalogProvider>(
                 _ => new ScriptableObjectModCatalogProvider(_itemAffixDatabase), Lifetime.Singleton);
             builder.Register<IItemAffixDisplayTextFormatter, ItemAffixDisplayTextFormatter>(Lifetime.Singleton);
+            builder.Register<IDropQualityProvider>(
+                _ => new ScriptableObjectDropQualityProvider(_dropQualityDatabase), Lifetime.Singleton);
             builder.Register<ICombatConfigProvider>(
                 _ => new ScriptableObjectCombatConfigProvider(_combatDatabase, _lootTable), Lifetime.Singleton);
             builder.Register<ISkillConfigProvider>(
@@ -161,9 +170,17 @@ namespace Game.Presentation.Core.Bootstrap
             builder.RegisterComponentInHierarchy<GameMenuView>();
             builder.RegisterComponentInHierarchy<SettingsView>();
 
+            // --- Combat Visual Config ---
+            builder.Register<ICombatVisualProvider>(
+                _ => new CombatVisualProviderAdapter(_combatVisualDatabase), Lifetime.Singleton);
+            builder.RegisterInstance(_locationDatabase);
+
             // --- Combat (MonoBehaviours from scene hierarchy) ---
             builder.RegisterComponentInHierarchy<CombatBridge>().AsImplementedInterfaces().AsSelf();
             builder.RegisterComponentInHierarchy<CombatRenderer>().AsImplementedInterfaces().AsSelf();
+            builder.RegisterComponentInHierarchy<CombatOverlayRenderer>().AsSelf();
+            builder.RegisterComponentInHierarchy<CombatVisualManager>().AsSelf();
+            builder.RegisterComponentInHierarchy<ProjectileVisualManager>().AsSelf();
             builder.RegisterComponentInHierarchy<DamageNumberPool>();
 
             // --- Presenters & Controllers (EntryPoints) ---
@@ -179,6 +196,7 @@ namespace Game.Presentation.Core.Bootstrap
             builder.RegisterEntryPoint<CombatPresenter>();
             builder.RegisterEntryPoint<SkillCraftingPresenter>();
             builder.RegisterEntryPoint<BattleFlowController>();
+            builder.RegisterEntryPoint<LocationController>();
 
             // --- Game bootstrap ---
             builder.RegisterEntryPoint<GameInitializer>();

@@ -18,3 +18,8 @@ MonoBehaviour:
   baseDamage: 5
   baseArmor: 2
   baseSpeed: 2
+  archetype: 0
+  attackRange: 1
+  attackSpeed: 0.8
+  spell: {fileID: 0}
+  visualId: 1

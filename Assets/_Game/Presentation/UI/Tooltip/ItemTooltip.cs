@@ -113,15 +113,15 @@ namespace Game.Presentation.UI.Tooltip
 
             var title = new Label(item.Definition.Name);
             title.AddToClassList("item-tooltip__title");
-            title.AddToClassList(RarityClass(item.Definition.Rarity));
+            title.AddToClassList(RarityClass(item.Rarity));
             title.pickingMode = PickingMode.Ignore;
             panel.Add(title);
 
-            if (item.Definition.Rarity != Rarity.Normal)
+            if (item.Rarity != Rarity.Normal)
             {
-                var rarityLabel = new Label(item.Definition.Rarity.ToString());
+                var rarityLabel = new Label(item.Rarity.ToString());
                 rarityLabel.AddToClassList("item-tooltip__rarity");
-                rarityLabel.AddToClassList(RarityClass(item.Definition.Rarity));
+                rarityLabel.AddToClassList(RarityClass(item.Rarity));
                 rarityLabel.pickingMode = PickingMode.Ignore;
                 panel.Add(rarityLabel);
             }

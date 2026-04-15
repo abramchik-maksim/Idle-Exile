@@ -8,5 +8,6 @@ namespace Game.Presentation.Combat.Components
         public float Speed;
         public float Damage;
         public bool IsCritical;
+        public int VisualId;
     }
 }

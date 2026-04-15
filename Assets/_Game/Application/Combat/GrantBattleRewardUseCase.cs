@@ -21,7 +21,7 @@ namespace Game.Application.Combat
             _itemRolling = itemRolling;
         }
 
-        public IReadOnlyList<ItemInstance> Execute(int battleIndex, int tierIndex)
+        public IReadOnlyList<ItemInstance> Execute(int battleIndex, int tierIndex, int globalStage)
         {
             var drops = new List<ItemInstance>();
 
@@ -30,14 +30,14 @@ namespace Game.Application.Combat
             if (_random.NextDouble() > dropChance)
                 return drops;
 
-            var item = _itemRolling.RollRandomItem();
+            var item = _itemRolling.RollRandomItem(globalStage);
             if (item != null)
                 drops.Add(item);
 
             float bonusChance = _combatConfig.GetBonusDropChance(tierIndex);
             if (bonusChance > 0 && _random.NextDouble() < bonusChance)
             {
-                var bonus = _itemRolling.RollRandomItem();
+                var bonus = _itemRolling.RollRandomItem(globalStage);
                 if (bonus != null)
                     drops.Add(bonus);
             }

@@ -147,7 +147,7 @@ namespace Game.Presentation.UI.DragDrop
         private void CreateGhost(Vector2 position)
         {
             var root = target.panel.visualTree;
-            var rarity = _draggedItem.Definition.Rarity;
+            var rarity = _draggedItem.Rarity;
 
             GetRarityColors(rarity, out var ghostBg, out var ghostBorder, out var placeholderBg);
 

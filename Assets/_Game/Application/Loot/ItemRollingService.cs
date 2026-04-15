@@ -13,33 +13,38 @@ namespace Game.Application.Loot
         private readonly IRandomService _random;
         private readonly IHeroItemClassProvider _heroClass;
         private readonly IItemAffixModifierResolver _resolver;
+        private readonly IDropQualityProvider _dropQuality;
 
         public ItemRollingService(
             IConfigProvider config,
             IAffixConfigProvider affix,
             IRandomService random,
             IHeroItemClassProvider heroClass,
-            IItemAffixModifierResolver resolver)
+            IItemAffixModifierResolver resolver,
+            IDropQualityProvider dropQuality)
         {
             _config = config;
             _affix = affix;
             _random = random;
             _heroClass = heroClass;
             _resolver = resolver;
+            _dropQuality = dropQuality;
         }
 
-        public ItemInstance RollRandomItem()
+        public ItemInstance RollRandomItem(int globalStage)
         {
             var allItems = _config.GetAllItems();
             if (allItems.Count == 0) return null;
 
             var def = allItems[_random.Next(0, allItems.Count)];
-            return RollItem(def);
+            return RollItem(def, globalStage);
         }
 
-        public ItemInstance RollItem(ItemDefinition def)
+        public ItemInstance RollItem(ItemDefinition def, int globalStage)
         {
-            int count = RollAffixCount(def.Rarity);
+            var band = _dropQuality.GetBandForStage(globalStage);
+            var rarity = RollRarity(band);
+            int count = RollAffixCount(rarity);
             var slot = def.Slot.NormalizeForAffixRules();
             var hero = _heroClass.GetHeroItemClass();
 
@@ -54,6 +59,7 @@ namespace Game.Application.Loot
                 {
                     if (!ClassMatches(e.ClassSpecific, hero)) continue;
                     if (!_affix.IsModAllowedOnSlot(e.ModId, slot)) continue;
+                    if (e.Tier < band.AllowedTierMin || e.Tier > band.AllowedTierMax) continue;
                     candidates.Add(e);
                 }
 
@@ -89,7 +95,25 @@ namespace Game.Application.Loot
                 }
             }
 
-            return new ItemInstance(def, affixes, mods);
+            return new ItemInstance(def, rarity, affixes, mods);
+        }
+
+        private Rarity RollRarity(DropQualityBand band)
+        {
+            int total = band.TotalRarityWeight;
+            if (total <= 0) return Rarity.Normal;
+
+            int roll = _random.Next(0, total);
+            int acc = band.WeightNormal;
+            if (roll < acc) return Rarity.Normal;
+
+            acc += band.WeightMagic;
+            if (roll < acc) return Rarity.Magic;
+
+            acc += band.WeightRare;
+            if (roll < acc) return Rarity.Rare;
+
+            return Rarity.Mythic;
         }
 
         private int PickWeightedIndex(List<ItemAffixPoolEntry> candidates, EquipmentSlotType slot, out float pickedWeight)

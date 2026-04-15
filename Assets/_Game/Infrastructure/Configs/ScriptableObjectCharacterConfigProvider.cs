@@ -21,7 +21,9 @@ namespace Game.Infrastructure.Configs
                     entry.heroClass,
                     string.IsNullOrWhiteSpace(entry.displayName) ? entry.heroClass.ToString() : entry.displayName,
                     entry.description ?? string.Empty,
-                    presetId ?? string.Empty);
+                    presetId ?? string.Empty,
+                    entry.visualId,
+                    entry.projectileVisualId);
             }
         }
 

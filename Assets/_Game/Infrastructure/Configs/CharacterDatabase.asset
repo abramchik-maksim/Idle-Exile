@@ -18,13 +18,19 @@ MonoBehaviour:
     description: Warrior start preset.
     icon: {fileID: 0}
     preset: {fileID: 11400000, guid: e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6, type: 2}
+    visualId: 0
+    projectileVisualId: 0
   - heroClass: 1
     displayName: Rogue
     description: Rogue start preset.
     icon: {fileID: 0}
     preset: {fileID: 11400000, guid: 27b81324c809753459c4f3866576713b, type: 2}
+    visualId: 0
+    projectileVisualId: 100
   - heroClass: 2
     displayName: Caster
     description: Caster start preset.
     icon: {fileID: 0}
     preset: {fileID: 11400000, guid: 649bd61a107288546933d33d69c28bbf, type: 2}
+    visualId: 0
+    projectileVisualId: 0

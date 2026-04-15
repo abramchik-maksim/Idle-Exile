@@ -6,6 +6,7 @@ using Game.Application.Ports;
 using Game.Domain.Combat;
 using Game.Domain.Combat.Progression;
 using Game.Presentation.Combat.Components;
+using Game.Presentation.Combat.Rendering;
 
 namespace Game.Presentation.Combat
 {
@@ -13,6 +14,7 @@ namespace Game.Presentation.Combat
     {
         private readonly ICombatConfigProvider _combatConfig;
         private EntityManager _entityManager;
+        private CombatVisualManager _visualManager;
         private EntityQuery _aliveEnemyQuery;
         private int _nextActorId;
         private bool _initialized;
@@ -22,9 +24,10 @@ namespace Game.Presentation.Combat
             _combatConfig = combatConfig;
         }
 
-        public void Initialize(EntityManager entityManager, int startingActorId)
+        public void Initialize(EntityManager entityManager, CombatVisualManager visualManager, int startingActorId)
         {
             _entityManager = entityManager;
+            _visualManager = visualManager;
             _nextActorId = startingActorId;
 
             _aliveEnemyQuery = _entityManager.CreateEntityQuery(
@@ -68,7 +71,9 @@ namespace Game.Presentation.Combat
                         typeof(EnemyBehavior),
                         typeof(TargetEntity),
                         typeof(StatusEffects),
-                        typeof(AilmentState)
+                        typeof(AilmentState),
+                        typeof(VisualId),
+                        typeof(ProjectileVisualId)
                     );
 
                     _entityManager.AddBuffer<BleedStack>(entity);
@@ -106,7 +111,11 @@ namespace Game.Presentation.Combat
                         Timer = atkCooldown
                     });
 
-                    _entityManager.SetComponentData(entity, new ActorId { Value = _nextActorId++ });
+                    int actorId = _nextActorId++;
+                    _entityManager.SetComponentData(entity, new ActorId { Value = actorId });
+                    _entityManager.SetComponentData(entity, new VisualId { Value = enemyDef.VisualId });
+                    _entityManager.SetComponentData(entity, new ProjectileVisualId { Value = enemyDef.ProjectileVisualId });
+                    _visualManager?.OnEntitySpawned(actorId, enemyDef.VisualId);
 
                     _entityManager.SetComponentData(entity, new EnemyBehavior
                     {
@@ -138,10 +147,15 @@ namespace Game.Presentation.Combat
                 typeof(Targetable),
                 typeof(ActorId),
                 typeof(StatusEffects),
-                typeof(AilmentState)
+                typeof(AilmentState),
+                typeof(VisualId)
             );
 
             _entityManager.AddBuffer<BleedStack>(clone);
+
+            int heroVisualId = _entityManager.HasComponent<VisualId>(heroEntity)
+                ? _entityManager.GetComponentData<VisualId>(heroEntity).Value
+                : 0;
 
             _entityManager.SetComponentData(clone, new Position2D { Value = heroPos + offset });
             _entityManager.SetComponentData(clone, new CombatStats
@@ -154,7 +168,10 @@ namespace Game.Presentation.Combat
                 MoveSpeed = heroStats.MoveSpeed
             });
             _entityManager.SetComponentData(clone, new Targetable { AggroWeight = 15f });
-            _entityManager.SetComponentData(clone, new ActorId { Value = _nextActorId++ });
+            int cloneActorId = _nextActorId++;
+            _entityManager.SetComponentData(clone, new ActorId { Value = cloneActorId });
+            _entityManager.SetComponentData(clone, new VisualId { Value = heroVisualId });
+            _visualManager?.OnEntitySpawned(cloneActorId, heroVisualId);
 
             Debug.Log($"[WaveSpawner] Clone spawned (Dmg: {damagePercent}%, Duration: {duration}s).");
         }

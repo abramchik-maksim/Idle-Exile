@@ -12,6 +12,8 @@ namespace Game.Domain.Combat.Progression
         public float AttackRange { get; }
         public float AttackSpeed { get; }
         public SpellDefinition Spell { get; }
+        public int VisualId { get; }
+        public int ProjectileVisualId { get; }
 
         public EnemyDefinition(
             string id, string name,
@@ -20,7 +22,9 @@ namespace Game.Domain.Combat.Progression
             EnemyArchetype archetype = EnemyArchetype.Melee,
             float attackRange = 1f,
             float attackSpeed = 0.8f,
-            SpellDefinition spell = null)
+            SpellDefinition spell = null,
+            int visualId = 0,
+            int projectileVisualId = 0)
         {
             Id = id;
             Name = name;
@@ -32,6 +36,8 @@ namespace Game.Domain.Combat.Progression
             AttackRange = attackRange;
             AttackSpeed = attackSpeed;
             Spell = spell;
+            VisualId = visualId;
+            ProjectileVisualId = projectileVisualId;
         }
     }
 }

@@ -12,11 +12,13 @@ namespace Game.Infrastructure.Configs.Combat
         private readonly Dictionary<string, List<BattleDefinition>> _battles = new();
         private readonly Dictionary<string, EnemyDefinition> _enemies = new();
         private readonly List<float> _tierScalings = new();
+        private readonly Dictionary<(int tierIndex, int choiceIndex), (MapDefinition, MapDefinition)> _mapChoices = new();
 
         private readonly float _baseDropChance;
         private readonly float _dropChancePerBattle;
         private readonly float _maxDropChance;
         private readonly float _bonusDropChancePerTier;
+
         public ScriptableObjectCombatConfigProvider(CombatDatabaseSO database, LootTableSO lootTable)
         {
             BuildFromDatabase(database);
@@ -72,6 +74,13 @@ namespace Game.Infrastructure.Configs.Combat
         public float GetBonusDropChance(int tierIndex) =>
             tierIndex * _bonusDropChancePerTier;
 
+        public (MapDefinition Option1, MapDefinition Option2) GetMapChoice(int tierIndex, int choiceIndex)
+        {
+            if (_mapChoices.TryGetValue((tierIndex, choiceIndex), out var pair))
+                return pair;
+            return (null, null);
+        }
+
         private void BuildFromDatabase(CombatDatabaseSO db)
         {
             foreach (var enemySO in db.enemies)
@@ -90,39 +99,113 @@ namespace Game.Infrastructure.Configs.Combat
                 for (int m = 0; m < tierSO.maps.Count; m++)
                 {
                     var mapSO = tierSO.maps[m];
-                    mapIds.Add(mapSO.id);
-
-                    var battleIds = new List<string>();
-                    var battleList = new List<BattleDefinition>();
-
-                    for (int b = 0; b < mapSO.battles.Count; b++)
-                    {
-                        var battleSO = mapSO.battles[b];
-                        battleIds.Add(battleSO.id);
-
-                        var waves = new List<WaveDefinition>();
-                        foreach (var waveSO in battleSO.waves)
-                        {
-                            var spawns = new List<WaveSpawnEntry>();
-                            foreach (var spawnSO in waveSO.spawns)
-                            {
-                                if (spawnSO.enemy == null) continue;
-                                spawns.Add(new WaveSpawnEntry(spawnSO.enemy.id, spawnSO.count));
-                            }
-                            waves.Add(new WaveDefinition(spawns, waveSO.delayBeforeWave));
-                        }
-
-                        battleList.Add(new BattleDefinition(
-                            battleSO.id, mapSO.id, b, waves, new List<RewardEntry>()));
-                    }
-
-                    _battles[mapSO.id] = battleList;
-                    _maps.TryAdd(tierSO.id, new List<MapDefinition>());
-                    _maps[tierSO.id].Add(new MapDefinition(mapSO.id, mapSO.displayName, tierSO.id, battleIds));
+                    BuildMap(tierSO, mapSO, mapIds);
                 }
 
-                _tiers.Add(new TierDefinition(tierSO.id, tierSO.displayName, t, mapIds));
+                for (int c = 0; c < tierSO.mapChoices.Count; c++)
+                {
+                    var choice = tierSO.mapChoices[c];
+                    MapDefinition opt1 = null, opt2 = null;
+
+                    if (choice.option1 != null)
+                        opt1 = BuildChoiceMap(tierSO, choice.option1);
+                    if (choice.option2 != null)
+                        opt2 = BuildChoiceMap(tierSO, choice.option2);
+
+                    _mapChoices[(t, c)] = (opt1, opt2);
+                }
+
+                int mapChoiceCount = tierSO.mapChoices.Count;
+                _tiers.Add(new TierDefinition(tierSO.id, tierSO.displayName, t, mapIds,
+                    tierSO.hasForcedStartMap, mapChoiceCount));
             }
+        }
+
+        private void BuildMap(TierDataSO tierSO, MapDataSO mapSO, List<string> mapIds)
+        {
+            mapIds.Add(mapSO.id);
+
+            var battleIds = new List<string>();
+            var battleList = new List<BattleDefinition>();
+
+            for (int b = 0; b < mapSO.battles.Count; b++)
+            {
+                var battleSO = mapSO.battles[b];
+                battleIds.Add(battleSO.id);
+
+                var waves = new List<WaveDefinition>();
+                foreach (var waveSO in battleSO.waves)
+                {
+                    var spawns = new List<WaveSpawnEntry>();
+                    foreach (var spawnSO in waveSO.spawns)
+                    {
+                        if (spawnSO.enemy == null) continue;
+                        spawns.Add(new WaveSpawnEntry(spawnSO.enemy.id, spawnSO.count));
+                    }
+                    waves.Add(new WaveDefinition(spawns, waveSO.delayBeforeWave));
+                }
+
+                battleList.Add(new BattleDefinition(
+                    battleSO.id, mapSO.id, b, waves, new List<RewardEntry>()));
+            }
+
+            _battles[mapSO.id] = battleList;
+
+            var modifiers = new List<MapModifier>();
+            if (mapSO.modifiers != null)
+            {
+                foreach (var mod in mapSO.modifiers)
+                    modifiers.Add(new MapModifier(mod.type, mod.value));
+            }
+
+            var lootBias = new LootBias(mapSO.itemWeightMultiplier, mapSO.currencyWeightMultiplier);
+
+            _maps.TryAdd(tierSO.id, new List<MapDefinition>());
+            _maps[tierSO.id].Add(new MapDefinition(
+                mapSO.id, mapSO.displayName, tierSO.id, battleIds,
+                mapSO.locationId, mapSO.description, lootBias, modifiers, mapSO.isBossMap));
+        }
+
+        private MapDefinition BuildChoiceMap(TierDataSO tierSO, MapDataSO mapSO)
+        {
+            var battleIds = new List<string>();
+            var battleList = new List<BattleDefinition>();
+
+            for (int b = 0; b < mapSO.battles.Count; b++)
+            {
+                var battleSO = mapSO.battles[b];
+                battleIds.Add(battleSO.id);
+
+                var waves = new List<WaveDefinition>();
+                foreach (var waveSO in battleSO.waves)
+                {
+                    var spawns = new List<WaveSpawnEntry>();
+                    foreach (var spawnSO in waveSO.spawns)
+                    {
+                        if (spawnSO.enemy == null) continue;
+                        spawns.Add(new WaveSpawnEntry(spawnSO.enemy.id, spawnSO.count));
+                    }
+                    waves.Add(new WaveDefinition(spawns, waveSO.delayBeforeWave));
+                }
+
+                battleList.Add(new BattleDefinition(
+                    battleSO.id, mapSO.id, b, waves, new List<RewardEntry>()));
+            }
+
+            _battles[mapSO.id] = battleList;
+
+            var modifiers = new List<MapModifier>();
+            if (mapSO.modifiers != null)
+            {
+                foreach (var mod in mapSO.modifiers)
+                    modifiers.Add(new MapModifier(mod.type, mod.value));
+            }
+
+            var lootBias = new LootBias(mapSO.itemWeightMultiplier, mapSO.currencyWeightMultiplier);
+
+            return new MapDefinition(
+                mapSO.id, mapSO.displayName, tierSO.id, battleIds,
+                mapSO.locationId, mapSO.description, lootBias, modifiers, mapSO.isBossMap);
         }
     }
 }

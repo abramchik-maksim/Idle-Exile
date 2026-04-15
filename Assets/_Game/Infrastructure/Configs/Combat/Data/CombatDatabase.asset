@@ -23,6 +23,8 @@ MonoBehaviour:
     maps:
     - id: map_1_1
       displayName: Twilight Shore
+      description: 
+      locationId: 1
       battles:
       - id: battle_1_1_00
         waves:
@@ -172,3 +174,29 @@ MonoBehaviour:
             count: 8
           - enemy: {fileID: 11400000, guid: f0e2a4d7c646cf7439ee7f5a02bab9d7, type: 2}
             count: 2
+      itemWeightMultiplier: 1
+      currencyWeightMultiplier: 1
+      modifiers: []
+      isBossMap: 0
+    hasForcedStartMap: 1
+    mapChoices:
+    - option1:
+        id: 
+        displayName: 
+        description: 
+        locationId: 
+        battles: []
+        itemWeightMultiplier: 0
+        currencyWeightMultiplier: 0
+        modifiers: []
+        isBossMap: 0
+      option2:
+        id: 
+        displayName: 
+        description: 
+        locationId: 
+        battles: []
+        itemWeightMultiplier: 0
+        currencyWeightMultiplier: 0
+        modifiers: []
+        isBossMap: 0
