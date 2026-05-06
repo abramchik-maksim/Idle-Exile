@@ -11,6 +11,7 @@ namespace Game.Presentation.Combat.Components
         public float FireDamage;
         public float ColdDamage;
         public float LightningDamage;
+        public float CorrosionDamage;
         public float CriticalChance;
         public float CriticalMultiplier;
         public float AttackSpeed;
@@ -29,5 +30,8 @@ namespace Game.Presentation.Combat.Components
         // Offense mechanics
         public float DoubleHitChance;
         public float IgnoreArmorChance;
+        public float ProjectileForkPercent;
+        public float ProjectilePiercePercent;
+        public float ProjectileChainPercent;
     }
 }

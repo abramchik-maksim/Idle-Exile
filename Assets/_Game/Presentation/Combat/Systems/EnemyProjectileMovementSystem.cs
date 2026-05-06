@@ -1,3 +1,4 @@
+using Game.Domain.Combat;
 using Game.Presentation.Combat.Components;
 using Unity.Entities;
 using Unity.Mathematics;
@@ -17,31 +18,34 @@ namespace Game.Presentation.Combat.Systems
         {
             float dt = SystemAPI.Time.DeltaTime;
             var ecb = new EntityCommandBuffer(Unity.Collections.Allocator.Temp);
+            float maxTurn = ProjectileConstants.ChainTurnRateRadPerSec * dt;
 
             foreach (var (pos, proj, entity)
-                in SystemAPI.Query<RefRW<Position2D>, RefRO<ProjectileData>>()
+                in SystemAPI.Query<RefRW<Position2D>, RefRW<ProjectileData>>()
                     .WithAll<EnemyProjectileTag>()
                     .WithEntityAccess())
             {
-                if (!EntityManager.Exists(proj.ValueRO.Target)
-                    || EntityManager.HasComponent<DeadTag>(proj.ValueRO.Target))
+                proj.ValueRW.PrevPosition = pos.ValueRO.Value;
+
+                Entity mt = proj.ValueRO.MotionTarget;
+                if (mt == Entity.Null || !EntityManager.Exists(mt) || EntityManager.HasComponent<DeadTag>(mt))
                 {
                     ecb.DestroyEntity(entity);
                     continue;
                 }
 
-                var targetPos = EntityManager.GetComponentData<Position2D>(proj.ValueRO.Target).Value;
-                float2 direction = targetPos - pos.ValueRO.Value;
-                float dist = math.length(direction);
+                float speed = math.length(proj.ValueRO.Velocity);
+                float2 targetPos = EntityManager.GetComponentData<Position2D>(mt).Value;
+                float2 desired = math.normalizesafe(targetPos - pos.ValueRO.Value, new float2(0f, 1f));
+                float2 curDir = math.normalizesafe(proj.ValueRO.Velocity, desired);
+                float2 newDir = ProjectileHitMath.SlerpDir2D(curDir, desired, maxTurn);
+                proj.ValueRW.Velocity = newDir * speed;
 
-                if (dist < 0.2f) continue;
+                pos.ValueRW.Value += proj.ValueRO.Velocity * dt;
+                proj.ValueRW.TimeToLiveSeconds -= dt;
 
-                float2 move = math.normalize(direction) * proj.ValueRO.Speed * dt;
-
-                if (math.length(move) >= dist)
-                    pos.ValueRW.Value = targetPos;
-                else
-                    pos.ValueRW.Value += move;
+                if (proj.ValueRO.TimeToLiveSeconds <= 0f)
+                    ecb.DestroyEntity(entity);
             }
 
             ecb.Playback(EntityManager);

@@ -6,6 +6,7 @@
         </ui:VisualElement>
         <ui:VisualElement style="padding: 0 12px 12px 12px;">
             <ui:Button name="btn-generate-item" text="Generate Random Item" class="btn" style="margin-bottom: 4px; margin-top: 6px;"/>
+            <ui:Button name="btn-generate-bow-proc" text="Generate Bow (Fork/Pierce/Chain)" class="btn" style="margin-bottom: 4px;"/>
             <ui:Button name="btn-add-skill-gem" text="Add Random Skill Gem" class="btn" style="margin-bottom: 4px;"/>
             <ui:Button name="btn-add-removal-orb" text="Add 5 Removal Orbs" class="btn" style="margin-bottom: 4px;"/>
             <ui:Button name="btn-add-tree-xp" text="Add 25 Tree XP" class="btn" style="margin-bottom: 4px;"/>

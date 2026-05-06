@@ -42,15 +42,19 @@ namespace Game.Domain.Combat
         {
             float physDmg = attacker.GetFinal(StatType.PhysicalDamage);
 
+            float extraPhysFlat = physDmg * gainAs.GainAsPhysicalPercent;
             float extraFireFlat = physDmg * gainAs.GainAsFirePercent;
             float extraColdFlat = physDmg * gainAs.GainAsColdPercent;
             float extraLtngFlat = physDmg * gainAs.GainAsLightningPercent;
+            float extraCorrosionFlat = physDmg * gainAs.GainAsCorrosionPercent;
 
+            physDmg += extraPhysFlat;
             float fireDmg = attacker.GetFinalWithExtraFlat(StatType.FireDamage, extraFireFlat);
             float coldDmg = attacker.GetFinalWithExtraFlat(StatType.ColdDamage, extraColdFlat);
             float ltngDmg = attacker.GetFinalWithExtraFlat(StatType.LightningDamage, extraLtngFlat);
+            float corrosionDmg = attacker.GetFinalWithExtraFlat(StatType.CorrosionDamage, extraCorrosionFlat);
 
-            float rawTotal = physDmg + fireDmg + coldDmg + ltngDmg;
+            float rawTotal = physDmg + fireDmg + coldDmg + ltngDmg + corrosionDmg;
 
             float globalIncreased = 0f;
             float globalMore = 1f;
@@ -80,7 +84,7 @@ namespace Game.Domain.Combat
             float mitigated = ApplyArmorReduction(rawTotal, defender.GetFinal(StatType.Armor));
 
             return new DamageBreakdown(
-                physDmg, fireDmg, coldDmg, ltngDmg,
+                physDmg, fireDmg, coldDmg, ltngDmg, corrosionDmg,
                 Math.Max(mitigated, 0f),
                 isCrit);
         }

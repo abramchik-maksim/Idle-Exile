@@ -6,6 +6,7 @@ namespace Game.Domain.Combat
         public float FireDamage { get; }
         public float ColdDamage { get; }
         public float LightningDamage { get; }
+        public float CorrosionDamage { get; }
         public float TotalRaw { get; }
         public float TotalMitigated { get; }
         public bool IsCritical { get; }
@@ -15,6 +16,7 @@ namespace Game.Domain.Combat
             float fireDamage,
             float coldDamage,
             float lightningDamage,
+            float corrosionDamage,
             float totalMitigated,
             bool isCritical)
         {
@@ -22,7 +24,8 @@ namespace Game.Domain.Combat
             FireDamage = fireDamage;
             ColdDamage = coldDamage;
             LightningDamage = lightningDamage;
-            TotalRaw = physicalDamage + fireDamage + coldDamage + lightningDamage;
+            CorrosionDamage = corrosionDamage;
+            TotalRaw = physicalDamage + fireDamage + coldDamage + lightningDamage + corrosionDamage;
             TotalMitigated = totalMitigated;
             IsCritical = isCritical;
         }

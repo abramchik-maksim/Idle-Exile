@@ -13,14 +13,19 @@ namespace Game.Application.Loot
         private readonly IAffixConfigProvider _affix;
         private readonly IRandomService _random;
         private readonly IHeroItemClassProvider _heroClass;
+        private readonly IHeroElementAffinityProvider _heroElements;
+        private readonly IModCatalogProvider _modCatalog;
         private readonly IItemAffixModifierResolver _resolver;
         private readonly IDropQualityProvider _dropQuality;
+        private readonly HashSet<string> _missingCatalogModIds = new(StringComparer.Ordinal);
 
         public ItemRollingService(
             IConfigProvider config,
             IAffixConfigProvider affix,
             IRandomService random,
             IHeroItemClassProvider heroClass,
+            IHeroElementAffinityProvider heroElements,
+            IModCatalogProvider modCatalog,
             IItemAffixModifierResolver resolver,
             IDropQualityProvider dropQuality)
         {
@@ -28,6 +33,8 @@ namespace Game.Application.Loot
             _affix = affix;
             _random = random;
             _heroClass = heroClass;
+            _heroElements = heroElements;
+            _modCatalog = modCatalog;
             _resolver = resolver;
             _dropQuality = dropQuality;
         }
@@ -65,6 +72,7 @@ namespace Game.Application.Loot
                     if (!ClassMatches(e.ClassSpecific, hero)) continue;
                     if (!_affix.IsModAllowedOnSlot(e.ModId, slot)) continue;
                     if (e.Tier < band.AllowedTierMin || e.Tier > band.AllowedTierMax) continue;
+                    if (!IsModAllowedForHeroElements(e.ModId)) continue;
                     candidates.Add(e);
                 }
 
@@ -155,6 +163,21 @@ namespace Game.Application.Loot
         {
             if (string.IsNullOrWhiteSpace(classSpecific)) return true;
             return string.Equals(classSpecific.Trim(), hero.ToString(), StringComparison.OrdinalIgnoreCase);
+        }
+
+        /// <summary>
+        /// Missing ModCatalog row: fail-closed to avoid leaking off-element affixes.
+        /// </summary>
+        private bool IsModAllowedForHeroElements(string modId)
+        {
+            var allowed = _heroElements.GetAllowedElements();
+            if (_modCatalog.TryGetEntry(modId, out var entry))
+                return entry.Element.IsAllowedForHero(allowed);
+
+            if (_missingCatalogModIds.Add(modId))
+                System.Diagnostics.Debug.WriteLine($"[ItemRollingService] ModCatalog missing modId '{modId}', filtering it out.");
+
+            return false;
         }
 
         private int RollAffixCount(Rarity rarity) =>

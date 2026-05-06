@@ -1,7 +1,9 @@
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Text;
+using Game.Domain.Items;
 using UnityEditor;
 using UnityEngine;
 using Game.Infrastructure.ItemAffixes;
@@ -47,11 +49,37 @@ namespace Game.Infrastructure.ItemAffixes.Editor
             db.slotRows = ParseSlots(File.ReadAllText(SlotsCsvPath, Encoding.UTF8));
             db.modCatalogRows = ParseModCatalog(File.ReadAllText(ModCatalogCsvPath, Encoding.UTF8));
 
+            if (!ValidatePoolModIdsAgainstCatalog(db))
+            {
+                Debug.LogError("[ItemAffixImporter] Import aborted: pool contains modIds missing in ModCatalog.csv.");
+                return;
+            }
+
             EditorUtility.SetDirty(db);
             AssetDatabase.SaveAssets();
             AssetDatabase.Refresh();
             Selection.activeObject = db;
             Debug.Log($"[ItemAffixImporter] Imported {db.poolRows.Count} pool rows, {db.slotRows.Count} slot rows, {db.modCatalogRows.Count} mod catalog rows → {DatabaseAssetPath}");
+        }
+
+        [MenuItem("Tools/Idle Exile/Validate Item Affix CSVs (pool vs ModCatalog)", priority = 11)]
+        public static void ValidateFromCsvFiles()
+        {
+            if (!File.Exists(PoolCsvPath) || !File.Exists(ModCatalogCsvPath))
+            {
+                Debug.LogError("[ItemAffixImporter] Missing ResolvedItemAffixPool.csv or ModCatalog.csv");
+                return;
+            }
+
+            var pool = ParsePool(File.ReadAllText(PoolCsvPath, Encoding.UTF8));
+            var catalog = ParseModCatalog(File.ReadAllText(ModCatalogCsvPath, Encoding.UTF8));
+            var db = ScriptableObject.CreateInstance<ItemAffixDatabaseSO>();
+            db.poolRows = pool;
+            db.modCatalogRows = catalog;
+            var ok = ValidatePoolModIdsAgainstCatalog(db);
+            if (ok)
+                Debug.Log("[ItemAffixImporter] Validation passed: all pool modIds exist in ModCatalog.csv.");
+            UnityEngine.Object.DestroyImmediate(db);
         }
 
         private static List<AffixPoolSerializedRow> ParsePool(string text)
@@ -65,7 +93,7 @@ namespace Game.Infrastructure.ItemAffixes.Editor
                 var line = lines[i].Trim();
                 if (string.IsNullOrEmpty(line)) continue;
 
-                var p = line.Split(',');
+                var p = ParseCsvLine(line);
                 if (p.Length < 11) continue;
 
                 var row = new AffixPoolSerializedRow
@@ -99,7 +127,7 @@ namespace Game.Infrastructure.ItemAffixes.Editor
                 var line = lines[i].Trim();
                 if (string.IsNullOrEmpty(line)) continue;
 
-                var p = line.Split(',');
+                var p = ParseCsvLine(line);
                 if (p.Length < 5) continue;
 
                 string notes = p.Length > 5
@@ -131,15 +159,21 @@ namespace Game.Infrastructure.ItemAffixes.Editor
                 var line = lines[i].Trim();
                 if (string.IsNullOrEmpty(line)) continue;
 
-                var p = line.Split(',');
+                var p = ParseCsvLine(line);
                 if (p.Length < 6) continue;
 
                 string modId = p[0].Trim();
                 if (string.IsNullOrEmpty(modId)) continue;
 
+                string elementStr = p.Length > 2 ? p[2].Trim() : string.Empty;
+                if (!ModCatalogElementExtensions.TryParse(elementStr, out _))
+                    Debug.LogWarning($"[ItemAffixImporter] Unknown element '{elementStr}' for modId={modId}, using NonSpecific.");
+
                 var row = new ModCatalogSerializedRow
                 {
                     modId = modId,
+                    family = p.Length > 1 ? p[1].Trim() : string.Empty,
+                    element = elementStr,
                     valueType = p[3].Trim(),
                     textTemplate = p[5].Trim()
                 };
@@ -147,6 +181,76 @@ namespace Game.Infrastructure.ItemAffixes.Editor
             }
 
             return list;
+        }
+
+        private static bool ValidatePoolModIdsAgainstCatalog(ItemAffixDatabaseSO db)
+        {
+            var catalogIds = new HashSet<string>(StringComparer.Ordinal);
+            foreach (var r in db.modCatalogRows)
+            {
+                if (!string.IsNullOrWhiteSpace(r.modId))
+                    catalogIds.Add(r.modId.Trim());
+            }
+
+            var missing = new HashSet<string>(StringComparer.Ordinal);
+            foreach (var r in db.poolRows)
+            {
+                if (string.IsNullOrWhiteSpace(r.modId)) continue;
+                var id = r.modId.Trim();
+                if (!catalogIds.Contains(id))
+                    missing.Add(id);
+            }
+
+            if (missing.Count > 0)
+            {
+                foreach (var id in missing)
+                    Debug.LogError($"[ItemAffixImporter] Pool references modId '{id}' missing from ModCatalog.csv");
+                return false;
+            }
+
+            return true;
+        }
+
+        /// <summary>
+        /// Lightweight CSV parser with quoted comma support (RFC4180-like).
+        /// </summary>
+        private static string[] ParseCsvLine(string line)
+        {
+            var fields = new List<string>(16);
+            var sb = new StringBuilder(line.Length);
+            bool inQuotes = false;
+
+            for (int i = 0; i < line.Length; i++)
+            {
+                char c = line[i];
+
+                if (c == '"')
+                {
+                    if (inQuotes && i + 1 < line.Length && line[i + 1] == '"')
+                    {
+                        sb.Append('"');
+                        i++;
+                    }
+                    else
+                    {
+                        inQuotes = !inQuotes;
+                    }
+
+                    continue;
+                }
+
+                if (c == ',' && !inQuotes)
+                {
+                    fields.Add(sb.ToString());
+                    sb.Clear();
+                    continue;
+                }
+
+                sb.Append(c);
+            }
+
+            fields.Add(sb.ToString());
+            return fields.ToArray();
         }
 
         private static int TryInt(string s, int fallback)

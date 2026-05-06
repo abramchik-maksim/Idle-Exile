@@ -89,16 +89,11 @@ namespace Game.Presentation.Combat.Rendering
                 float py = positions[i].Value.y;
                 view.SetPosition(px, py);
 
-                var target = projDatas[i].Target;
-                if (em.Exists(target) && em.HasComponent<Position2D>(target))
+                float2 vel = projDatas[i].Velocity;
+                if (math.lengthsq(vel) > 0.0001f)
                 {
-                    var targetPos = em.GetComponentData<Position2D>(target).Value;
-                    float2 dir = targetPos - positions[i].Value;
-                    if (math.lengthsq(dir) > 0.0001f)
-                    {
-                        float angle = math.atan2(dir.y, dir.x) * Mathf.Rad2Deg;
-                        view.SetRotation(angle);
-                    }
+                    float angle = math.atan2(vel.y, vel.x) * Mathf.Rad2Deg;
+                    view.SetRotation(angle);
                 }
 
                 view.SetSortingOrder(SortOrderBase + Mathf.RoundToInt(-py * 100f) + ProjectileSortOffset);

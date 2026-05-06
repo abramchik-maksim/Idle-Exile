@@ -9,6 +9,7 @@ using VContainer.Unity;
 using Game.Application.Ports;
 using Game.Domain.DTOs.Progression;
 using Game.Infrastructure.Configs;
+using Game.Presentation.Combat;
 
 namespace Game.Presentation.Core.Services
 {
@@ -18,6 +19,7 @@ namespace Game.Presentation.Core.Services
         private readonly ISubscriber<MapChangedDTO> _mapChangedSub;
         private readonly IGameStateProvider _gameState;
         private readonly ICombatConfigProvider _combatConfig;
+        private readonly CombatBridge _combatBridge;
         private readonly List<IDisposable> _subscriptions = new();
 
         private AsyncOperationHandle<GameObject> _currentHandle;
@@ -27,12 +29,14 @@ namespace Game.Presentation.Core.Services
             LocationDatabaseSO locationDb,
             ISubscriber<MapChangedDTO> mapChangedSub,
             IGameStateProvider gameState,
-            ICombatConfigProvider combatConfig)
+            ICombatConfigProvider combatConfig,
+            CombatBridge combatBridge)
         {
             _locationDb = locationDb;
             _mapChangedSub = mapChangedSub;
             _gameState = gameState;
             _combatConfig = combatConfig;
+            _combatBridge = combatBridge;
         }
 
         public void Start()
@@ -68,6 +72,7 @@ namespace Game.Presentation.Core.Services
 
             if (_currentInstance != null)
             {
+                _combatBridge.UnregisterLocationArenaRoot(_currentInstance);
                 UnityEngine.Object.Destroy(_currentInstance);
                 _currentInstance = null;
             }
@@ -82,6 +87,7 @@ namespace Game.Presentation.Core.Services
             var prefab = _currentHandle.Result;
 
             _currentInstance = UnityEngine.Object.Instantiate(prefab);
+            _combatBridge.RegisterLocationArenaRoot(_currentInstance);
             Debug.Log($"[LocationController] Loaded location '{locationId}'.");
         }
 
@@ -92,7 +98,10 @@ namespace Game.Presentation.Core.Services
             _subscriptions.Clear();
 
             if (_currentInstance != null)
+            {
+                _combatBridge.UnregisterLocationArenaRoot(_currentInstance);
                 UnityEngine.Object.Destroy(_currentInstance);
+            }
 
             if (_currentHandle.IsValid())
                 Addressables.Release(_currentHandle);

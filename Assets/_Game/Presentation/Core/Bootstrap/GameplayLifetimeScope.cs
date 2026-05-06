@@ -37,6 +37,13 @@ namespace Game.Presentation.Core.Bootstrap
 {
     public sealed class GameplayLifetimeScope : LifetimeScope
     {
+        /// <summary>
+        /// <see cref="ISaveSlotManager"/> and <see cref="GameSessionContext"/> live on <see cref="RootLifetimeScope"/>.
+        /// Scene YAML often has empty <c>parentReference</c>; <see cref="SceneLoader"/> uses <see cref="LifetimeScope.EnqueueParent"/>.
+        /// If that stack is empty (e.g. Play on Gameplay scene only), resolve the DontDestroyOnLoad root explicitly.
+        /// </summary>
+        protected override LifetimeScope FindParent() => Find<RootLifetimeScope>();
+
         [SerializeField] private ItemDatabaseSO _itemDatabase;
         [SerializeField] private CombatDatabaseSO _combatDatabase;
         [SerializeField] private LootTableSO _lootTable;
@@ -111,6 +118,8 @@ namespace Game.Presentation.Core.Bootstrap
                 _ => new ScriptableObjectAffixConfigProvider(_itemAffixDatabase), Lifetime.Singleton);
             builder.Register<IHeroItemClassProvider>(
                 c => new HeroItemClassFromPresetProvider(c.Resolve<StartingPresetSO>()), Lifetime.Singleton);
+            builder.Register<IHeroElementAffinityProvider>(
+                c => new HeroElementAffinityFromPresetProvider(c.Resolve<StartingPresetSO>()), Lifetime.Singleton);
             builder.Register<IItemAffixModifierResolver, ItemAffixModifierResolver>(Lifetime.Singleton);
             builder.Register<IModCatalogProvider>(
                 _ => new ScriptableObjectModCatalogProvider(_itemAffixDatabase), Lifetime.Singleton);

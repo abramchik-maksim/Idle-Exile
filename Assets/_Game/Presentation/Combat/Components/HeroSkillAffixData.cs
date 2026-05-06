@@ -13,6 +13,8 @@ namespace Game.Presentation.Combat.Components
         public float GainAsFirePercent;
         public float GainAsColdPercent;
         public float GainAsLightningPercent;
+        public float GainAsPhysicalPercent;
+        public float GainAsCorrosionPercent;
 
         public float AoEAilmentChance;
         public float AoEAilmentRadius;

@@ -15,16 +15,16 @@ MonoBehaviour:
   entries:
   - id: 1
     spriteViewPrefab: {fileID: 4775136470125758144, guid: 4507c1e49a0679c40b23b2be0098d27d, type: 3}
-    scale: 0.4
+    scale: 1
   - id: 2
     spriteViewPrefab: {fileID: 4775136470125758144, guid: 9abf18f42734e464fb0323cd422d0fae, type: 3}
-    scale: 0.4
+    scale: 1
   - id: 3
     spriteViewPrefab: {fileID: 4775136470125758144, guid: 7bae4dfd41dff1c4a9499327788880a2, type: 3}
-    scale: 0.4
+    scale: 1
   - id: 0
     spriteViewPrefab: {fileID: 4775136470125758144, guid: 8a79e3e74c1692848ba746cad17f3883, type: 3}
-    scale: 0.4
+    scale: 1
   - id: 100
     spriteViewPrefab: {fileID: 592616631442060151, guid: 362cefae3c9659249b482f43f9286464, type: 3}
-    scale: 0.4
+    scale: 1

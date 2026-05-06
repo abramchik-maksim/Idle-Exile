@@ -75,10 +75,18 @@ namespace Game.Presentation.Combat.Systems
                     var proj = ecb.CreateEntity();
                     ecb.AddComponent(proj, new EnemyProjectileTag());
                     ecb.AddComponent(proj, new Position2D { Value = p.Origin });
+                    float2 targetPos = EntityManager.GetComponentData<Position2D>(p.Target).Value;
+                    float2 dir = math.normalizesafe(targetPos - p.Origin, new float2(0f, 1f));
+                    float speed = ProjectileConstants.DefaultEnemyProjectileSpeed;
                     ecb.AddComponent(proj, new ProjectileData
                     {
-                        Target = p.Target,
-                        Speed = 8f,
+                        Velocity = dir * speed,
+                        PrevPosition = p.Origin,
+                        MotionMode = ProjectileMotionMode.GuidedHoming,
+                        MotionTarget = p.Target,
+                        TimeToLiveSeconds = ProjectileConstants.EnemyProjectileMaxLifetimeSeconds,
+                        SpawnOrigin = p.Origin,
+                        AgeSeconds = 0f,
                         Damage = p.Damage,
                         IsCritical = false,
                         VisualId = p.VisualId

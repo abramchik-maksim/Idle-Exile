@@ -16,6 +16,7 @@ using Game.Domain.Items;
 using Game.Domain.Skills;
 using Game.Domain.Skills.Crafting;
 using Game.Domain.Stats;
+using Game.Presentation.Combat.Arena;
 using Game.Presentation.Combat.Components;
 using Game.Presentation.Combat.Rendering;
 
@@ -43,6 +44,21 @@ namespace Game.Presentation.Combat
         private EntityManager _entityManager;
         private Entity _heroEntity;
         private readonly List<IDisposable> _subscriptions = new();
+        private readonly List<Entity> _bakedWallEntities = new();
+
+        [Tooltip("Optional fallback: instantiate this prefab under CombatBridge when no location root is registered. " +
+                 "When LocationController loads the same arena from Addressables, leave this false and it will RegisterLocationArenaRoot instead (avoids duplicate hierarchy and double scale).")]
+        [SerializeField] private GameObject _arenaPrefab;
+
+        [SerializeField]
+        private bool _spawnArenaPrefabFromBridge;
+
+        [Tooltip("After Instantiate, adjust arena root localScale so world scale matches the prefab root design scale, divided by this transform's lossyScale (fixes 0.4×0.4 when parent is also 0.4).")]
+        [SerializeField]
+        private bool _compensateArenaRootScaleForParentLossyScale = true;
+
+        private GameObject _arenaRuntimeInstance;
+        private GameObject _externalArenaRoot;
 
         public bool IsReady { get; private set; }
 
@@ -114,6 +130,7 @@ namespace Game.Presentation.Combat
             _entityManager = world.EntityManager;
 
             SpawnHeroEntity();
+            SpawnArenaWalls();
 
             _waveSpawner.Initialize(_entityManager, _visualManager, 1);
             _damageProcessor.Initialize(world.GetExistingSystemManaged<Systems.DamageEventBufferSystem>());
@@ -172,6 +189,8 @@ namespace Game.Presentation.Combat
 
         private CombatStats BuildCombatStats(Domain.Characters.HeroState hero, float attackSpeed)
         {
+            GetProjectileProcPercents(hero, _gameState.Loadout?.MainSkill, out float fork, out float pierce, out float chain);
+
             return new CombatStats
             {
                 MaxHealth = hero.Stats.GetFinal(StatType.MaxHealth),
@@ -180,6 +199,7 @@ namespace Game.Presentation.Combat
                 FireDamage = hero.Stats.GetFinal(StatType.FireDamage),
                 ColdDamage = hero.Stats.GetFinal(StatType.ColdDamage),
                 LightningDamage = hero.Stats.GetFinal(StatType.LightningDamage),
+                CorrosionDamage = hero.Stats.GetFinal(StatType.CorrosionDamage),
                 CriticalChance = hero.Stats.GetFinal(StatType.CriticalChance),
                 CriticalMultiplier = hero.Stats.GetFinal(StatType.CriticalMultiplier),
                 AttackSpeed = attackSpeed,
@@ -194,7 +214,42 @@ namespace Game.Presentation.Combat
                 CorrosionResistance = hero.Stats.GetFinal(StatType.CorrosionResistance),
                 DoubleHitChance = hero.Stats.GetFinal(StatType.DoubleHitChance),
                 IgnoreArmorChance = hero.Stats.GetFinal(StatType.IgnoreArmorChance),
+                ProjectileForkPercent = fork,
+                ProjectilePiercePercent = pierce,
+                ProjectileChainPercent = chain,
             };
+        }
+
+        private static bool IsMeleeWeapon(WeaponType wt) =>
+            wt == WeaponType.Sword || wt == WeaponType.Axe || wt == WeaponType.Dagger;
+
+        private static void GetProjectileProcPercents(
+            Domain.Characters.HeroState hero,
+            SkillInstance mainSkill,
+            out float fork,
+            out float pierce,
+            out float chain)
+        {
+            fork = 0f;
+            pierce = 0f;
+            chain = 0f;
+
+            if (mainSkill == null) return;
+
+            var wt = mainSkill.Definition.RequiredWeapon;
+            if (IsMeleeWeapon(wt)) return;
+
+            if (wt == WeaponType.Bow)
+            {
+                fork = hero.Stats.GetFinal(StatType.RangedForkChance);
+                pierce = hero.Stats.GetFinal(StatType.RangedPierceChance);
+                chain = hero.Stats.GetFinal(StatType.RangedChainChance);
+                return;
+            }
+
+            fork = hero.Stats.GetFinal(StatType.SpellForkChance);
+            pierce = hero.Stats.GetFinal(StatType.SpellPierceChance);
+            chain = hero.Stats.GetFinal(StatType.SpellChainChance);
         }
 
         private void UpdateHeroAttackRange()
@@ -208,7 +263,7 @@ namespace Game.Presentation.Combat
             if (mainSkill != null)
             {
                 var wt = mainSkill.Definition.RequiredWeapon;
-                isMelee = wt == WeaponType.Sword || wt == WeaponType.Axe || wt == WeaponType.Dagger;
+                isMelee = IsMeleeWeapon(wt);
                 range = isMelee ? 1.5f : 50f;
             }
 
@@ -309,6 +364,7 @@ namespace Game.Presentation.Combat
             attacker.SetBase(StatType.FireDamage, hero.Stats.GetFinal(StatType.FireDamage));
             attacker.SetBase(StatType.ColdDamage, hero.Stats.GetFinal(StatType.ColdDamage));
             attacker.SetBase(StatType.LightningDamage, hero.Stats.GetFinal(StatType.LightningDamage));
+            attacker.SetBase(StatType.CorrosionDamage, hero.Stats.GetFinal(StatType.CorrosionDamage));
             attacker.SetBase(StatType.CriticalChance, hero.Stats.GetFinal(StatType.CriticalChance));
             attacker.SetBase(StatType.CriticalMultiplier, hero.Stats.GetFinal(StatType.CriticalMultiplier));
             if (dmgMult != 1f)
@@ -328,7 +384,9 @@ namespace Game.Presentation.Combat
                 new GainAsElementData(
                     affixData.GainAsFirePercent,
                     affixData.GainAsColdPercent,
-                    affixData.GainAsLightningPercent),
+                    affixData.GainAsLightningPercent,
+                    affixData.GainAsPhysicalPercent,
+                    affixData.GainAsCorrosionPercent),
                 () => 1d);
 
             var stats = _entityManager.GetComponentData<CombatStats>(_heroEntity);
@@ -336,10 +394,15 @@ namespace Game.Presentation.Combat
             stats.FireDamage = breakdown.FireDamage;
             stats.ColdDamage = breakdown.ColdDamage;
             stats.LightningDamage = breakdown.LightningDamage;
+            stats.CorrosionDamage = breakdown.CorrosionDamage;
             stats.CriticalChance = hero.Stats.GetFinal(StatType.CriticalChance);
             stats.CriticalMultiplier = hero.Stats.GetFinal(StatType.CriticalMultiplier);
             stats.AttackSpeed = finalAs;
             stats.Armor = finalArmor;
+            GetProjectileProcPercents(hero, mainSkill, out float fork, out float pierce, out float chain);
+            stats.ProjectileForkPercent = fork;
+            stats.ProjectilePiercePercent = pierce;
+            stats.ProjectileChainPercent = chain;
             _entityManager.SetComponentData(_heroEntity, stats);
 
             float cooldown = finalAs > 0 ? 1f / finalAs : 1f;
@@ -412,6 +475,8 @@ namespace Game.Presentation.Combat
             data.GainAsFirePercent      += hero.Stats.GetFinal(StatType.GainAsFirePercent);
             data.GainAsColdPercent      += hero.Stats.GetFinal(StatType.GainAsColdPercent);
             data.GainAsLightningPercent += hero.Stats.GetFinal(StatType.GainAsLightningPercent);
+            data.GainAsPhysicalPercent  += hero.Stats.GetFinal(StatType.GainAsPhysicalPercent);
+            data.GainAsCorrosionPercent += hero.Stats.GetFinal(StatType.GainAsCorrosionPercent);
         }
 
         private void ApplyFlatDamageAffix(SkillAffix affix)
@@ -508,6 +573,7 @@ namespace Game.Presentation.Combat
             stats.FireDamage         = Stat(f, StatType.FireDamage);
             stats.ColdDamage         = Stat(f, StatType.ColdDamage);
             stats.LightningDamage    = Stat(f, StatType.LightningDamage);
+            stats.CorrosionDamage    = Stat(f, StatType.CorrosionDamage);
             stats.CriticalChance     = Stat(f, StatType.CriticalChance, 0.05f);
             stats.CriticalMultiplier = Stat(f, StatType.CriticalMultiplier, 1.5f);
             stats.Armor              = Stat(f, StatType.Armor, 5f);
@@ -522,6 +588,10 @@ namespace Game.Presentation.Combat
             stats.CorrosionResistance = Stat(f, StatType.CorrosionResistance);
             stats.DoubleHitChance    = Stat(f, StatType.DoubleHitChance);
             stats.IgnoreArmorChance  = Stat(f, StatType.IgnoreArmorChance);
+            GetProjectileProcPercents(_gameState.Hero, _gameState.Loadout?.MainSkill, out float fork, out float pierce, out float chain);
+            stats.ProjectileForkPercent = fork;
+            stats.ProjectilePiercePercent = pierce;
+            stats.ProjectileChainPercent = chain;
             _entityManager.SetComponentData(_heroEntity, stats);
 
             float cooldown = atkSpd > 0 ? 1f / atkSpd : 1f;
@@ -547,7 +617,143 @@ namespace Game.Presentation.Combat
                 sub.Dispose();
             _subscriptions.Clear();
 
+            ClearBakedWallEntities();
+            if (_arenaRuntimeInstance != null)
+            {
+                Destroy(_arenaRuntimeInstance);
+                _arenaRuntimeInstance = null;
+            }
+
+            _externalArenaRoot = null;
+
             _waveSpawner?.Dispose();
+        }
+
+        /// <summary>
+        /// Call from <c>LocationController</c> after it instantiates the location prefab.
+        /// Re-bakes ECS walls from that hierarchy and destroys any arena instance previously spawned by the bridge (removes duplicate + wrong scale).
+        /// </summary>
+        public void RegisterLocationArenaRoot(GameObject locationRoot)
+        {
+            if (locationRoot == null)
+                return;
+
+            _externalArenaRoot = locationRoot;
+
+            if (_arenaRuntimeInstance != null)
+            {
+                Destroy(_arenaRuntimeInstance);
+                _arenaRuntimeInstance = null;
+            }
+
+            var world = World.DefaultGameObjectInjectionWorld;
+            if (world == null || !world.IsCreated || _entityManager == default)
+                return;
+
+            RebakeArenaWallsFromCurrentSource();
+        }
+
+        /// <summary>Call before destroying the location instance so ECS walls are cleared.</summary>
+        public void UnregisterLocationArenaRoot(GameObject locationRoot)
+        {
+            if (locationRoot == null || _externalArenaRoot != locationRoot)
+                return;
+
+            _externalArenaRoot = null;
+            ClearBakedWallEntities();
+        }
+
+        private void RebakeArenaWallsFromCurrentSource()
+        {
+            ClearBakedWallEntities();
+
+            var baker = FindArenaBaker();
+            if (baker == null)
+            {
+                Debug.LogWarning("[CombatBridge] RebakeArenaWallsFromCurrentSource: no ArenaColliderBaker found.");
+                return;
+            }
+
+            baker.BakeIntoEntities(_entityManager, _bakedWallEntities);
+        }
+
+        private ArenaColliderBaker FindArenaBaker()
+        {
+            if (_externalArenaRoot != null)
+                return _externalArenaRoot.GetComponentInChildren<ArenaColliderBaker>(true);
+            if (_arenaRuntimeInstance != null)
+                return _arenaRuntimeInstance.GetComponentInChildren<ArenaColliderBaker>(true);
+            return null;
+        }
+
+        private static void ApplyArenaRootScaleForParent(Transform instanceRoot, Transform prefabRootTemplate,
+            Transform parent)
+        {
+            Vector3 p = parent.lossyScale;
+            Vector3 design = prefabRootTemplate.localScale;
+            float cx = Mathf.Abs(p.x) > 1e-6f ? design.x / p.x : design.x;
+            float cy = Mathf.Abs(p.y) > 1e-6f ? design.y / p.y : design.y;
+            float cz = Mathf.Abs(p.z) > 1e-6f ? design.z / p.z : design.z;
+            instanceRoot.localScale = new Vector3(cx, cy, cz);
+        }
+
+        private void SpawnArenaWalls()
+        {
+            ClearBakedWallEntities();
+
+            ArenaColliderBaker baker = null;
+
+            if (_externalArenaRoot != null)
+            {
+                baker = _externalArenaRoot.GetComponentInChildren<ArenaColliderBaker>(true);
+            }
+            else if (_spawnArenaPrefabFromBridge && _arenaPrefab != null)
+            {
+                _arenaRuntimeInstance = Instantiate(_arenaPrefab, transform);
+                _arenaRuntimeInstance.name = "ArenaRuntime";
+
+                if (_compensateArenaRootScaleForParentLossyScale)
+                    ApplyArenaRootScaleForParent(_arenaRuntimeInstance.transform, _arenaPrefab.transform, transform);
+
+                baker = _arenaRuntimeInstance.GetComponentInChildren<ArenaColliderBaker>(true);
+            }
+
+            if (baker == null)
+            {
+                if (!_spawnArenaPrefabFromBridge && _externalArenaRoot == null)
+                    Debug.Log(
+                        "[CombatBridge] Arena wall bake deferred: _spawnArenaPrefabFromBridge is off; " +
+                        "walls will bake when LocationController calls RegisterLocationArenaRoot.");
+                else
+                    Debug.LogWarning(
+                        "[CombatBridge] No arena wall bake source: enable _spawnArenaPrefabFromBridge and assign _arenaPrefab, " +
+                        "or ensure the location prefab contains ArenaColliderBaker.");
+                return;
+            }
+
+            baker.BakeIntoEntities(_entityManager, _bakedWallEntities);
+        }
+
+        private void ClearBakedWallEntities()
+        {
+            if (_bakedWallEntities.Count == 0)
+                return;
+
+            var world = World.DefaultGameObjectInjectionWorld;
+            if (world == null || !world.IsCreated)
+            {
+                _bakedWallEntities.Clear();
+                return;
+            }
+
+            var em = world.EntityManager;
+            foreach (var e in _bakedWallEntities)
+            {
+                if (em.Exists(e))
+                    em.DestroyEntity(e);
+            }
+
+            _bakedWallEntities.Clear();
         }
     }
 }

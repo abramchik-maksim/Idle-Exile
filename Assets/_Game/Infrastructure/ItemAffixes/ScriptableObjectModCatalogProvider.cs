@@ -17,7 +17,16 @@ namespace Game.Infrastructure.ItemAffixes
             foreach (var r in database.modCatalogRows)
             {
                 if (string.IsNullOrWhiteSpace(r.modId)) continue;
-                _byModId[r.modId.Trim()] = new ModCatalogEntry(r.modId.Trim(), r.valueType ?? string.Empty, r.textTemplate ?? string.Empty);
+                var element = ModCatalogElement.NonSpecific;
+                if (!ModCatalogElementExtensions.TryParse(r.element, out element))
+                    element = ModCatalogElement.NonSpecific;
+
+                _byModId[r.modId.Trim()] = new ModCatalogEntry(
+                    r.modId.Trim(),
+                    r.family ?? string.Empty,
+                    element,
+                    r.valueType ?? string.Empty,
+                    r.textTemplate ?? string.Empty);
             }
         }
 
@@ -29,7 +38,7 @@ namespace Game.Infrastructure.ItemAffixes
                 return false;
             }
 
-            return !string.IsNullOrWhiteSpace(entry.TextTemplate);
+            return true;
         }
     }
 }

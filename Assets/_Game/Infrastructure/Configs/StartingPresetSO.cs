@@ -21,6 +21,9 @@ namespace Game.Infrastructure.Configs
         [Tooltip("Filters class-specific affix rolls (Melee / Rogue / Caster mods).")]
         public HeroItemClass heroItemClass = HeroItemClass.Warrior;
 
+        [Tooltip("Item affix pool: only these combat elements + NonSpecific mods. Empty = all five elements (legacy).")]
+        public List<CombatElement> allowedElements = new();
+
         [Header("Allowed Weapons")]
         [Tooltip("Weapon types this class can find as drops. Empty = all weapon types allowed.")]
         public List<WeaponType> allowedWeaponTypes = new();

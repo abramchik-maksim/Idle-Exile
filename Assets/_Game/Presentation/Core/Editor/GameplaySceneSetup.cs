@@ -120,6 +120,22 @@ namespace Game.Presentation.Core.Editor
             var bridgeGo = new GameObject("CombatBridge");
             bridgeGo.transform.SetParent(combatRoot.transform);
             bridgeGo.AddComponent<CombatBridge>();
+            var arenaPrefab = AssetDatabase.LoadAssetAtPath<GameObject>(
+                "Assets/_Game/Content/Prefabs/Arenas/FirstArena.prefab");
+            if (arenaPrefab != null)
+            {
+                var bridgeSo = new SerializedObject(bridgeGo.GetComponent<CombatBridge>());
+                var arenaProp = bridgeSo.FindProperty("_arenaPrefab");
+                if (arenaProp != null)
+                    arenaProp.objectReferenceValue = arenaPrefab;
+                var spawnOwn = bridgeSo.FindProperty("_spawnArenaPrefabFromBridge");
+                if (spawnOwn != null)
+                    spawnOwn.boolValue = false;
+                var compensate = bridgeSo.FindProperty("_compensateArenaRootScaleForParentLossyScale");
+                if (compensate != null)
+                    compensate.boolValue = true;
+                bridgeSo.ApplyModifiedPropertiesWithoutUndo();
+            }
 
             var rendererGo = new GameObject("CombatRenderer");
             rendererGo.transform.SetParent(combatRoot.transform);

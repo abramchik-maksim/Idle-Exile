@@ -6,6 +6,9 @@ namespace Game.Presentation.Core.Bootstrap
 {
     public sealed class MainMenuLifetimeScope : LifetimeScope
     {
+        /// <inheritdoc cref="GameplayLifetimeScope.FindParent"/>
+        protected override LifetimeScope FindParent() => Find<RootLifetimeScope>();
+
         protected override void Configure(IContainerBuilder builder)
         {
             builder.Register<MainMenuState>(Lifetime.Singleton);

@@ -10328,287 +10328,477 @@ MonoBehaviour:
     notes: 
   modCatalogRows:
   - modId: Damage_Flat_Lightning
+    family: Flat
+    element: Lightning
     valueType: FlatNumber
     textTemplate: Add {min}-{max} Lightning damage
   - modId: Damage_Flat_Fire
+    family: Flat
+    element: Fire
     valueType: FlatNumber
     textTemplate: Add {min}-{max} Fire damage
   - modId: Damage_Flat_Cold
+    family: Flat
+    element: Cold
     valueType: FlatNumber
     textTemplate: Add {min}-{max} Cold damage
   - modId: Damage_Flat_Physical
+    family: Flat
+    element: Physical
     valueType: FlatNumber
     textTemplate: Add {min}-{max} Physical damage
   - modId: Damage_Flat_Corrosion
+    family: Flat
+    element: Corrosion
     valueType: FlatNumber
     textTemplate: Add {min}-{max} Corrosion damage
   - modId: Damage_Increased_Lightning
+    family: Increased
+    element: Lightning
     valueType: Percent
     textTemplate: Increase {value}% Lightning damage
   - modId: Damage_Increased_Fire
+    family: Increased
+    element: Fire
     valueType: Percent
     textTemplate: Increase {value}% Fire damage
   - modId: Damage_Increased_Cold
+    family: Increased
+    element: Cold
     valueType: Percent
     textTemplate: Increase {value}% Cold damage
   - modId: Damage_Increased_Physical
+    family: Increased
+    element: Physical
     valueType: Percent
     textTemplate: Increase {value}% Physical damage
   - modId: Damage_Increased_Corrosion
+    family: Increased
+    element: Corrosion
     valueType: Percent
     textTemplate: Increase {value}% Corrosion damage
   - modId: Damage_Increased_All
+    family: Increased
+    element: NonSpecific
     valueType: Percent
     textTemplate: Increase {value}% damage
   - modId: Damage_GainAs_Lightning
+    family: Gain
+    element: Lightning
     valueType: Percent
     textTemplate: Gain {value}% of damage as Lightning damage
   - modId: Damage_GainAs_Fire
+    family: Gain
+    element: Fire
     valueType: Percent
     textTemplate: Gain {value}% of damage as Fire damage
   - modId: Damage_GainAs_Cold
+    family: Gain
+    element: Cold
     valueType: Percent
     textTemplate: Gain {value}% of damage as Cold damage
   - modId: Damage_GainAs_Physical
+    family: Gain
+    element: Physical
     valueType: Percent
     textTemplate: Gain {value}% of damage as Physical damage
   - modId: Damage_GainAs_Corrosion
+    family: Gain
+    element: Corrosion
     valueType: Percent
     textTemplate: Gain {value}% of damage as Corrosion damage
   - modId: Damage_Penetration_Lightning
+    family: Penetration
+    element: Lightning
     valueType: Percent
     textTemplate: Damage Penetrates {value}% Lightning resistance
   - modId: Damage_Penetration_Fire
+    family: Penetration
+    element: Fire
     valueType: Percent
     textTemplate: Damage Penetrates {value}% Fire resistance
   - modId: Damage_Penetration_Cold
+    family: Penetration
+    element: Cold
     valueType: Percent
     textTemplate: Damage Penetrates {value}% Cold resistance
   - modId: Damage_IgnoreArmor
+    family: Penetration
+    element: Physical
     valueType: Percent
     textTemplate: Ignore {value}% of armor
   - modId: Damage_Penetration_Corrosion
+    family: Penetration
+    element: Corrosion
     valueType: Percent
     textTemplate: Damage Penetrates {value}% Corrosion resistance
   - modId: Damage_DoubleHit_Lightning
+    family: DoubleDamage
+    element: Lightning
     valueType: Percent
     textTemplate: '{value}% Chance to deal double Hit Lightning damage'
   - modId: Damage_DoubleHit_Fire
+    family: DoubleDamage
+    element: Fire
     valueType: Percent
     textTemplate: '{value}% Chance to deal double Hit Fire damage'
   - modId: Damage_DoubleHit_Cold
+    family: DoubleDamage
+    element: Cold
     valueType: Percent
     textTemplate: '{value}% Chance to deal double Hit Cold damage'
   - modId: Damage_DoubleHit_Physical
+    family: DoubleDamage
+    element: Physical
     valueType: Percent
     textTemplate: '{value}% Chance to deal double Hit Physical damage'
   - modId: Damage_DoubleHit_Corrosion
+    family: DoubleDamage
+    element: Corrosion
     valueType: Percent
     textTemplate: '{value}% Chance to deal double Hit Corrosion damage'
   - modId: Damage_DoubleHit_All
+    family: DoubleDamage
+    element: NonSpecific
     valueType: Percent
     textTemplate: '{value}% Chance to deal double damage'
   - modId: Crit_Chance
+    family: CritChance
+    element: NonSpecific
     valueType: FlatNumber
     textTemplate: '{value} Critical Chance'
   - modId: Crit_Chance_Increased
+    family: CritChance
+    element: NonSpecific
     valueType: Percent
     textTemplate: Increase {value}% Critical Chance
   - modId: Crit_Multiplier
+    family: CritMultiplier
+    element: NonSpecific
     valueType: FlatNumber
     textTemplate: '{value} Critical multiplier'
   - modId: Ailment_Chance_Shock
+    family: AilmentChance
+    element: Lightning
     valueType: Percent
     textTemplate: '{value}% Chance to Shock'
   - modId: Ailment_Chance_Ignite
+    family: AilmentChance
+    element: Fire
     valueType: Percent
     textTemplate: '{value}% Chance to Ignite'
   - modId: Ailment_Chance_Chill
+    family: AilmentChance
+    element: Cold
     valueType: Percent
     textTemplate: '{value}% Chance to Chill'
   - modId: Ailment_Chance_Bleed
+    family: AilmentChance
+    element: Physical
     valueType: Percent
     textTemplate: '{value}% Chance to Bleed'
   - modId: Ailment_Chance_Poison
+    family: AilmentChance
+    element: Corrosion
     valueType: Percent
     textTemplate: '{value}% Chance to Poison'
   - modId: Ailment_Chance_All
+    family: AilmentChance
+    element: NonSpecific
     valueType: Percent
     textTemplate: '{value}% Chance to inflict all ailments'
   - modId: Ailment_ExtraStack_Shock
+    family: AilmentSpeed
+    element: Lightning
     valueType: Percent
     textTemplate: '{value}% chance to apply an additional Shock'
   - modId: Ailment_Faster_Ignite
+    family: AilmentSpeed
+    element: Fire
     valueType: Percent
     textTemplate: Ignite deals damage {value}% faster
   - modId: Ailment_ExtraStack_Chill
+    family: AilmentSpeed
+    element: Cold
     valueType: Percent
     textTemplate: '{value}% chance to apply an additional Chill'
   - modId: Ailment_Faster_Bleed
+    family: AilmentSpeed
+    element: Physical
     valueType: Percent
     textTemplate: Bleed deals damage {value}% faster
   - modId: Ailment_Faster_Corrosion
+    family: AilmentSpeed
+    element: Corrosion
     valueType: Percent
     textTemplate: Corrosion deals damage {value}% faster
   - modId: Ailment_Duration_Generic
+    family: AilmentSpeed
+    element: NonSpecific
     valueType: Percent
     textTemplate: '{value}% Increased ailment Duration'
   - modId: Ailment_Effect_Shock
+    family: AilmentEffect
+    element: Lightning
     valueType: Percent
     textTemplate: Increase {value}% Shock Effect
   - modId: Ailment_Effect_Ignite
+    family: AilmentEffect
+    element: Fire
     valueType: Percent
     textTemplate: Increase {value}% Ignite Damage
   - modId: Ailment_Effect_Chill
+    family: AilmentEffect
+    element: Cold
     valueType: Percent
     textTemplate: Increase {value}% Chill Effect
   - modId: Ailment_Effect_Bleed
+    family: AilmentEffect
+    element: Physical
     valueType: Percent
     textTemplate: Increase {value}% Bleed Damage
   - modId: Ailment_Effect_Poison
+    family: AilmentEffect
+    element: Corrosion
     valueType: Percent
     textTemplate: Increase {value}% Poison Damage
   - modId: Ailment_Effect_All
+    family: AilmentEffect
+    element: NonSpecific
     valueType: Percent
     textTemplate: Increase {value}% ailment Effect / Damage
   - modId: Ailment_SpreadOnHit_Shock
+    family: AilmentSpreadOnHit
+    element: Lightning
     valueType: Percent
     textTemplate: '{value}% Chance to Spread Shock on Hit'
   - modId: Ailment_SpreadOnHit_Ignite
+    family: AilmentSpreadOnHit
+    element: Fire
     valueType: Percent
     textTemplate: '{value}% Chance to Spread Ignite on Hit'
   - modId: Ailment_SpreadOnHit_Chill
+    family: AilmentSpreadOnHit
+    element: Cold
     valueType: Percent
     textTemplate: '{value}% Chance to Spread Chill on Hit'
   - modId: Ailment_SpreadOnHit_Bleed
+    family: AilmentSpreadOnHit
+    element: Physical
     valueType: Percent
     textTemplate: '{value}% Chance to Spread Bleed on Hit'
   - modId: Ailment_SpreadOnHit_Poison
+    family: AilmentSpreadOnHit
+    element: Corrosion
     valueType: Percent
     textTemplate: '{value}% Chance to Spread Poison on Hit'
   - modId: Ailment_SpreadOnKill_Shock
+    family: AilmentSpreadOnKill
+    element: Lightning
     valueType: Percent
     textTemplate: '{value}% Chance to Spread Shock on Kill'
   - modId: Ailment_SpreadOnKill_Ignite
+    family: AilmentSpreadOnKill
+    element: Fire
     valueType: Percent
     textTemplate: '{value}% Chance to Spread Ignite on Kill'
   - modId: Ailment_SpreadOnKill_Chill
+    family: AilmentSpreadOnKill
+    element: Cold
     valueType: Percent
     textTemplate: '{value}% Chance to Spread Chill on Kill'
   - modId: Ailment_SpreadOnKill_Bleed
+    family: AilmentSpreadOnKill
+    element: Physical
     valueType: Percent
     textTemplate: '{value}% Chance to Spread Bleed on Kill'
   - modId: Ailment_SpreadOnKill_Poison
+    family: AilmentSpreadOnKill
+    element: Corrosion
     valueType: Percent
     textTemplate: '{value}% Chance to Spread Poison on Kill'
   - modId: Ailment_SpreadArea
+    family: AilmentSpreadArea
+    element: NonSpecific
     valueType: Percent
     textTemplate: '{value}% Ailment Spread Area'
   - modId: Defense_Flat_Evasion
+    family: FlatDefence
+    element: NonSpecific
     valueType: FlatNumber
     textTemplate: '{value} Evasion'
   - modId: Defense_Flat_Health
+    family: FlatDefence
+    element: NonSpecific
     valueType: FlatNumber
     textTemplate: '{value} Health'
   - modId: Defense_Flat_Barrier
+    family: FlatDefence
+    element: NonSpecific
     valueType: FlatNumber
     textTemplate: '{value} Barrier'
   - modId: Defense_Flat_Armor
+    family: FlatDefence
+    element: NonSpecific
     valueType: FlatNumber
     textTemplate: '{value} Armor'
   - modId: Defense_LifeLeech
+    family: FlatDefence
+    element: NonSpecific
     valueType: Percent
     textTemplate: '{value}% of Damage leached as life'
   - modId: Defense_Increased_Evasion
+    family: IncreasedDefence
+    element: NonSpecific
     valueType: FlatNumber
     textTemplate: Increase {value} Evasion
   - modId: Defense_Increased_Health
+    family: IncreasedDefence
+    element: NonSpecific
     valueType: FlatNumber
     textTemplate: Increase {value} Health
   - modId: Defense_Increased_Barrier
+    family: IncreasedDefence
+    element: NonSpecific
     valueType: FlatNumber
     textTemplate: Increase {value} Barrier
   - modId: Defense_Increased_Armor
+    family: IncreasedDefence
+    element: NonSpecific
     valueType: FlatNumber
     textTemplate: Increase {value} Armor
   - modId: Defense_Increased_LeechRate
+    family: IncreasedDefence
+    element: NonSpecific
     valueType: FlatNumber
     textTemplate: Increase {value} Leech rate
   - modId: Defense_Resist_Lightning
+    family: Resistance
+    element: NonSpecific
     valueType: FlatNumber
     textTemplate: '{value} Lightning Resistance'
   - modId: Defense_Resist_Fire
+    family: Resistance
+    element: NonSpecific
     valueType: FlatNumber
     textTemplate: '{value} Fire Resistance'
   - modId: Defense_Resist_Cold
+    family: Resistance
+    element: NonSpecific
     valueType: FlatNumber
     textTemplate: '{value} Cold Resistance'
   - modId: Defense_ArmorToNonPhysical
+    family: Resistance
+    element: NonSpecific
     valueType: Percent
     textTemplate: '{value}% of Armor mitigation apply to non Physical damage'
   - modId: Defense_Resist_Corrosion
+    family: Resistance
+    element: NonSpecific
     valueType: FlatNumber
     textTemplate: '{value} Corrosion Resistance'
   - modId: Melee_IncreasedDamage
+    family: Melee
+    element: NonSpecific
     valueType: Percent
     textTemplate: Increase {value}% Melee damage
   - modId: Melee_AttackSpeed
+    family: Melee
+    element: NonSpecific
     valueType: Percent
     textTemplate: '{value}% Melee Attack Speed'
   - modId: Melee_AreaOfEffect
+    family: Melee
+    element: NonSpecific
     valueType: Percent
     textTemplate: '{value}% Melee Area of Effect'
   - modId: Block_Chance
+    family: Block
+    element: NonSpecific
     valueType: FlatNumber
     textTemplate: '{value} Block Chance'
   - modId: Block_Chance_Increased
+    family: Block
+    element: NonSpecific
     valueType: Percent
     textTemplate: Increase {value}% Block Chance
   - modId: Ranged_IncreasedDamage
+    family: Ranged
+    element: NonSpecific
     valueType: Percent
     textTemplate: Increase {value}% Ranged damage
   - modId: Ranged_AttackSpeed
+    family: Ranged
+    element: NonSpecific
     valueType: Percent
     textTemplate: '{value}% Ranged Attack Speed'
   - modId: Ranged_ChainChance
+    family: Ranged
+    element: NonSpecific
     valueType: FlatNumber
     textTemplate: '{value} Ranged Chain Chance'
   - modId: Ranged_ForkChance
+    family: Ranged
+    element: NonSpecific
     valueType: FlatNumber
     textTemplate: '{value} Ranged Fork Chance'
   - modId: Ranged_PierceChance
+    family: Ranged
+    element: NonSpecific
     valueType: FlatNumber
     textTemplate: '{value} Ranged Pierce Target Chance'
   - modId: Spell_IncreasedDamage
+    family: Spell
+    element: NonSpecific
     valueType: Percent
     textTemplate: Increase {value}% Spell damage
   - modId: Spell_CastSpeed
+    family: Spell
+    element: NonSpecific
     valueType: Percent
     textTemplate: '{value}% Cast Speed'
   - modId: Spell_AreaOfEffect
+    family: Spell
+    element: NonSpecific
     valueType: Percent
     textTemplate: '{value}% Spell Area of Effect'
   - modId: Spell_ChainChance
+    family: Spell
+    element: NonSpecific
     valueType: FlatNumber
     textTemplate: '{value} Spell Chain Chance'
   - modId: Spell_ForkChance
+    family: Spell
+    element: NonSpecific
     valueType: FlatNumber
     textTemplate: '{value} Spell Fork Chance'
   - modId: Spell_PierceChance
+    family: Spell
+    element: NonSpecific
     valueType: FlatNumber
     textTemplate: '{value} Spell Pierce Target Chance'
   - modId: Utility_CooldownRecoveryRate
+    family: Utility
+    element: NonSpecific
     valueType: Percent
     textTemplate: '{value}% Cooldown recovery rate'
   - modId: Utility_BuffEffect
+    family: Utility
+    element: NonSpecific
     valueType: Percent
     textTemplate: '{value}% Buff Effect'
   - modId: Utility_BuffDuration
+    family: Utility
+    element: NonSpecific
     valueType: Percent
     textTemplate: '{value}% Buff Duration'
   - modId: Utility_MovementSpeed
+    family: Utility
+    element: NonSpecific
     valueType: FlatNumber
     textTemplate: '{value} Movement Speed'
   - modId: Tree_Socket
+    family: TreeSpecific
+    element: NonSpecific
     valueType: None
     textTemplate: Socket for other Branch

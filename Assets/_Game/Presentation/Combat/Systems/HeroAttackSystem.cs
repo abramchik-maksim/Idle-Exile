@@ -13,6 +13,7 @@ namespace Game.Presentation.Combat.Systems
         private EntityQuery _enemyQuery;
         private DamageEventBufferSystem _damageBuffer;
         private uint _rngState;
+        private int _nextProjectileLineageId = 1;
 
         private struct PendingMeleeHit
         {
@@ -31,12 +32,16 @@ namespace Game.Presentation.Combat.Systems
         private struct PendingProjectile
         {
             public float2 HeroPos;
-            public Entity Target;
+            public float2 AimDirection;
             public float TotalDamage;
             public bool IsCritical;
             public int VisualId;
             public float IgnoreArmorChance;
             public float LifeLeech;
+            public float ForkPercent;
+            public float PiercePercent;
+            public float ChainPercent;
+            public int LineageId;
         }
 
         protected override void OnCreate()
@@ -48,6 +53,7 @@ namespace Game.Presentation.Combat.Systems
             );
             _damageBuffer = World.GetExistingSystemManaged<DamageEventBufferSystem>();
             _rngState = (uint)System.Environment.TickCount;
+            _nextProjectileLineageId = 1;
             RequireForUpdate<HeroTag>();
         }
 
@@ -118,7 +124,8 @@ namespace Game.Presentation.Combat.Systems
 
                 float dist = math.sqrt(nearestDistSq);
                 float totalDamage = stats.ValueRO.PhysicalDamage + stats.ValueRO.FireDamage
-                    + stats.ValueRO.ColdDamage + stats.ValueRO.LightningDamage;
+                    + stats.ValueRO.ColdDamage + stats.ValueRO.LightningDamage
+                    + stats.ValueRO.CorrosionDamage;
                 float critChance = math.clamp(stats.ValueRO.CriticalChance, 0f, 1f);
                 bool isCritical = NextRandom() < critChance;
                 if (isCritical)
@@ -148,15 +155,23 @@ namespace Game.Presentation.Combat.Systems
                 {
                     cooldown.ValueRW.Timer = cooldown.ValueRO.Cooldown;
 
+                    float2 aimDir = math.normalizesafe(
+                        enemyPositions[nearestIdx].Value - heroPos.ValueRO.Value,
+                        new float2(0f, 1f));
+
                     projectiles.Add(new PendingProjectile
                     {
                         HeroPos = heroPos.ValueRO.Value,
-                        Target = nearest,
+                        AimDirection = aimDir,
                         TotalDamage = totalDamage,
                         IsCritical = isCritical,
                         VisualId = heroProjectileVisualId,
                         IgnoreArmorChance = stats.ValueRO.IgnoreArmorChance,
                         LifeLeech = stats.ValueRO.LifeLeech,
+                        ForkPercent = math.max(0f, stats.ValueRO.ProjectileForkPercent),
+                        PiercePercent = math.max(0f, stats.ValueRO.ProjectilePiercePercent),
+                        ChainPercent = math.max(0f, stats.ValueRO.ProjectileChainPercent),
+                        LineageId = _nextProjectileLineageId++
                     });
                 }
             }
@@ -247,17 +262,54 @@ namespace Game.Presentation.Combat.Systems
 
                 var proj = ecb.CreateEntity();
                 ecb.AddComponent(proj, new ProjectileTag());
-                ecb.AddComponent(proj, new Position2D { Value = p.HeroPos });
+                SplitProcPercent(p.ForkPercent, out int forkGuaranteed, out float forkRemainder);
+                SplitProcPercent(p.PiercePercent, out int pierceGuaranteed, out float pierceRemainder);
+                SplitProcPercent(p.ChainPercent, out int chainGuaranteed, out float chainRemainder);
+
+                float speed = ProjectileConstants.DefaultHeroProjectileSpeed;
+                float2 vel = p.AimDirection * speed;
+                float2 spawnPos = p.HeroPos + p.AimDirection * ProjectileConstants.ProjectileSpawnForwardOffset;
+
+                ecb.AddComponent(proj, new Position2D { Value = spawnPos });
                 ecb.AddComponent(proj, new ProjectileData
                 {
-                    Target = p.Target,
-                    Speed = 12f,
+                    Velocity = vel,
+                    PrevPosition = spawnPos,
+                    MotionMode = ProjectileMotionMode.Straight,
+                    MotionTarget = Entity.Null,
+                    TimeToLiveSeconds = ProjectileConstants.HeroProjectileMaxLifetimeSeconds,
+                    SpawnOrigin = spawnPos,
+                    WallHitNearSpawnIgnoreEnabled = 1,
+                    AgeSeconds = 0f,
                     Damage = p.TotalDamage,
                     IsCritical = p.IsCritical,
                     VisualId = p.VisualId,
                     IgnoreArmorChance = p.IgnoreArmorChance,
                     LifeLeech = p.LifeLeech,
+                    ProjectileLineageId = p.LineageId,
+                    LastHitTarget = Entity.Null,
+                    ForkGuaranteedLeft = forkGuaranteed,
+                    ForkRemainderChance = forkRemainder,
+                    PierceGuaranteedLeft = pierceGuaranteed,
+                    PierceRemainderChance = pierceRemainder,
+                    ChainGuaranteedLeft = chainGuaranteed,
+                    ChainRemainderChance = chainRemainder
                 });
+                ecb.AddBuffer<ProjectileHitHistory>(proj);
+
+                ProjectileLifetimeDebug.LogHeroSpawn(
+                    proj,
+                    spawnPos,
+                    vel,
+                    ProjectileConstants.HeroProjectileMaxLifetimeSeconds,
+                    p.LineageId,
+                    forkGuaranteed,
+                    forkRemainder,
+                    pierceGuaranteed,
+                    pierceRemainder,
+                    chainGuaranteed,
+                    chainRemainder,
+                    p.TotalDamage);
             }
 
             if (totalLeech > 0f && heroEntity != Entity.Null && EntityManager.Exists(heroEntity))
@@ -321,6 +373,13 @@ namespace Game.Presentation.Combat.Systems
             uint result = ((_rngState >> (int)((_rngState >> 28) + 4u)) ^ _rngState) * 277803737u;
             result = (result >> 22) ^ result;
             return result / (float)uint.MaxValue;
+        }
+
+        private static void SplitProcPercent(float percent, out int guaranteed, out float remainder)
+        {
+            float clamped = math.max(0f, percent);
+            guaranteed = (int)math.floor(clamped);
+            remainder = clamped - guaranteed;
         }
     }
 }

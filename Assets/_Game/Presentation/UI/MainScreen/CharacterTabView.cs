@@ -35,6 +35,12 @@ namespace Game.Presentation.UI.MainScreen
             StatType.GainAsFirePercent,
             StatType.GainAsColdPercent,
             StatType.GainAsLightningPercent,
+            StatType.GainAsPhysicalPercent,
+            StatType.GainAsCorrosionPercent,
+            StatType.FirePenetration,
+            StatType.ColdPenetration,
+            StatType.LightningPenetration,
+            StatType.CorrosionPenetration,
         };
 
         private static readonly StatType[] DefenseStats =
@@ -72,6 +78,15 @@ namespace Game.Presentation.UI.MainScreen
             StatType.BuffDuration,
             StatType.BuffEffect,
             StatType.CooldownRecoveryRate,
+            StatType.RangedForkChance,
+            StatType.RangedPierceChance,
+            StatType.RangedChainChance,
+            StatType.SpellForkChance,
+            StatType.SpellPierceChance,
+            StatType.SpellChainChance,
+            StatType.MeleeIncreasedDamage,
+            StatType.RangedIncreasedDamage,
+            StatType.SpellIncreasedDamage,
         };
 
         protected override void OnBind()
@@ -184,6 +199,8 @@ namespace Game.Presentation.UI.MainScreen
             StatType.GainAsFirePercent => "Gain as Fire",
             StatType.GainAsColdPercent => "Gain as Cold",
             StatType.GainAsLightningPercent => "Gain as Lightning",
+            StatType.GainAsPhysicalPercent => "Gain as Physical",
+            StatType.GainAsCorrosionPercent => "Gain as Corrosion",
             StatType.FirePenetration => "Fire Penetration",
             StatType.ColdPenetration => "Cold Penetration",
             StatType.LightningPenetration => "Lightning Penetration",
@@ -191,6 +208,12 @@ namespace Game.Presentation.UI.MainScreen
             StatType.MeleeIncreasedDamage => "Melee Damage",
             StatType.RangedIncreasedDamage => "Ranged Damage",
             StatType.SpellIncreasedDamage => "Spell Damage",
+            StatType.RangedForkChance => "Ranged Fork Chance",
+            StatType.RangedPierceChance => "Ranged Pierce Chance",
+            StatType.RangedChainChance => "Ranged Chain Chance",
+            StatType.SpellForkChance => "Spell Fork Chance",
+            StatType.SpellPierceChance => "Spell Pierce Chance",
+            StatType.SpellChainChance => "Spell Chain Chance",
             StatType.BuffDuration => "Buff Duration",
             StatType.BuffEffect => "Buff Effect",
             StatType.CooldownRecoveryRate => "Cooldown Recovery",
@@ -221,6 +244,14 @@ namespace Game.Presentation.UI.MainScreen
             StatType.ColdPenetration or
             StatType.LightningPenetration or
             StatType.CorrosionPenetration or
+            StatType.RangedForkChance or
+            StatType.RangedPierceChance or
+            StatType.RangedChainChance or
+            StatType.SpellForkChance or
+            StatType.SpellPierceChance or
+            StatType.SpellChainChance or
+            StatType.GainAsPhysicalPercent or
+            StatType.GainAsCorrosionPercent or
             StatType.FireResistance or
             StatType.ColdResistance or
             StatType.LightningResistance or

@@ -2,6 +2,7 @@
     "name": "Game.Infrastructure.ItemAffixes.Editor",
     "rootNamespace": "Game.Infrastructure.ItemAffixes.Editor",
     "references": [
+        "Game.Domain",
         "Game.Infrastructure"
     ],
     "includePlatforms": [

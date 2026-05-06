@@ -50,6 +50,8 @@ namespace Game.Infrastructure.ItemAffixes
     public sealed class ModCatalogSerializedRow
     {
         public string modId;
+        public string family;
+        public string element;
         public string valueType;
         public string textTemplate;
     }

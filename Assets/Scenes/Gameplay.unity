@@ -163,6 +163,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d1f914f4e22c02e4190b561677530f78, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Game.Presentation.Combat::Game.Presentation.Combat.CombatBridge
+  _arenaPrefab: {fileID: 7186924804399714885, guid: b9d668abab72d3a42830a221f676b4a2, type: 3}
+  _spawnArenaPrefabFromBridge: 0
+  _compensateArenaRootScaleForParentLossyScale: 1
 --- !u!1 &239951146
 GameObject:
   m_ObjectHideFlags: 0

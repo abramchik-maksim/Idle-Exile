@@ -8,6 +8,7 @@ namespace Game.Presentation.UI.Cheats
     public sealed class CheatsView : LayoutView
     {
         private Button _btnGenerateItem;
+        private Button _btnGenerateBowProc;
         private Button _btnAddSkillGem;
         private Button _btnAddRemovalOrb;
         private Button _btnAddTreeXp;
@@ -21,6 +22,7 @@ namespace Game.Presentation.UI.Cheats
         private Vector2 _dragOffset;
 
         public event Action OnGenerateItemClicked;
+        public event Action OnGenerateBowProcClicked;
         public event Action OnAddSkillGemClicked;
         public event Action OnAddRemovalOrbClicked;
         public event Action OnAddTreeXpClicked;
@@ -29,6 +31,7 @@ namespace Game.Presentation.UI.Cheats
         protected override void OnBind()
         {
             _btnGenerateItem = Q<Button>("btn-generate-item");
+            _btnGenerateBowProc = Q<Button>("btn-generate-bow-proc");
             _btnAddSkillGem = Q<Button>("btn-add-skill-gem");
             _btnAddRemovalOrb = Q<Button>("btn-add-removal-orb");
             _btnAddTreeXp = Q<Button>("btn-add-tree-xp");
@@ -38,6 +41,7 @@ namespace Game.Presentation.UI.Cheats
             _header = Q("cheats-header");
 
             _btnGenerateItem.clicked += RaiseGenerateItemClicked;
+            _btnGenerateBowProc.clicked += RaiseGenerateBowProcClicked;
             _btnAddSkillGem.clicked += RaiseAddSkillGemClicked;
             _btnAddRemovalOrb.clicked += RaiseAddRemovalOrbClicked;
             _btnAddTreeXp.clicked += RaiseAddTreeXpClicked;
@@ -107,6 +111,7 @@ namespace Game.Presentation.UI.Cheats
         public override void Dispose()
         {
             if (_btnGenerateItem != null) _btnGenerateItem.clicked -= RaiseGenerateItemClicked;
+            if (_btnGenerateBowProc != null) _btnGenerateBowProc.clicked -= RaiseGenerateBowProcClicked;
             if (_btnAddSkillGem != null) _btnAddSkillGem.clicked -= RaiseAddSkillGemClicked;
             if (_btnAddRemovalOrb != null) _btnAddRemovalOrb.clicked -= RaiseAddRemovalOrbClicked;
             if (_btnAddTreeXp != null) _btnAddTreeXp.clicked -= RaiseAddTreeXpClicked;
@@ -120,6 +125,7 @@ namespace Game.Presentation.UI.Cheats
         }
 
         private void RaiseGenerateItemClicked() => OnGenerateItemClicked?.Invoke();
+        private void RaiseGenerateBowProcClicked() => OnGenerateBowProcClicked?.Invoke();
         private void RaiseAddSkillGemClicked() => OnAddSkillGemClicked?.Invoke();
         private void RaiseAddRemovalOrbClicked() => OnAddRemovalOrbClicked?.Invoke();
         private void RaiseAddTreeXpClicked() => OnAddTreeXpClicked?.Invoke();
